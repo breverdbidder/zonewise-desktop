@@ -25,32 +25,42 @@
       border-radius: 6px;
       border: none;
       font-size: 14px;
+      min-width: 200px;
     }
     .mapboxgl-popup-content {
       padding: 15px;
       border-radius: 8px;
+      min-width: 200px;
     }
-    .district-popup h3 { color: #1E3A5F; margin-bottom: 8px; }
-    .district-popup .category {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      color: white;
-      margin-bottom: 8px;
-    }
+    .district-popup h3 { color: #1E3A5F; margin-bottom: 8px; font-size: 16px; }
+    .district-popup p { margin: 4px 0; color: #4B5563; }
+    .district-popup .count { font-size: 24px; font-weight: bold; color: #0D9488; }
     .legend {
       position: absolute;
       bottom: 30px;
       right: 10px;
       background: white;
-      padding: 10px;
+      padding: 12px 15px;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       font-size: 12px;
     }
+    .legend-title { font-weight: 600; margin-bottom: 8px; color: #1E3A5F; }
     .legend-item { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
-    .legend-color { width: 12px; height: 12px; border-radius: 2px; }
+    .legend-color { width: 14px; height: 14px; border-radius: 3px; }
+    .stats {
+      position: absolute;
+      top: 70px;
+      left: 10px;
+      background: white;
+      padding: 12px 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      font-size: 13px;
+    }
+    .stats-title { font-weight: 600; color: #1E3A5F; margin-bottom: 6px; }
+    .stats-row { display: flex; justify-content: space-between; gap: 20px; margin: 3px 0; }
+    .stats-value { font-weight: 600; color: #0D9488; }
   </style>
 </head>
 <body>
@@ -58,40 +68,48 @@
     <h1>🗺️ ZoneWise Map</h1>
     <select id="jurisdiction-select">
       <option value="">Select Jurisdiction...</option>
-      <option value="1,-80.6081,28.0836">Melbourne (26)</option>
-      <option value="2,-80.5887,27.9606">Palm Bay (25)</option>
-      <option value="3,-80.5887,28.1472">Indian Harbour Beach (12)</option>
-      <option value="4,-80.8076,28.6122">Titusville (40)</option>
-      <option value="5,-80.7420,28.3861">Cocoa (21)</option>
-      <option value="6,-80.5901,28.1761">Satellite Beach (8)</option>
-      <option value="7,-80.6078,28.3200">Cocoa Beach (12)</option>
-      <option value="8,-80.7248,28.3169">Rockledge (21)</option>
-      <option value="9,-80.6519,28.0722">West Melbourne (11)</option>
-      <option value="10,-80.6056,28.4058">Cape Canaveral (9)</option>
-      <option value="11,-80.5656,28.0897">Indialantic (8)</option>
-      <option value="12,-80.5617,28.0681">Melbourne Beach (8)</option>
-      <option value="13,-80.7000,28.3000">Unincorporated Brevard (54)</option>
-      <option value="14,-80.5667,28.0000">Malabar (13)</option>
-      <option value="15,-80.5500,27.9400">Grant-Valkaria (6)</option>
-      <option value="16,-80.5833,28.1167">Palm Shores (4)</option>
-      <option value="17,-80.6700,28.0800">Melbourne Village (23)</option>
+      <option value="1,-80.6081,28.0836">Melbourne (26 districts)</option>
+      <option value="2,-80.5887,27.9606">Palm Bay (25 districts)</option>
+      <option value="3,-80.5887,28.1472">Indian Harbour Beach (12 districts)</option>
+      <option value="4,-80.8076,28.6122">Titusville (40 districts)</option>
+      <option value="5,-80.7420,28.3861">Cocoa (21 districts)</option>
+      <option value="6,-80.5901,28.1761">Satellite Beach (8 districts)</option>
+      <option value="7,-80.6078,28.3200">Cocoa Beach (12 districts)</option>
+      <option value="8,-80.7248,28.3169">Rockledge (21 districts)</option>
+      <option value="9,-80.6519,28.0722">West Melbourne (11 districts)</option>
+      <option value="10,-80.6056,28.4058">Cape Canaveral (9 districts)</option>
+      <option value="11,-80.5656,28.0897">Indialantic (8 districts)</option>
+      <option value="12,-80.5617,28.0681">Melbourne Beach (8 districts)</option>
+      <option value="13,-80.7000,28.3000">Unincorporated Brevard (54 districts)</option>
+      <option value="14,-80.5667,28.0000">Malabar (13 districts)</option>
+      <option value="15,-80.5500,27.9400">Grant-Valkaria (6 districts)</option>
+      <option value="16,-80.5833,28.1167">Palm Shores (4 districts)</option>
+      <option value="17,-80.6700,28.0800">Melbourne Village (23 districts)</option>
     </select>
   </div>
   
   <div id="map"></div>
   
+  <div class="stats">
+    <div class="stats-title">Brevard County Coverage</div>
+    <div class="stats-row"><span>Jurisdictions:</span> <span class="stats-value">17</span></div>
+    <div class="stats-row"><span>Total Districts:</span> <span class="stats-value">301</span></div>
+    <div class="stats-row"><span>Data Source:</span> <span>Municode</span></div>
+  </div>
+  
   <div class="legend">
-    <strong>Zoning Categories</strong>
+    <div class="legend-title">Zoning Categories</div>
     <div class="legend-item"><div class="legend-color" style="background:#10B981"></div> Residential</div>
     <div class="legend-item"><div class="legend-color" style="background:#0D9488"></div> Commercial</div>
     <div class="legend-item"><div class="legend-color" style="background:#6366F1"></div> Industrial</div>
     <div class="legend-item"><div class="legend-color" style="background:#8B5CF6"></div> Mixed-Use</div>
     <div class="legend-item"><div class="legend-color" style="background:#84CC16"></div> Agricultural</div>
+    <div class="legend-item"><div class="legend-color" style="background:#F59E0B"></div> Planned Dev</div>
   </div>
 
   <script>
-    // REPLACE WITH YOUR MAPBOX TOKEN
-    mapboxgl.accessToken = 'YOUR_MAPBOX_TOKEN';
+    // ZoneWise Mapbox Token
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZXZlcmVzdDE4IiwiYSI6ImNtYnAydnExdjAwNnAyb3EwaTJjcTZiNnIifQ.55IMlqQsnOCLflDblrQGKw';
     
     const map = new mapboxgl.Map({
       container: 'map',
@@ -103,7 +121,7 @@
     map.addControl(new mapboxgl.NavigationControl());
     map.addControl(new mapboxgl.ScaleControl(), 'bottom-left');
     
-    // Jurisdiction markers
+    // Jurisdiction data
     const jurisdictions = [
       { id: 1, name: 'Melbourne', coords: [-80.6081, 28.0836], count: 26 },
       { id: 2, name: 'Palm Bay', coords: [-80.5887, 27.9606], count: 25 },
@@ -117,7 +135,7 @@
       { id: 10, name: 'Cape Canaveral', coords: [-80.6056, 28.4058], count: 9 },
       { id: 11, name: 'Indialantic', coords: [-80.5656, 28.0897], count: 8 },
       { id: 12, name: 'Melbourne Beach', coords: [-80.5617, 28.0681], count: 8 },
-      { id: 13, name: 'Unincorporated', coords: [-80.7000, 28.3000], count: 54 },
+      { id: 13, name: 'Unincorporated Brevard', coords: [-80.7000, 28.3000], count: 54 },
       { id: 14, name: 'Malabar', coords: [-80.5667, 28.0000], count: 13 },
       { id: 15, name: 'Grant-Valkaria', coords: [-80.5500, 27.9400], count: 6 },
       { id: 16, name: 'Palm Shores', coords: [-80.5833, 28.1167], count: 4 },
@@ -126,24 +144,45 @@
     
     map.on('load', () => {
       jurisdictions.forEach(j => {
+        // Create marker element
         const el = document.createElement('div');
+        const size = Math.max(30, Math.min(50, 20 + j.count * 0.5));
         el.style.cssText = `
-          width: 30px; height: 30px; background: #1E3A5F; color: white;
-          border-radius: 50%; display: flex; align-items: center; justify-content: center;
-          font-size: 11px; font-weight: bold; cursor: pointer;
-          border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+          width: ${size}px; 
+          height: ${size}px; 
+          background: #1E3A5F; 
+          color: white;
+          border-radius: 50%; 
+          display: flex; 
+          align-items: center; 
+          justify-content: center;
+          font-size: ${size > 35 ? 13 : 11}px; 
+          font-weight: bold; 
+          cursor: pointer;
+          border: 3px solid white; 
+          box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+          transition: transform 0.2s;
         `;
         el.textContent = j.count;
-        el.title = `${j.name}: ${j.count} districts`;
+        el.title = `${j.name}: ${j.count} zoning districts`;
+        
+        // Hover effect
+        el.onmouseenter = () => el.style.transform = 'scale(1.15)';
+        el.onmouseleave = () => el.style.transform = 'scale(1)';
+        
+        // Create popup
+        const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
+          <div class="district-popup">
+            <h3>${j.name}</h3>
+            <p class="count">${j.count}</p>
+            <p>zoning districts</p>
+            <p style="margin-top:8px;font-size:11px;color:#6B7280;">Click dropdown to fly here</p>
+          </div>
+        `);
         
         new mapboxgl.Marker(el)
           .setLngLat(j.coords)
-          .setPopup(new mapboxgl.Popup().setHTML(`
-            <div class="district-popup">
-              <h3>${j.name}</h3>
-              <p><strong>${j.count}</strong> zoning districts</p>
-            </div>
-          `))
+          .setPopup(popup)
           .addTo(map);
       });
     });
@@ -152,7 +191,12 @@
     document.getElementById('jurisdiction-select').addEventListener('change', (e) => {
       if (!e.target.value) return;
       const [id, lng, lat] = e.target.value.split(',');
-      map.flyTo({ center: [parseFloat(lng), parseFloat(lat)], zoom: 12, duration: 1500 });
+      map.flyTo({ 
+        center: [parseFloat(lng), parseFloat(lat)], 
+        zoom: 12, 
+        duration: 1500,
+        essential: true
+      });
     });
   </script>
 </body>

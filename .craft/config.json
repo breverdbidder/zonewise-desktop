@@ -1,0 +1,56 @@
+{
+  "name": "ZoneWise AI",
+  "version": "1.0.0",
+  "description": "Brevard County Zoning Intelligence Assistant",
+  "author": "Everest Capital USA",
+  "repository": "https://github.com/breverdbidder/zonewise-desktop",
+  
+  "branding": {
+    "displayName": "ZoneWise AI",
+    "tagline": "Brevard County Zoning Intelligence",
+    "colors": {
+      "primary": "#1E3A5F",
+      "secondary": "#0D9488",
+      "accent": "#F59E0B"
+    },
+    "logo": "resources/zonewise-logo.png"
+  },
+  
+  "connections": {
+    "supabase": {
+      "url": "https://mocerqjnksmhcjzxrewo.supabase.co",
+      "tables": ["zoning_districts", "jurisdictions"]
+    },
+    "mapbox": {
+      "style": "mapbox://styles/mapbox/streets-v12"
+    },
+    "gis": {
+      "brevardZoning": "https://gis.brevardfl.gov/gissrv/rest/services/Planning_Development/Zoning_WKID2881/MapServer/0"
+    }
+  },
+  
+  "skills": [
+    "skills/SKILL-zoning-lookup.md",
+    "skills/SKILL-setback-calculator.md",
+    "skills/SKILL-map-visualization.md"
+  ],
+  
+  "artifacts": [
+    "artifacts/zonewise-map.html"
+  ],
+  
+  "capabilities": {
+    "zoningQueries": true,
+    "setbackCalculation": true,
+    "mapVisualization": true,
+    "jurisdictionComparison": true,
+    "dimensionalStandards": true
+  },
+  
+  "data": {
+    "jurisdictions": 17,
+    "zoningDistricts": 301,
+    "gisPolygons": 10092,
+    "uniqueZoneCodes": 56
+  }
+}

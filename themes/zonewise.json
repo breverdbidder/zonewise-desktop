@@ -1,0 +1,40 @@
+{
+  "name": "ZoneWise",
+  "description": "ZoneWise zoning intelligence platform - Navy/Teal professional theme",
+  "author": "Ariel Shapira - Everest Capital USA",
+  "license": "Apache-2.0",
+  "source": "https://github.com/breverdbidder/zonewise",
+  "supportedModes": ["light", "dark"],
+  
+  "background": "#FFFFFF",
+  "foreground": "#1F2937",
+  "accent": "#1E3A5F",
+  "info": "#0D9488",
+  "success": "#10B981",
+  "destructive": "#EF4444",
+  
+  "paper": "#F9FAFB",
+  "navigator": "#1E3A5F",
+  "input": "#FFFFFF",
+  "popover": "#FFFFFF",
+  "popoverSolid": "#FFFFFF",
+  
+  "dark": {
+    "background": "#111827",
+    "foreground": "#F9FAFB",
+    "accent": "#3B82F6",
+    "info": "#14B8A6",
+    "success": "#22C55E",
+    "destructive": "#F87171",
+    "paper": "#1F2937",
+    "navigator": "#0F172A",
+    "input": "#1F2937",
+    "popover": "#1F2937",
+    "popoverSolid": "#1F2937"
+  },
+  
+  "shikiTheme": {
+    "light": "github-light",
+    "dark": "github-dark"
+  }
+}

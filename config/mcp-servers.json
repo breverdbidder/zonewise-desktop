@@ -1,0 +1,51 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--supabase-url",
+        "https://mocerqjnksmhcjzxrewo.supabase.co",
+        "--supabase-key",
+        "${SUPABASE_SERVICE_KEY}"
+      ],
+      "description": "ZoneWise database - districts, dimensional standards, use permissions"
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "description": "GitHub repository access for code and configs"
+    },
+    "puppeteer": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"],
+      "description": "Web scraping for Municode and county sites"
+    },
+    "fetch": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"],
+      "description": "HTTP requests for APIs"
+    }
+  },
+  "permissions": {
+    "mode": "auto",
+    "allowedOperations": [
+      "SELECT",
+      "git status",
+      "git log",
+      "git diff",
+      "npm install",
+      "bun install"
+    ],
+    "blockedOperations": [
+      "DROP",
+      "DELETE FROM",
+      "rm -rf",
+      "git push --force"
+    ]
+  }
+}

@@ -9,116 +9,208 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: system-ui, -apple-system, sans-serif; }
-    #map { position: absolute; top: 60px; bottom: 0; width: 70%; }
-    .header { height: 60px; background: #1E3A5F; color: white; display: flex; align-items: center; padding: 0 20px; gap: 20px; }
-    .header h1 { font-size: 20px; font-weight: 600; }
-    .header select { padding: 8px 12px; border-radius: 6px; border: none; font-size: 14px; min-width: 220px; }
-    .sidebar { position: absolute; top: 60px; right: 0; bottom: 0; width: 30%; background: #f8fafc; border-left: 1px solid #e2e8f0; overflow-y: auto; }
-    .sidebar-header { padding: 15px 20px; background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10; }
-    .sidebar-title { font-size: 16px; font-weight: 600; color: #1E3A5F; }
-    .sidebar-subtitle { font-size: 12px; color: #6B7280; margin-top: 4px; }
-    .district-list { padding: 10px; }
-    .district-card { background: white; border-radius: 8px; padding: 12px 15px; margin-bottom: 8px; border-left: 4px solid #ccc; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .district-card.residential { border-left-color: #10B981; }
-    .district-card.commercial { border-left-color: #0D9488; }
-    .district-card.industrial { border-left-color: #6366F1; }
-    .district-card.mixed-use { border-left-color: #8B5CF6; }
-    .district-card.agricultural { border-left-color: #84CC16; }
-    .district-card.planned { border-left-color: #F59E0B; }
-    .district-card.conservation { border-left-color: #22C55E; }
-    .district-code { font-weight: 600; color: #1E3A5F; font-size: 14px; }
-    .district-name { color: #4B5563; font-size: 13px; margin-top: 2px; }
-    .district-category { display: inline-block; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-top: 6px; color: white; }
-    .district-category.residential { background: #10B981; }
-    .district-category.commercial { background: #0D9488; }
-    .district-category.industrial { background: #6366F1; }
-    .district-category.mixed-use { background: #8B5CF6; }
-    .district-category.agricultural { background: #84CC16; }
-    .district-category.planned { background: #F59E0B; }
-    .district-category.conservation { background: #22C55E; }
-    .district-dims { font-size: 11px; color: #6B7280; margin-top: 8px; line-height: 1.4; }
-    .loading { text-align: center; padding: 40px; color: #6B7280; }
-    .no-selection { text-align: center; padding: 60px 20px; color: #9CA3AF; }
-    .no-selection-icon { font-size: 48px; margin-bottom: 15px; }
-    .marker { cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 8px rgba(0,0,0,0.4); transition: transform 0.2s; background: #1E3A5F; }
-    .marker:hover { transform: scale(1.2); }
-    .marker.active { background: #0D9488; border-color: #0D9488; }
-    .legend { position: absolute; bottom: 30px; left: 10px; background: white; padding: 12px 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); font-size: 11px; }
-    .legend-title { font-weight: 600; margin-bottom: 8px; color: #1E3A5F; font-size: 12px; }
-    .legend-item { display: flex; align-items: center; gap: 8px; margin: 3px 0; }
-    .legend-color { width: 12px; height: 12px; border-radius: 3px; }
-    .stats-badge { background: #0D9488; color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    
+    .container { display: flex; height: 100vh; }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 350px;
+      background: white;
+      border-right: 1px solid #E5E7EB;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .sidebar-header {
+      padding: 16px 20px;
+      background: #1E3A5F;
+      color: white;
+    }
+    .sidebar-header h1 { font-size: 20px; margin-bottom: 4px; }
+    .sidebar-header p { font-size: 13px; opacity: 0.8; }
+    
+    .jurisdiction-select {
+      padding: 12px 16px;
+      border-bottom: 1px solid #E5E7EB;
+    }
+    .jurisdiction-select select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #D1D5DB;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    
+    .districts-panel {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0;
+    }
+    .districts-header {
+      padding: 12px 16px;
+      background: #F9FAFB;
+      border-bottom: 1px solid #E5E7EB;
+      font-weight: 600;
+      color: #374151;
+      position: sticky;
+      top: 0;
+    }
+    .district-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid #F3F4F6;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .district-item:hover { background: #F9FAFB; }
+    .district-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .category-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .district-code {
+      font-weight: 600;
+      color: #1E3A5F;
+      font-size: 14px;
+    }
+    .district-name {
+      color: #6B7280;
+      font-size: 13px;
+      flex: 1;
+    }
+    .district-category {
+      font-size: 11px;
+      color: #9CA3AF;
+      margin-top: 4px;
+      margin-left: 22px;
+    }
+    .district-dims {
+      font-size: 11px;
+      color: #6B7280;
+      margin-top: 4px;
+      margin-left: 22px;
+      background: #F3F4F6;
+      padding: 6px 8px;
+      border-radius: 4px;
+    }
+    
+    .empty-state {
+      padding: 40px 20px;
+      text-align: center;
+      color: #9CA3AF;
+    }
+    .empty-state p { margin-top: 8px; font-size: 13px; }
+    
+    .loading {
+      padding: 20px;
+      text-align: center;
+      color: #6B7280;
+    }
+    
+    /* Legend */
+    .legend-bar {
+      padding: 12px 16px;
+      background: #F9FAFB;
+      border-top: 1px solid #E5E7EB;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 11px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    /* Map */
+    #map { flex: 1; }
+    
+    .marker {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      background: #1E3A5F;
+    }
+    .marker:hover {
+      transform: scale(1.15);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .marker.active {
+      background: #0D9488;
+      transform: scale(1.2);
+    }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>🗺️ ZoneWise Map</h1>
-    <select id="jurisdiction-select">
-      <option value="">Select Jurisdiction...</option>
-      <option value="1,-80.6081,28.0836,Melbourne">Melbourne (26)</option>
-      <option value="2,-80.5887,27.9606,Palm Bay">Palm Bay (25)</option>
-      <option value="3,-80.5887,28.1472,Indian Harbour Beach">Indian Harbour Beach (12)</option>
-      <option value="4,-80.8076,28.6122,Titusville">Titusville (40)</option>
-      <option value="5,-80.7420,28.3861,Cocoa">Cocoa (21)</option>
-      <option value="6,-80.5901,28.1761,Satellite Beach">Satellite Beach (8)</option>
-      <option value="7,-80.6078,28.3200,Cocoa Beach">Cocoa Beach (12)</option>
-      <option value="8,-80.7248,28.3169,Rockledge">Rockledge (21)</option>
-      <option value="9,-80.6519,28.0722,West Melbourne">West Melbourne (11)</option>
-      <option value="10,-80.6056,28.4058,Cape Canaveral">Cape Canaveral (9)</option>
-      <option value="11,-80.5656,28.0897,Indialantic">Indialantic (8)</option>
-      <option value="12,-80.5617,28.0681,Melbourne Beach">Melbourne Beach (8)</option>
-      <option value="13,-80.7000,28.3000,Unincorporated Brevard">Unincorporated Brevard (54)</option>
-      <option value="14,-80.5667,28.0000,Malabar">Malabar (13)</option>
-      <option value="15,-80.5500,27.9400,Grant-Valkaria">Grant-Valkaria (6)</option>
-      <option value="16,-80.5833,28.1167,Palm Shores">Palm Shores (4)</option>
-      <option value="17,-80.6700,28.0800,Melbourne Village">Melbourne Village (23)</option>
-    </select>
-    <span class="stats-badge">301 Districts • 17 Jurisdictions</span>
-  </div>
-  
-  <div id="map"></div>
-  
-  <div class="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-title" id="sidebar-title">Zoning Districts</div>
-      <div class="sidebar-subtitle" id="sidebar-subtitle">Click a jurisdiction marker to view districts</div>
-    </div>
-    <div id="district-list" class="district-list">
-      <div class="no-selection">
-        <div class="no-selection-icon">📍</div>
-        <div>Click a jurisdiction marker<br>to view its zoning districts</div>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h1>🗺️ ZoneWise</h1>
+        <p>Brevard County Zoning Intelligence</p>
+      </div>
+      
+      <div class="jurisdiction-select">
+        <select id="jurisdiction-select">
+          <option value="">Select a jurisdiction...</option>
+        </select>
+      </div>
+      
+      <div class="districts-panel" id="districts-panel">
+        <div class="empty-state">
+          <div style="font-size: 32px;">📍</div>
+          <p>Click a marker or select a jurisdiction to view zoning districts</p>
+        </div>
+      </div>
+      
+      <div class="legend-bar">
+        <div class="legend-item"><div class="category-dot" style="background:#10B981"></div> Residential</div>
+        <div class="legend-item"><div class="category-dot" style="background:#0D9488"></div> Commercial</div>
+        <div class="legend-item"><div class="category-dot" style="background:#6366F1"></div> Industrial</div>
+        <div class="legend-item"><div class="category-dot" style="background:#8B5CF6"></div> Mixed-Use</div>
+        <div class="legend-item"><div class="category-dot" style="background:#84CC16"></div> Agricultural</div>
+        <div class="legend-item"><div class="category-dot" style="background:#F59E0B"></div> Planned Dev</div>
       </div>
     </div>
+    
+    <!-- Map -->
+    <div id="map"></div>
   </div>
-  
-  <div class="legend">
-    <div class="legend-title">Zoning Categories</div>
-    <div class="legend-item"><div class="legend-color" style="background:#10B981"></div> Residential</div>
-    <div class="legend-item"><div class="legend-color" style="background:#0D9488"></div> Commercial</div>
-    <div class="legend-item"><div class="legend-color" style="background:#6366F1"></div> Industrial</div>
-    <div class="legend-item"><div class="legend-color" style="background:#8B5CF6"></div> Mixed-Use</div>
-    <div class="legend-item"><div class="legend-color" style="background:#84CC16"></div> Agricultural</div>
-    <div class="legend-item"><div class="legend-color" style="background:#F59E0B"></div> Planned Dev</div>
-  </div>
-  
+
   <script>
-    // Supabase config
+    // Configuration
+    const MAPBOX_TOKEN = 'pk.eyJ1IjoiZXZlcmVzdDE4IiwiYSI6ImNtanB5cDQ5ZzF1eWgzaHB2cGVhZXdqbjMifQ.4RPrkTf84GL1-clmhmCnTw';
     const SUPABASE_URL = 'https://mocerqjnksmhcjzxrewo.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vY2VycWpua3NtaGNqenhyZXdvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDUzMjUyNiwiZXhwIjoyMDgwMTA4NTI2fQ.fL255mO0V8-rrU0Il3L41cIdQXUau-HRQXiamTqp9nE';
     
-    // Mapbox
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZXZlcmVzdDE4IiwiYSI6ImNtanB5cDQ5ZzF1eWgzaHB2cGVhZXdqbjMifQ.4RPrkTf84GL1-clmhmCnTw';
+    // Category colors
+    const CATEGORY_COLORS = {
+      'Residential': '#10B981',
+      'Commercial': '#0D9488',
+      'Industrial': '#6366F1',
+      'Mixed-Use': '#8B5CF6',
+      'Agricultural': '#84CC16',
+      'Conservation': '#22C55E',
+      'Planned Development': '#F59E0B',
+      'Special Purpose': '#EC4899',
+      'Overlay': '#F97316',
+      'default': '#6B7280'
+    };
     
-    const map = new mapboxgl.Map({
-      container: 'map',
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: [-80.65, 28.25],
-      zoom: 9
-    });
-    
-    map.addControl(new mapboxgl.NavigationControl(), 'top-right');
-    map.addControl(new mapboxgl.ScaleControl(), 'bottom-left');
-    
+    // Jurisdiction data
     const jurisdictions = [
       { id: 1, name: 'Melbourne', coords: [-80.6081, 28.0836], count: 26 },
       { id: 2, name: 'Palm Bay', coords: [-80.5887, 27.9606], count: 25 },
@@ -139,21 +231,82 @@
       { id: 17, name: 'Melbourne Village', coords: [-80.6700, 28.0800], count: 23 }
     ];
     
+    // Populate dropdown
+    const select = document.getElementById('jurisdiction-select');
+    jurisdictions.forEach(j => {
+      const opt = document.createElement('option');
+      opt.value = j.id;
+      opt.textContent = j.name + ' (' + j.count + ' districts)';
+      select.appendChild(opt);
+    });
+    
+    // Initialize map
+    mapboxgl.accessToken = MAPBOX_TOKEN;
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/streets-v12',
+      center: [-80.65, 28.25],
+      zoom: 9
+    });
+    
+    map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    map.addControl(new mapboxgl.ScaleControl(), 'bottom-left');
+    
+    // Store markers
     const markerElements = {};
     let activeJurisdiction = null;
     
-    // Get category class for styling
-    function getCategoryClass(category) {
-      if (!category) return '';
-      const cat = category.toLowerCase();
-      if (cat.includes('resident')) return 'residential';
-      if (cat.includes('commerc')) return 'commercial';
-      if (cat.includes('industr')) return 'industrial';
-      if (cat.includes('mixed')) return 'mixed-use';
-      if (cat.includes('agricult')) return 'agricultural';
-      if (cat.includes('planned') || cat.includes('pud')) return 'planned';
-      if (cat.includes('conserv')) return 'conservation';
-      return '';
+    // Create markers
+    map.on('load', function() {
+      jurisdictions.forEach(function(j) {
+        const size = Math.max(32, Math.min(52, 24 + j.count * 0.5));
+        
+        const el = document.createElement('div');
+        el.className = 'marker';
+        el.style.width = size + 'px';
+        el.style.height = size + 'px';
+        el.style.fontSize = (size > 38 ? 14 : 12) + 'px';
+        el.textContent = j.count;
+        el.title = j.name;
+        
+        el.addEventListener('click', function(e) {
+          e.stopPropagation();
+          selectJurisdiction(j.id);
+          select.value = j.id;
+        });
+        
+        new mapboxgl.Marker({ element: el, anchor: 'center' })
+          .setLngLat(j.coords)
+          .addTo(map);
+        
+        markerElements[j.id] = el;
+      });
+    });
+    
+    // Fetch districts from Supabase
+    async function fetchDistricts(jurisdictionId) {
+      const panel = document.getElementById('districts-panel');
+      panel.innerHTML = '<div class="loading">Loading districts...</div>';
+      
+      try {
+        const response = await fetch(
+          SUPABASE_URL + '/rest/v1/zoning_districts?jurisdiction_id=eq.' + jurisdictionId + '&order=code',
+          {
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': 'Bearer ' + SUPABASE_KEY
+            }
+          }
+        );
+        
+        if (!response.ok) throw new Error('Failed to fetch');
+        
+        const districts = await response.json();
+        displayDistricts(districts, jurisdictionId);
+      } catch (error) {
+        console.error('Error fetching districts:', error);
+        panel.innerHTML = '<div class="empty-state"><p>Error loading districts. Check console.</p></div>';
+      }
     }
     
     // Parse dimensional standards from description
@@ -170,125 +323,77 @@
       return null;
     }
     
-    // Format dimensional standards
-    function formatDims(dims) {
-      if (!dims) return '';
-      let html = '<div class="district-dims">';
-      if (dims.min_lot_sqft) html += '📐 Min Lot: ' + dims.min_lot_sqft.toLocaleString() + ' sqft<br>';
-      if (dims.max_height_ft) html += '📏 Max Height: ' + dims.max_height_ft + ' ft<br>';
-      if (dims.setbacks_ft) {
-        const s = dims.setbacks_ft;
-        html += '↔️ Setbacks: ' + s.front + '/' + s.side + '/' + s.rear + ' ft (F/S/R)<br>';
-      }
-      if (dims.density_du_acre) html += '🏠 Density: ' + dims.density_du_acre + ' du/acre';
-      html += '</div>';
-      return html;
-    }
-    
-    // Fetch districts from Supabase
-    async function fetchDistricts(jurisdictionId) {
-      const listEl = document.getElementById('district-list');
-      listEl.innerHTML = '<div class="loading">Loading districts...</div>';
+    // Display districts in sidebar
+    function displayDistricts(districts, jurisdictionId) {
+      const panel = document.getElementById('districts-panel');
+      const j = jurisdictions.find(x => x.id === jurisdictionId);
       
-      try {
-        const response = await fetch(
-          SUPABASE_URL + '/rest/v1/zoning_districts?jurisdiction_id=eq.' + jurisdictionId + '&order=code',
-          {
-            headers: {
-              'apikey': SUPABASE_KEY,
-              'Authorization': 'Bearer ' + SUPABASE_KEY
-            }
+      if (districts.length === 0) {
+        panel.innerHTML = '<div class="empty-state"><p>No districts found for this jurisdiction.</p></div>';
+        return;
+      }
+      
+      let html = '<div class="districts-header">' + j.name + ' — ' + districts.length + ' Districts</div>';
+      
+      districts.forEach(d => {
+        const color = CATEGORY_COLORS[d.category] || CATEGORY_COLORS.default;
+        const dims = parseDims(d.description);
+        
+        html += '<div class="district-item">';
+        html += '<div class="district-row">';
+        html += '<div class="category-dot" style="background:' + color + '"></div>';
+        html += '<span class="district-code">' + d.code + '</span>';
+        html += '<span class="district-name">' + d.name + '</span>';
+        html += '</div>';
+        html += '<div class="district-category">' + (d.category || 'Uncategorized') + '</div>';
+        
+        if (dims) {
+          html += '<div class="district-dims">';
+          if (dims.min_lot_sqft) html += 'Min Lot: ' + dims.min_lot_sqft.toLocaleString() + ' sqft • ';
+          if (dims.max_height_ft) html += 'Max Height: ' + dims.max_height_ft + 'ft • ';
+          if (dims.density_du_acre) html += 'Density: ' + dims.density_du_acre + ' du/ac';
+          if (dims.setbacks_ft) {
+            html += '<br>Setbacks: Front ' + dims.setbacks_ft.front + 'ft / Side ' + dims.setbacks_ft.side + 'ft / Rear ' + dims.setbacks_ft.rear + 'ft';
           }
-        );
-        
-        const districts = await response.json();
-        
-        if (districts.length === 0) {
-          listEl.innerHTML = '<div class="no-selection">No districts found</div>';
-          return;
+          html += '</div>';
         }
         
-        let html = '';
-        districts.forEach(function(d) {
-          const catClass = getCategoryClass(d.category);
-          const dims = parseDims(d.description);
-          html += '<div class="district-card ' + catClass + '">';
-          html += '<div class="district-code">' + d.code + '</div>';
-          html += '<div class="district-name">' + d.name + '</div>';
-          if (d.category) {
-            html += '<span class="district-category ' + catClass + '">' + d.category + '</span>';
-          }
-          html += formatDims(dims);
-          html += '</div>';
-        });
-        
-        listEl.innerHTML = html;
-        
-      } catch (error) {
-        console.error('Error fetching districts:', error);
-        listEl.innerHTML = '<div class="no-selection">Error loading districts</div>';
-      }
+        html += '</div>';
+      });
+      
+      panel.innerHTML = html;
     }
     
     // Select jurisdiction
-    function selectJurisdiction(j) {
+    function selectJurisdiction(id) {
       // Update active state
       if (activeJurisdiction && markerElements[activeJurisdiction]) {
         markerElements[activeJurisdiction].classList.remove('active');
       }
-      activeJurisdiction = j.id;
-      if (markerElements[j.id]) {
-        markerElements[j.id].classList.add('active');
+      activeJurisdiction = id;
+      if (markerElements[id]) {
+        markerElements[id].classList.add('active');
       }
       
-      // Update sidebar header
-      document.getElementById('sidebar-title').textContent = j.name;
-      document.getElementById('sidebar-subtitle').textContent = j.count + ' zoning districts';
+      // Fly to jurisdiction
+      const j = jurisdictions.find(x => x.id === id);
+      if (j) {
+        map.flyTo({
+          center: j.coords,
+          zoom: 12,
+          duration: 1200
+        });
+      }
       
-      // Fetch and display districts
-      fetchDistricts(j.id);
-      
-      // Fly to location
-      map.flyTo({
-        center: j.coords,
-        zoom: 11,
-        duration: 1000
-      });
+      // Fetch districts
+      fetchDistricts(id);
     }
     
-    // Add markers on map load
-    map.on('load', function() {
-      jurisdictions.forEach(function(j) {
-        const size = Math.max(32, Math.min(52, 24 + j.count * 0.5));
-        
-        const el = document.createElement('div');
-        el.className = 'marker';
-        el.style.width = size + 'px';
-        el.style.height = size + 'px';
-        el.style.fontSize = (size > 38 ? 14 : 12) + 'px';
-        el.textContent = j.count;
-        el.title = j.name + ': ' + j.count + ' districts';
-        
-        markerElements[j.id] = el;
-        
-        el.addEventListener('click', function(e) {
-          e.stopPropagation();
-          selectJurisdiction(j);
-        });
-        
-        new mapboxgl.Marker({ element: el, anchor: 'center' })
-          .setLngLat(j.coords)
-          .addTo(map);
-      });
-    });
-    
-    // Dropdown handler
-    document.getElementById('jurisdiction-select').addEventListener('change', function(e) {
-      if (!e.target.value) return;
-      const parts = e.target.value.split(',');
-      const id = parseInt(parts[0]);
-      const j = jurisdictions.find(function(x) { return x.id === id; });
-      if (j) selectJurisdiction(j);
+    // Handle dropdown change
+    select.addEventListener('change', function() {
+      if (this.value) {
+        selectJurisdiction(parseInt(this.value));
+      }
     });
   </script>
 </body>

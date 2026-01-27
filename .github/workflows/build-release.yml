@@ -19,24 +19,60 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
           
-      - name: Install dependencies
+      - name: Install dependencies (root)
+        run: bun install
+        
+      - name: Install dependencies (electron)
         run: bun install
         working-directory: apps/electron
         
-      - name: Build app
-        run: bun run build:win
+      - name: Install electron-builder
+        run: bun add -D electron-builder
+        working-directory: apps/electron
+
+      - name: Build renderer and main
+        run: |
+          bun run build:main:win
+          bun run build:preload
+          bun run build:renderer
         working-directory: apps/electron
         
-      - name: Build Windows installer
-        run: bun run dist:win
+      - name: Copy resources
+        run: |
+          if (Test-Path "resources") { Copy-Item -Path resources -Destination dist\resources -Recurse -Force }
+          New-Item -ItemType Directory -Path dist\assets -Force
+          if (Test-Path "..\..\packages\shared\assets\docs") { Copy-Item -Path ..\..\packages\shared\assets\docs -Destination dist\assets\docs -Recurse -Force }
+        shell: pwsh
+        working-directory: apps/electron
+        
+      - name: Create vendor/bun directory
+        run: |
+          New-Item -ItemType Directory -Path vendor\bun -Force
+          Copy-Item -Path (Get-Command bun).Source -Destination vendor\bun\bun.exe -Force
+        shell: pwsh
+        working-directory: apps/electron
+
+      - name: Build Windows installer with electron-builder
+        run: npx electron-builder --win --x64
         working-directory: apps/electron
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: List release folder
+        run: Get-ChildItem -Path release -Recurse
+        shell: pwsh
+        working-directory: apps/electron
+        continue-on-error: true
           
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
@@ -46,20 +82,10 @@ jobs:
             apps/electron/release/*.exe
             apps/electron/release/*.msi
           retention-days: 30
-          
-      - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            apps/electron/release/*.exe
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          if-no-files-found: warn
 
-  build-mac:
-    runs-on: macos-latest
+  build-portable:
+    runs-on: windows-latest
     
     steps:
       - name: Checkout code
@@ -70,36 +96,25 @@ jobs:
         with:
           bun-version: latest
           
-      - name: Install dependencies
-        run: bun install
-        working-directory: apps/electron
+      - name: Install and build
+        run: |
+          bun install
+          cd apps/electron
+          bun install
+          bun run build:main:win
+          bun run build:preload
+          bun run build:renderer
         
-      - name: Build app
-        run: bun run build
-        working-directory: apps/electron
+      - name: Package as ZIP (portable)
+        run: |
+          cd apps/electron
+          mkdir -p release
+          Compress-Archive -Path dist/* -DestinationPath release/ZoneWise-portable.zip -Force
+        shell: pwsh
         
-      - name: Build macOS DMG
-        run: bun run dist:mac
-        working-directory: apps/electron
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Upload macOS artifacts
+      - name: Upload portable artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ZoneWise-macOS
-          path: |
-            apps/electron/release/*.dmg
-            apps/electron/release/*.zip
+          name: ZoneWise-Portable
+          path: apps/electron/release/ZoneWise-portable.zip
           retention-days: 30
-          
-      - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            apps/electron/release/*.dmg
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,21 +1,20 @@
 # ZoneWise.AI Skills Manifest
 # Progressive Disclosure Architecture
-# Each skill only loads ~5% upfront, full context on-demand
+# Updated: 2026-02-01
 
-version: "1.0.0"
+version: "1.1.0"
 updated: "2026-02-01"
-total_skills: 10
+total_skills: 12
 
 skills:
   # ============================================================================
-  # CORE ZONING SKILLS
+  # CORE ANALYSIS SKILLS
   # ============================================================================
   
   - name: zoning-analysis
     description: |
-      Analyze zoning codes, DIMS (Development Intensity Metrics), and land use 
-      regulations. Extract setbacks, FAR, height limits, and lot coverage from 
-      municipal codes. Supports Brevard County jurisdictions.
+      Analyze zoning codes and land use regulations. Extract setbacks, FAR, 
+      height limits, and lot coverage from municipal codes.
     path: zonewise/skills/zoning-analysis/SKILL.md
     category: zoning
     priority: 1
@@ -24,81 +23,36 @@ skills:
       - malabar-zoning-table.md
       - brevard-jurisdictions.md
 
-  - name: envelope-development
+  - name: property-valuation
     description: |
-      Generate 3D building envelopes from zoning parameters. Calculate maximum 
-      buildable volume using setbacks, height limits, and FAR. Output Three.js 
-      BufferGeometry for visualization.
-    path: zonewise/skills/envelope-development/SKILL.md
-    category: visualization
+      Estimate property values using comparable sales, income approach, and cost 
+      approach. Calculate ARV, max bid, and investment returns.
+    path: zonewise/skills/property-valuation/SKILL.md
+    category: analysis
     priority: 1
     tokens_estimate: 120
     references:
-      - envelope-algorithm.md
-      - three-geometry-patterns.md
+      - valuation-methods.md
+      - bcpao-values-api.md
+      - comp-selection.md
 
-  # ============================================================================
-  # THREE.JS VISUALIZATION SKILLS
-  # ============================================================================
-  
-  - name: threejs-fundamentals
+  - name: permit-lookup
     description: |
-      Core Three.js concepts: Scene, Camera, Renderer, Mesh, Material, and 
-      animation loop. React Three Fiber integration patterns. Canvas setup.
-    path: zonewise/skills/threejs-fundamentals/SKILL.md
-    category: visualization
+      Search building permits, code violations, and inspection history. Identify 
+      unpermitted work and assess permit risk for investment properties.
+    path: zonewise/skills/permit-lookup/SKILL.md
+    category: data
     priority: 2
-    tokens_estimate: 80
+    tokens_estimate: 100
     references:
-      - r3f-setup.md
+      - brevard-permit-portal.md
+      - permit-types.md
+      - violation-codes.md
 
-  - name: threejs-geometry
-    description: |
-      Create and manipulate Three.js geometries. BufferGeometry, ExtrudeGeometry,
-      vertex manipulation, and polygon triangulation with Earcut.
-    path: zonewise/skills/threejs-geometry/SKILL.md
-    category: visualization
-    priority: 2
-    tokens_estimate: 90
-    references:
-      - geometry-types.md
-      - earcut-usage.md
-
-  - name: threejs-materials
-    description: |
-      Three.js materials for building visualization. MeshStandardMaterial,
-      transparency, vertex colors, and performance optimization.
-    path: zonewise/skills/threejs-materials/SKILL.md
-    category: visualization
-    priority: 2
-    tokens_estimate: 70
-
-  - name: threejs-lighting
-    description: |
-      Lighting for architectural visualization. AmbientLight, DirectionalLight,
-      shadow mapping, and realistic sun simulation.
-    path: zonewise/skills/threejs-lighting/SKILL.md
-    category: visualization
-    priority: 2
-    tokens_estimate: 75
-
-  - name: threejs-interaction
-    description: |
-      User interaction: OrbitControls, raycasting, click detection, hover effects.
-      Touch support for mobile devices.
-    path: zonewise/skills/threejs-interaction/SKILL.md
-    category: visualization
-    priority: 2
-    tokens_estimate: 65
-
-  # ============================================================================
-  # SUN/SHADOW ANALYSIS SKILLS (PHASE 5)
-  # ============================================================================
-  
   - name: sun-analysis
     description: |
-      Calculate sun position using SunCalc. Generate sun paths, shadow projections,
-      and solar exposure heatmaps. Animate shadows throughout the day.
+      Calculate sun position, generate sun paths, shadow projections, and solar 
+      exposure heatmaps. Animate shadows throughout the day.
     path: zonewise/skills/sun-analysis/SKILL.md
     category: analysis
     priority: 1
@@ -108,13 +62,73 @@ skills:
       - shadow-algorithm.md
 
   # ============================================================================
+  # VISUALIZATION SKILLS
+  # ============================================================================
+  
+  - name: envelope-development
+    description: |
+      Generate 3D building envelopes from zoning parameters. Calculate maximum 
+      buildable volume using setbacks, height limits, and FAR.
+    path: zonewise/skills/envelope-development/SKILL.md
+    category: visualization
+    priority: 1
+    tokens_estimate: 120
+    references:
+      - envelope-algorithm.md
+      - three-geometry-patterns.md
+
+  - name: threejs-fundamentals
+    description: |
+      Core Three.js concepts: Scene, Camera, Renderer, Mesh, Material. 
+      React Three Fiber integration patterns.
+    path: zonewise/skills/threejs-fundamentals/SKILL.md
+    category: visualization
+    priority: 2
+    tokens_estimate: 80
+
+  - name: threejs-geometry
+    description: |
+      Create and manipulate Three.js geometries. BufferGeometry, ExtrudeGeometry,
+      vertex manipulation, polygon triangulation.
+    path: zonewise/skills/threejs-geometry/SKILL.md
+    category: visualization
+    priority: 2
+    tokens_estimate: 90
+
+  - name: threejs-materials
+    description: |
+      Three.js materials for building visualization. MeshStandardMaterial,
+      transparency, vertex colors.
+    path: zonewise/skills/threejs-materials/SKILL.md
+    category: visualization
+    priority: 2
+    tokens_estimate: 70
+
+  - name: threejs-lighting
+    description: |
+      Lighting for architectural visualization. AmbientLight, DirectionalLight,
+      shadow mapping, sun simulation.
+    path: zonewise/skills/threejs-lighting/SKILL.md
+    category: visualization
+    priority: 2
+    tokens_estimate: 75
+
+  - name: threejs-interaction
+    description: |
+      User interaction: OrbitControls, raycasting, click detection, hover effects.
+    path: zonewise/skills/threejs-interaction/SKILL.md
+    category: visualization
+    priority: 2
+    tokens_estimate: 65
+
+  # ============================================================================
   # DATA INTEGRATION SKILLS
   # ============================================================================
   
   - name: bcpao-integration
     description: |
       Brevard County Property Appraiser data integration. Parcel lookup, property
-      photos, owner information, and assessed values via REST API.
+      photos, owner information, assessed values.
     path: zonewise/skills/bcpao-integration/SKILL.md
     category: data
     priority: 2
@@ -126,7 +140,7 @@ skills:
   - name: mapbox-integration
     description: |
       Mapbox GL JS integration with Three.js overlays. Satellite imagery, geocoding,
-      and custom map styles. react-three-map patterns.
+      custom map styles.
     path: zonewise/skills/mapbox-integration/SKILL.md
     category: visualization
     priority: 2
@@ -135,29 +149,56 @@ skills:
       - mapbox-styles.md
       - react-three-map.md
 
-# Categories for filtering
+# Categories
 categories:
   zoning: "Zoning code analysis and regulations"
   visualization: "3D visualization and rendering"
-  analysis: "Property and sun analysis"
+  analysis: "Property and environmental analysis"
   data: "External data integration"
 
 # Progressive Disclosure Levels
 disclosure_levels:
   level_1:
     name: "Metadata"
-    description: "Skill name and brief description"
+    description: "Brief description in system prompt"
     tokens: "50-150 per skill"
-    loaded: "Always in system prompt"
+    loaded: "Always"
   
   level_2:
     name: "Instructions"
     description: "Full SKILL.md content"
     tokens: "500-2000 per skill"
-    loaded: "On-demand via load_skill tool"
+    loaded: "On-demand via load_skill"
   
   level_3:
     name: "References"
     description: "API docs, examples, schemas"
     tokens: "1000-5000 per reference"
-    loaded: "On-demand via read_reference tool"
+    loaded: "On-demand via read_reference"
+
+# Agent Configuration
+agents:
+  orchestrator:
+    name: "ZoneWise Orchestrator"
+    description: "Main agent that routes to specialized agents"
+    skills: ["all"]
+  
+  zoning_agent:
+    name: "Zoning Agent"
+    description: "Analyzes zoning codes and regulations"
+    skills: ["zoning-analysis", "envelope-development"]
+  
+  valuation_agent:
+    name: "Valuation Agent"
+    description: "Estimates property values"
+    skills: ["property-valuation", "bcpao-integration"]
+  
+  permit_agent:
+    name: "Permit Agent"
+    description: "Checks permits and violations"
+    skills: ["permit-lookup"]
+  
+  visualization_agent:
+    name: "Visualization Agent"
+    description: "Creates 3D visualizations"
+    skills: ["envelope-development", "sun-analysis", "threejs-*", "mapbox-integration"]

@@ -1,18 +1,20 @@
 # ZoneWise.AI Desktop
 
-> 3D Building Envelope Intelligence for Brevard County, FL
+> 3D Building Envelope Intelligence with Sun/Shadow Analysis for Brevard County, FL
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Version](https://img.shields.io/badge/version-1.1.0-blue)
 ![License](https://img.shields.io/badge/license-Apache--2.0-green)
 ![Status](https://img.shields.io/badge/status-beta-yellow)
 
 ## Overview
 
-ZoneWise.AI Desktop provides instant 3D building envelope visualization based on verified municipal zoning codes. Know exactly what you can build before you buy.
+ZoneWise.AI Desktop provides instant 3D building envelope visualization with real-time sun/shadow analysis based on verified municipal zoning codes. Know exactly what you can build and how shadows will affect your property.
 
 ### Key Features
 
 - 🏗️ **3D Envelope Visualization** - See maximum buildable volume instantly
+- ☀️ **Sun/Shadow Analysis** - Real-time shadows with date/time picker
+- 🌡️ **Sun Hours Heatmap** - Visualize solar exposure across your lot
 - 🗺️ **Mapbox Integration** - Satellite imagery with 3D overlay
 - 📊 **Verified DIMS** - Municode-sourced zoning regulations
 - 📤 **Export Options** - PNG, OBJ, JSON, GeoJSON formats
@@ -28,51 +30,70 @@ ZoneWise.AI Desktop provides instant 3D building envelope visualization based on
 git clone https://github.com/breverdbidder/zonewise-desktop.git
 cd zonewise-desktop
 
-# Install dependencies
+# Install dependencies (including suncalc)
 bun install
 
 # Start development server
 bun run viewer:dev
 ```
 
-### Basic Usage
-
-```tsx
-import { EnvelopeViewer, ZoningDIMS } from '@craft-agent/ui/envelope';
-
-const dims: ZoningDIMS = {
-  district_code: 'RS-1',
-  district_name: 'Residential Single-Family',
-  max_height_ft: 35,
-  max_far: 0.35,
-  setbacks_ft: { front: 25, side: 15, rear: 20 },
-  // ... other DIMS
-};
-
-<EnvelopeViewer
-  lotPolygon={myLotPolygon}
-  dims={dims}
-  onEnvelopeCalculated={(result) => console.log(result)}
-/>
-```
-
 ## Components
 
 ### EnvelopeViewer
 
-Standalone 3D envelope visualization component.
+Standalone 3D envelope visualization.
 
 ```tsx
 <EnvelopeViewer
-  lotPolygon={polygon}           // GeoJSON polygon
-  dims={zoningDims}              // Zoning DIMS
-  showSetbackLines={true}        // Show setback boundaries
-  showHeightPlane={true}         // Show max height plane
-  showGrid={true}                // Show ground grid
-  envelopeColor="#4A90D9"        // Envelope color
-  envelopeOpacity={0.7}          // 0-1 opacity
+  lotPolygon={polygon}
+  dims={zoningDims}
+  showSetbackLines={true}
+  showHeightPlane={true}
+  envelopeColor="#4A90D9"
 />
 ```
+
+### SunShadowViewer ☀️ NEW
+
+3D envelope with real-time sun position and shadow casting.
+
+```tsx
+<SunShadowViewer
+  lotPolygon={polygon}
+  dims={zoningDims}
+  initialDate={new Date('2026-06-21')} // Summer solstice
+  location={[-80.5687, 28.004]}         // [lng, lat]
+  showSunPath={true}                    // Show sun arc
+  showShadows={true}                    // Enable shadow casting
+/>
+```
+
+**Features:**
+- 📅 Date picker for any day of year
+- ⏰ Time slider from sunrise to sunset
+- ▶️ Animation with 30x-240x speed
+- 🧭 Compass directions
+- 📍 Hour markers on sun path
+
+### SunHoursHeatmap 🌡️ NEW
+
+Visualize solar exposure across your lot using shadow raycasting.
+
+```tsx
+<SunHoursHeatmap
+  lotPolygon={polygon}
+  dims={zoningDims}
+  date={new Date()}
+  resolution={2}        // 2 meter grid
+  gridSize={60}         // 60m analysis area
+/>
+```
+
+**Features:**
+- 🎨 Color-coded sun hours (purple=shadow, yellow=full sun)
+- 📊 Average sun hours calculation
+- 🔄 Re-analyze for different dates
+- 📈 Summer vs Winter comparison
 
 ### MapEnvelopeViewer
 
@@ -80,21 +101,58 @@ Standalone 3D envelope visualization component.
 
 ```tsx
 <MapEnvelopeViewer
-  center={[-80.5687, 28.004]}    // [lng, lat]
+  center={[-80.5687, 28.004]}
   lotPolygon={polygon}
   dims={zoningDims}
-  mapStyle="satellite"           // satellite, streets, light, dark
+  mapStyle="satellite"
   zoom={18}
   pitch={60}
 />
 ```
 
-### ZoneWiseApp
+## Sun Analysis API
 
-Full application with sidebar, DIMS editor, and view toggle.
+### Calculate Sun Position
 
-```tsx
-<ZoneWiseApp />
+```typescript
+import { calculateSunPosition, getSunTimes } from '@craft-agent/ui/envelope';
+
+// Get sun position for specific time
+const position = calculateSunPosition(new Date(), 28.004, -80.5687);
+console.log(`Azimuth: ${position.azimuthDegrees}°`);
+console.log(`Altitude: ${position.altitudeDegrees}°`);
+
+// Get sunrise/sunset times
+const times = getSunTimes(new Date(), 28.004, -80.5687);
+console.log(`Sunrise: ${times.sunrise}`);
+console.log(`Sunset: ${times.sunset}`);
+```
+
+### Generate Sun Path
+
+```typescript
+import { generateSunPath } from '@craft-agent/ui/envelope';
+
+const path = generateSunPath({
+  latitude: 28.004,
+  longitude: -80.5687,
+  date: new Date('2026-06-21'), // Summer solstice
+  intervalMinutes: 30,
+  sunDistance: 80
+});
+
+// Returns array of { time, position, vector }
+```
+
+### Analyze Sun Hours
+
+```typescript
+import { analyzeSunHours, generateAnalysisGrid } from '@craft-agent/ui/envelope';
+
+const grid = generateAnalysisGrid([-30, -30, 30, 30], 0.1, 2);
+const results = analyzeSunHours(grid, config, buildingMeshes);
+
+// Returns array of { point, sunHours, sunPercentage, shadowPeriods }
 ```
 
 ## Zoning Data
@@ -127,41 +185,6 @@ Full application with sidebar, DIMS editor, and view toggle.
 
 Source: [Malabar LDC Article III](https://library.municode.com/fl/malabar/codes/land_development_code)
 
-## Export Formats
-
-### PNG Screenshot
-
-```tsx
-import { exportToPNG } from '@craft-agent/ui/envelope';
-
-const canvas = document.querySelector('canvas');
-await exportToPNG(canvas, 'envelope.png');
-```
-
-### OBJ 3D Model
-
-```tsx
-import { exportToOBJ } from '@craft-agent/ui/envelope';
-
-exportToOBJ(result.geometry, 'envelope.obj');
-```
-
-### JSON Data
-
-```tsx
-import { exportToJSON } from '@craft-agent/ui/envelope';
-
-exportToJSON(dims, result, lotPolygon, 'data.json');
-```
-
-### GeoJSON Polygons
-
-```tsx
-import { exportToGeoJSON } from '@craft-agent/ui/envelope';
-
-exportToGeoJSON(lotPolygon, result, dims, 'envelope.geojson');
-```
-
 ## Architecture
 
 ```
@@ -170,19 +193,20 @@ packages/ui/
 │   ├── lib/
 │   │   ├── envelope-generator.ts    # Core 3D algorithm
 │   │   ├── geo-utils.ts             # Coordinate transforms
+│   │   ├── sun-analysis.ts          # SunCalc integration ☀️
 │   │   ├── export-utils.ts          # PNG/OBJ/JSON export
 │   │   ├── supabase-zoning.ts       # Database integration
 │   │   └── use-responsive.ts        # Mobile hooks
 │   ├── components/envelope/
 │   │   ├── EnvelopeViewer.tsx       # 3D viewer
+│   │   ├── SunShadowViewer.tsx      # Sun/shadow viewer ☀️
+│   │   ├── SunHoursHeatmap.tsx      # Solar heatmap 🌡️
 │   │   ├── MapEnvelopeViewer.tsx    # Map + 3D
 │   │   ├── ZoneWiseApp.tsx          # Full app
 │   │   ├── ExportPanel.tsx          # Export UI
-│   │   └── EnvelopeTest.tsx         # Test component
-│   ├── data/
-│   │   └── malabar-sample-data.ts   # Test data
-│   └── pages/
-│       └── EnvelopeTestPage.tsx     # Test page
+│   │   └── index.ts                 # Module exports
+│   └── data/
+│       └── malabar-sample-data.ts   # Test data
 ```
 
 ## Dependencies
@@ -195,29 +219,8 @@ packages/ui/
 | react-three-map | ^0.5.0 | Mapbox + Three.js |
 | mapbox-gl | ^3.0.0 | Map tiles |
 | @turf/turf | ^6.5.0 | Geospatial ops |
+| **suncalc** | **^1.9.0** | **Sun position** ☀️ |
 | earcut | ^2.2.4 | Triangulation |
-| suncalc | ^1.9.0 | Sun position |
-
-## Development
-
-### Run Tests
-
-```bash
-bun test
-```
-
-### Build
-
-```bash
-bun run viewer:build
-```
-
-### Deploy
-
-```bash
-# Automatic via GitHub Actions on push to main
-# Manual trigger available via workflow_dispatch
-```
 
 ## Roadmap
 
@@ -241,10 +244,18 @@ bun run viewer:build
 - [x] Performance tests
 - [x] Cloudflare deploy
 
-### Phase 5: Sun/Shadow (March 2026)
-- [ ] SunCalc integration
-- [ ] Shadow raycasting
-- [ ] Date/time picker
+### Phase 5: Sun/Shadow ✅
+- [x] sun-analysis.ts with SunCalc
+- [x] SunShadowViewer component
+- [x] Shadow raycasting
+- [x] Sun hours heatmap
+- [x] Date/time picker
+- [x] Shadow animation
+
+### Phase 6: Melbourne Expansion (April 2026)
+- [ ] Melbourne zoning districts
+- [ ] BCPAO parcel integration
+- [ ] Multi-jurisdiction support
 
 ## License
 
@@ -255,5 +266,6 @@ Apache-2.0 © 2026 ZoneWise.AI
 - [Three.js](https://threejs.org/)
 - [React Three Fiber](https://docs.pmnd.rs/react-three-fiber)
 - [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/)
+- [SunCalc](https://github.com/mourner/suncalc) ☀️
 - [Turf.js](https://turfjs.org/)
 - [Malabar LDC](https://library.municode.com/fl/malabar)

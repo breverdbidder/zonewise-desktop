@@ -1,14 +1,30 @@
 {
-  "checkpoint_version": "1.0.1",
-  "checkpoint_date": "2026-02-01T23:45:00Z",
+  "checkpoint_version": "1.1.0",
+  "checkpoint_date": "2026-02-01T23:50:00Z",
   "assessed_by": "Claude AI Architect",
   "greptile_integration": "GOLD",
   
   "scoring_tiers": {
     "SAFEGUARD": { "min": 95, "description": "Production-ready, minimal risk" },
-    "ADOPT": { "min": 80, "max": 94, "description": "Acceptable with action items" },
-    "EVALUATE": { "min": 60, "max": 79, "description": "Conditional use" },
-    "REJECT": { "max": 59, "description": "Not recommended" }
+    "ADOPT": { "min": 80, "max": 94.9, "description": "Acceptable with monitoring" },
+    "EVALUATE": { "min": 60, "max": 79.9, "description": "Needs improvement" },
+    "CONDITIONAL": { "min": 40, "max": 59.9, "description": "Significant work required" },
+    "REJECT": { "max": 39.9, "description": "Not recommended" }
+  },
+  
+  "summary": {
+    "zonewise-v2": {
+      "combined_score": 85,
+      "status": "ADOPT",
+      "safeguard_achieved": false,
+      "gap_to_safeguard": 10
+    },
+    "zonewise-desktop": {
+      "combined_score": 92.5,
+      "status": "ADOPT", 
+      "safeguard_achieved": false,
+      "gap_to_safeguard": 2.5
+    }
   },
   
   "repositories": {
@@ -20,46 +36,59 @@
       "code_quality_score": 88,
       "combined_score": 85,
       "status": "ADOPT",
+      "safeguard_achieved": false,
       "gap_to_safeguard": 10,
+      "security_gap": 13,
+      "code_quality_gap": 7,
       "critical_issues": [
         {
           "id": "SEC-001",
           "severity": "CRITICAL",
-          "impact": "-8 points",
+          "impact": "-8 security points",
           "title": "Hardcoded Supabase Credentials",
           "file": "server/supabase.ts",
-          "remediation": "Remove fallback values, add startup validation"
+          "remediation": "Remove fallback values, use env vars only, add startup validation",
+          "deadline": "2026-02-03"
         },
         {
           "id": "SEC-002",
           "severity": "HIGH",
-          "impact": "-5 points",
+          "impact": "-5 security points",
           "title": "Missing Rate Limiting",
           "affected": "All tRPC endpoints",
-          "remediation": "Implement express-rate-limit"
+          "remediation": "Implement express-rate-limit middleware",
+          "deadline": "2026-02-08"
         },
         {
           "id": "CQ-001",
           "severity": "MEDIUM",
-          "impact": "-3 points",
-          "title": "Low Test Coverage",
-          "current": "~30%",
-          "target": "80%",
-          "remediation": "Add unit tests for KPI engine and API routes"
+          "impact": "-4 code quality points",
+          "title": "Low Test Coverage (~30%)",
+          "target": "80%+",
+          "remediation": "Add unit tests for KPI engine, API routes, and services",
+          "deadline": "2026-02-15"
         },
         {
           "id": "CQ-002",
           "severity": "MEDIUM",
-          "impact": "-2 points",
+          "impact": "-3 code quality points",
           "title": "Limited Documentation",
-          "remediation": "Add JSDoc to public functions, create API docs"
+          "remediation": "Add JSDoc to all exported functions, create API documentation",
+          "deadline": "2026-02-15"
         }
       ],
       "path_to_safeguard": [
-        { "action": "Fix SEC-001 (credentials)", "points": "+8", "deadline": "Feb 3" },
-        { "action": "Implement rate limiting", "points": "+3", "deadline": "Feb 8" },
-        { "action": "Add test coverage to 80%", "points": "+2", "deadline": "Feb 15" }
-      ]
+        { "action": "Fix hardcoded credentials (SEC-001)", "security_gain": "+8", "deadline": "Feb 3" },
+        { "action": "Implement rate limiting (SEC-002)", "security_gain": "+5", "deadline": "Feb 8" },
+        { "action": "Add test coverage to 80%", "quality_gain": "+4", "deadline": "Feb 15" },
+        { "action": "Add JSDoc documentation", "quality_gain": "+3", "deadline": "Feb 15" }
+      ],
+      "projected_after_fixes": {
+        "security": 95,
+        "code_quality": 95,
+        "combined": 95,
+        "status": "SAFEGUARD"
+      }
     },
     "zonewise-desktop": {
       "url": "https://github.com/breverdbidder/zonewise-desktop",
@@ -70,103 +99,115 @@
       "code_quality_score": 94,
       "combined_score": 92.5,
       "status": "ADOPT",
+      "safeguard_achieved": false,
       "gap_to_safeguard": 2.5,
+      "security_gap": 4,
+      "code_quality_gap": 1,
       "issues": [
         {
           "id": "SEC-003",
           "severity": "MEDIUM",
-          "impact": "-3 points",
-          "title": "OAuth Secrets in Environment",
-          "remediation": "Use OS keychain for OAuth secrets"
+          "impact": "-4 security points",
+          "title": "OAuth Secrets in Environment Files",
+          "remediation": "Migrate OAuth secrets to OS keychain (macOS Keychain, Windows Credential Manager)",
+          "deadline": "2026-02-08"
         },
         {
           "id": "CQ-003",
           "severity": "LOW",
-          "impact": "-2 points",
-          "title": "ZoneWise-specific test coverage",
+          "impact": "-1 code quality point",
+          "title": "ZoneWise Components Need Tests",
           "current": "~70%",
-          "target": "90%",
-          "remediation": "Add tests for 3D components and GIS utilities"
-        },
-        {
-          "id": "CQ-004",
-          "severity": "LOW",
-          "impact": "-1.5 points",
-          "title": "Python agent test coverage",
-          "current": "~60%",
-          "target": "85%",
-          "remediation": "Add pytest tests for LangGraph workflow"
+          "target": "95%+",
+          "remediation": "Add tests for 3D envelope components, GIS utilities",
+          "deadline": "2026-02-15"
         }
       ],
       "path_to_safeguard": [
-        { "action": "Implement OS keychain for secrets", "points": "+2", "deadline": "Feb 8" },
-        { "action": "Add ZoneWise component tests", "points": "+1", "deadline": "Feb 15" },
-        { "action": "Add Python agent tests", "points": "+0.5", "deadline": "Feb 15" }
-      ]
+        { "action": "Implement OS keychain for OAuth", "security_gain": "+4", "deadline": "Feb 8" },
+        { "action": "Add ZoneWise component tests", "quality_gain": "+1", "deadline": "Feb 15" }
+      ],
+      "projected_after_fixes": {
+        "security": 95,
+        "code_quality": 95,
+        "combined": 95,
+        "status": "SAFEGUARD"
+      }
     }
   },
   
-  "sync_status": {
-    "last_sync": "2026-02-01T23:15:00Z",
-    "files_synced_v2_to_desktop": 60,
-    "files_synced_desktop_to_v2": 33,
-    "feature_parity": true,
-    "drift_detected": false
-  },
-  
-  "action_items": [
+  "action_items_prioritized": [
     {
+      "rank": 1,
       "priority": "CRITICAL",
-      "task": "Remove hardcoded Supabase credentials",
       "repo": "zonewise-v2",
+      "task": "Remove hardcoded Supabase credentials from server/supabase.ts",
       "impact": "+8 security points",
-      "deadline": "2026-02-03"
+      "deadline": "2026-02-03",
+      "owner": "Claude Code"
     },
     {
+      "rank": 2,
       "priority": "HIGH",
-      "task": "Implement rate limiting",
       "repo": "zonewise-v2",
-      "impact": "+3 security points",
-      "deadline": "2026-02-08"
+      "task": "Implement express-rate-limit on all API endpoints",
+      "impact": "+5 security points",
+      "deadline": "2026-02-08",
+      "owner": "Claude Code"
     },
     {
+      "rank": 3,
       "priority": "HIGH",
-      "task": "Implement OS keychain for OAuth",
       "repo": "zonewise-desktop",
-      "impact": "+2 security points",
-      "deadline": "2026-02-08"
+      "task": "Migrate OAuth secrets to OS keychain",
+      "impact": "+4 security points",
+      "deadline": "2026-02-08",
+      "owner": "Claude Code"
     },
     {
+      "rank": 4,
       "priority": "MEDIUM",
-      "task": "Increase test coverage to 80%",
       "repo": "zonewise-v2",
-      "impact": "+2 code quality points",
-      "deadline": "2026-02-15"
+      "task": "Add unit tests (target 80% coverage)",
+      "impact": "+4 code quality points",
+      "deadline": "2026-02-15",
+      "owner": "Claude Code"
     },
     {
+      "rank": 5,
       "priority": "MEDIUM",
-      "task": "Add ZoneWise component tests",
+      "repo": "zonewise-v2",
+      "task": "Add JSDoc to all exported functions",
+      "impact": "+3 code quality points",
+      "deadline": "2026-02-15",
+      "owner": "Claude Code"
+    },
+    {
+      "rank": 6,
+      "priority": "MEDIUM",
       "repo": "zonewise-desktop",
-      "impact": "+1 code quality points",
-      "deadline": "2026-02-15"
+      "task": "Add tests for ZoneWise 3D components",
+      "impact": "+1 code quality point",
+      "deadline": "2026-02-15",
+      "owner": "Claude Code"
     }
   ],
   
-  "projected_scores_after_remediation": {
-    "zonewise-v2": {
-      "security": 93,
-      "code_quality": 92,
-      "combined": 92.5,
-      "status": "ADOPT (close to SAFEGUARD)"
-    },
+  "safeguard_timeline": {
     "zonewise-desktop": {
-      "security": 95,
-      "code_quality": 96,
-      "combined": 95.5,
-      "status": "SAFEGUARD"
+      "current": 92.5,
+      "target": 95,
+      "estimated_completion": "2026-02-08",
+      "blocking_items": ["SEC-003"]
+    },
+    "zonewise-v2": {
+      "current": 85,
+      "target": 95,
+      "estimated_completion": "2026-02-15",
+      "blocking_items": ["SEC-001", "SEC-002", "CQ-001", "CQ-002"]
     }
   },
   
-  "next_review": "2026-03-01",
-  "review_frequency": "monthly"
+  "next_review": "2026-02-08",
+  "review_frequency": "weekly until SAFEGUARD achieved"
 }

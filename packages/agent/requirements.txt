@@ -1,24 +1,31 @@
 # ZoneWise.AI Agent Dependencies
-# Based on Cole Medin's custom-agent-with-skills pattern
+# Progressive Disclosure + Multi-Agent + Observability
 
 # Core Framework
-pydantic-ai>=0.0.34
+pydantic-ai>=0.0.40
 pydantic>=2.0.0
 
-# LLM Providers (choose one)
-anthropic>=0.40.0  # For Claude
-# openai>=1.0.0    # For GPT-4
-# openrouter       # For multi-model
+# LLM Providers
+anthropic>=0.40.0
+# openai>=1.0.0
+# openrouter
+
+# LangGraph Multi-Agent
+langgraph>=0.2.0
+langchain-core>=0.3.0
+
+# Observability
+logfire>=0.50.0
+
+# Testing & Evals
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
 
 # Utilities
 pyyaml>=6.0
 httpx>=0.27.0
-rich>=13.0.0       # CLI interface
-
-# Testing & Observability
-pytest>=8.0.0
-pytest-asyncio>=0.23.0
-# logfire          # For production observability
+rich>=13.0.0
+beautifulsoup4>=4.12.0
 
 # Optional: Local models
 # ollama>=0.1.0

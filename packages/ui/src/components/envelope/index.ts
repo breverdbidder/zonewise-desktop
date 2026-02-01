@@ -1,14 +1,14 @@
 /**
  * ZoneWise.AI Envelope Module
  * 
- * Complete module for 3D building envelope visualization.
+ * Complete module for 3D building envelope visualization with sun/shadow analysis.
  * 
  * @module envelope
- * @version 1.0.0
+ * @version 1.1.0
  */
 
 // ============================================================================
-// Main Components
+// Phase 1-4: Core Components
 // ============================================================================
 
 export { EnvelopeViewer, type EnvelopeViewerProps } from './EnvelopeViewer';
@@ -16,6 +16,13 @@ export { MapEnvelopeViewer, type MapEnvelopeViewerProps } from './MapEnvelopeVie
 export { ZoneWiseApp } from './ZoneWiseApp';
 export { EnvelopeTest } from './EnvelopeTest';
 export { ExportPanel, type ExportPanelProps } from './ExportPanel';
+
+// ============================================================================
+// Phase 5: Sun/Shadow Components
+// ============================================================================
+
+export { SunShadowViewer, type SunShadowViewerProps } from './SunShadowViewer';
+export { SunHoursHeatmap, type SunHoursHeatmapProps } from './SunHoursHeatmap';
 
 // ============================================================================
 // Core Library - Envelope Generation
@@ -66,6 +73,33 @@ export {
   exportToJSON,
   exportToGeoJSON
 } from '../../lib/export-utils';
+
+// ============================================================================
+// Core Library - Sun Analysis (Phase 5)
+// ============================================================================
+
+export {
+  calculateSunPosition,
+  getSunTimes,
+  getDaylightHours,
+  generateSunPath,
+  sunPositionToVector,
+  getSunDirection,
+  createSunLight,
+  analyzeSunHours,
+  generateAnalysisGrid,
+  getSunHoursColor,
+  createSunHoursHeatmap,
+  getSolarDates,
+  formatTime,
+  formatSunPosition,
+  isDST,
+  type SunPosition,
+  type SunTimes,
+  type SunPathPoint,
+  type ShadowAnalysis,
+  type SunAnalysisConfig
+} from '../../lib/sun-analysis';
 
 // ============================================================================
 // Core Library - Supabase Integration

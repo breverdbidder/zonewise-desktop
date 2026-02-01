@@ -1,8 +1,15 @@
 {
-  "checkpoint_version": "1.0.0",
-  "checkpoint_date": "2026-02-01T23:30:00Z",
+  "checkpoint_version": "1.0.1",
+  "checkpoint_date": "2026-02-01T23:45:00Z",
   "assessed_by": "Claude AI Architect",
   "greptile_integration": "GOLD",
+  
+  "scoring_tiers": {
+    "SAFEGUARD": { "min": 95, "description": "Production-ready, minimal risk" },
+    "ADOPT": { "min": 80, "max": 94, "description": "Acceptable with action items" },
+    "EVALUATE": { "min": 60, "max": 79, "description": "Conditional use" },
+    "REJECT": { "max": 59, "description": "Not recommended" }
+  },
   
   "repositories": {
     "zonewise-v2": {
@@ -13,33 +20,45 @@
       "code_quality_score": 88,
       "combined_score": 85,
       "status": "ADOPT",
+      "gap_to_safeguard": 10,
       "critical_issues": [
         {
           "id": "SEC-001",
           "severity": "CRITICAL",
+          "impact": "-8 points",
           "title": "Hardcoded Supabase Credentials",
           "file": "server/supabase.ts",
           "remediation": "Remove fallback values, add startup validation"
         },
         {
           "id": "SEC-002",
-          "severity": "MEDIUM",
+          "severity": "HIGH",
+          "impact": "-5 points",
           "title": "Missing Rate Limiting",
           "affected": "All tRPC endpoints",
           "remediation": "Implement express-rate-limit"
+        },
+        {
+          "id": "CQ-001",
+          "severity": "MEDIUM",
+          "impact": "-3 points",
+          "title": "Low Test Coverage",
+          "current": "~30%",
+          "target": "80%",
+          "remediation": "Add unit tests for KPI engine and API routes"
+        },
+        {
+          "id": "CQ-002",
+          "severity": "MEDIUM",
+          "impact": "-2 points",
+          "title": "Limited Documentation",
+          "remediation": "Add JSDoc to public functions, create API docs"
         }
       ],
-      "strengths": [
-        "Modern TypeScript with strict mode",
-        "Zod validation on all inputs",
-        "tRPC end-to-end type safety",
-        "Secure Stripe integration",
-        "Supabase RLS policies"
-      ],
-      "files_deployed": [
-        "SECURITY.md",
-        "CODE_QUALITY.md",
-        "SYNC_CHECKPOINT.md"
+      "path_to_safeguard": [
+        { "action": "Fix SEC-001 (credentials)", "points": "+8", "deadline": "Feb 3" },
+        { "action": "Implement rate limiting", "points": "+3", "deadline": "Feb 8" },
+        { "action": "Add test coverage to 80%", "points": "+2", "deadline": "Feb 15" }
       ]
     },
     "zonewise-desktop": {
@@ -50,20 +69,39 @@
       "security_score": 91,
       "code_quality_score": 94,
       "combined_score": 92.5,
-      "status": "SAFEGUARD_ACHIEVED",
-      "critical_issues": [],
-      "strengths": [
-        "Electron context isolation",
-        "Secure IPC implementation",
-        "OAuth PKCE flow",
-        "Monorepo architecture",
-        "Comprehensive TypeScript types",
-        "Inherits Craft Agents security"
+      "status": "ADOPT",
+      "gap_to_safeguard": 2.5,
+      "issues": [
+        {
+          "id": "SEC-003",
+          "severity": "MEDIUM",
+          "impact": "-3 points",
+          "title": "OAuth Secrets in Environment",
+          "remediation": "Use OS keychain for OAuth secrets"
+        },
+        {
+          "id": "CQ-003",
+          "severity": "LOW",
+          "impact": "-2 points",
+          "title": "ZoneWise-specific test coverage",
+          "current": "~70%",
+          "target": "90%",
+          "remediation": "Add tests for 3D components and GIS utilities"
+        },
+        {
+          "id": "CQ-004",
+          "severity": "LOW",
+          "impact": "-1.5 points",
+          "title": "Python agent test coverage",
+          "current": "~60%",
+          "target": "85%",
+          "remediation": "Add pytest tests for LangGraph workflow"
+        }
       ],
-      "files_deployed": [
-        "SECURITY.md",
-        "CODE_QUALITY.md",
-        "SYNC_CHECKPOINT.md"
+      "path_to_safeguard": [
+        { "action": "Implement OS keychain for secrets", "points": "+2", "deadline": "Feb 8" },
+        { "action": "Add ZoneWise component tests", "points": "+1", "deadline": "Feb 15" },
+        { "action": "Add Python agent tests", "points": "+0.5", "deadline": "Feb 15" }
       ]
     }
   },
@@ -76,111 +114,58 @@
     "drift_detected": false
   },
   
-  "shared_features": {
-    "kpi_engine": {
-      "kpi_count": 63,
-      "synced": true,
-      "location_v2": "src/lib/kpi-engine/",
-      "location_desktop": "zonewise/lib/kpi-engine/"
-    },
-    "financial_calculator": {
-      "synced": true,
-      "location_v2": "src/lib/financial-calculator/",
-      "location_desktop": "zonewise/lib/financial-calculator/"
-    },
-    "report_generator": {
-      "formats": ["DOCX", "PDF", "CSV", "JSON", "Markdown"],
-      "synced": true,
-      "location_v2": "src/lib/export/",
-      "location_desktop": "zonewise/lib/export/"
-    },
-    "skills": {
-      "count": 12,
-      "synced": true,
-      "list": [
-        "zoning-analysis",
-        "property-valuation",
-        "permit-lookup",
-        "bcpao-integration",
-        "mapbox-integration",
-        "envelope-development",
-        "sun-analysis",
-        "threejs-fundamentals",
-        "threejs-geometry",
-        "threejs-interaction",
-        "threejs-lighting",
-        "threejs-materials"
-      ]
-    },
-    "agent": {
-      "type": "LangGraph",
-      "synced": true,
-      "location_v2": "agent/",
-      "location_desktop": "packages/agent/"
-    },
-    "3d_visualization": {
-      "components": 8,
-      "synced": true,
-      "location_v2": "src/components/envelope/",
-      "location_desktop": "packages/ui/src/components/envelope/"
-    }
-  },
-  
-  "platform_matrix": {
-    "web": {
-      "status": "PRODUCTION",
-      "unique_features": [
-        "Stripe payments",
-        "Multi-tenant SaaS",
-        "Public API"
-      ]
-    },
-    "desktop": {
-      "status": "PRODUCTION",
-      "unique_features": [
-        "Craft Agents UI",
-        "Session search",
-        "Mini Agents",
-        "Offline mode"
-      ]
-    },
-    "mobile": {
-      "status": "PLANNED",
-      "target_date": "2026-Q2",
-      "unique_features": [
-        "GPS location",
-        "Camera integration",
-        "Push notifications"
-      ]
-    }
-  },
-  
   "action_items": [
     {
       "priority": "CRITICAL",
       "task": "Remove hardcoded Supabase credentials",
       "repo": "zonewise-v2",
+      "impact": "+8 security points",
       "deadline": "2026-02-03"
     },
     {
       "priority": "HIGH",
       "task": "Implement rate limiting",
       "repo": "zonewise-v2",
+      "impact": "+3 security points",
+      "deadline": "2026-02-08"
+    },
+    {
+      "priority": "HIGH",
+      "task": "Implement OS keychain for OAuth",
+      "repo": "zonewise-desktop",
+      "impact": "+2 security points",
       "deadline": "2026-02-08"
     },
     {
       "priority": "MEDIUM",
-      "task": "Add ZoneWise-specific tests",
-      "repo": "zonewise-desktop",
+      "task": "Increase test coverage to 80%",
+      "repo": "zonewise-v2",
+      "impact": "+2 code quality points",
       "deadline": "2026-02-15"
     },
     {
       "priority": "MEDIUM",
-      "task": "Set up automated sync workflow",
-      "repo": "both",
-      "deadline": "2026-02-08"
+      "task": "Add ZoneWise component tests",
+      "repo": "zonewise-desktop",
+      "impact": "+1 code quality points",
+      "deadline": "2026-02-15"
     }
   ],
+  
+  "projected_scores_after_remediation": {
+    "zonewise-v2": {
+      "security": 93,
+      "code_quality": 92,
+      "combined": 92.5,
+      "status": "ADOPT (close to SAFEGUARD)"
+    },
+    "zonewise-desktop": {
+      "security": 95,
+      "code_quality": 96,
+      "combined": 95.5,
+      "status": "SAFEGUARD"
+    }
+  },
   
   "next_review": "2026-03-01",
   "review_frequency": "monthly"

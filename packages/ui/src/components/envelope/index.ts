@@ -9,6 +9,7 @@
 
 // Components
 export { EnvelopeViewer, type EnvelopeViewerProps } from './EnvelopeViewer';
+export { EnvelopeTest } from './EnvelopeTest';
 
 // Re-export types and utilities from lib
 export { 
@@ -19,3 +20,12 @@ export {
   type ZoningDIMS,
   type EnvelopeResult
 } from '../../lib/envelope-generator';
+
+// Re-export sample data for testing
+export {
+  MALABAR_DISTRICTS,
+  SAMPLE_LOT_POLYGON,
+  DEFAULT_TEST_DIMS,
+  getDistrictByCode,
+  getAllDistrictCodes
+} from '../../data/malabar-sample-data';

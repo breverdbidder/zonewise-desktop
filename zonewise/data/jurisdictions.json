@@ -1,0 +1,151 @@
+{
+  "brevard_county_jurisdictions": {
+    "total": 17,
+    "last_updated": "2026-01-31",
+    "source": "breverdbidder/zonewise-desktop-v1-archive",
+    "jurisdictions": [
+      {
+        "id": "brevard_county",
+        "name": "Brevard County",
+        "type": "county",
+        "municode_url": "https://library.municode.com/fl/brevard_county",
+        "gis_layer": "Brevard County Zoning",
+        "status": "100%"
+      },
+      {
+        "id": "melbourne",
+        "name": "City of Melbourne",
+        "type": "city",
+        "municode_url": "https://library.municode.com/fl/melbourne",
+        "gis_layer": "Melbourne Zoning",
+        "status": "100%"
+      },
+      {
+        "id": "palm_bay",
+        "name": "City of Palm Bay",
+        "type": "city",
+        "municode_url": "https://library.municode.com/fl/palm_bay",
+        "gis_layer": "Palm Bay Zoning",
+        "status": "100%"
+      },
+      {
+        "id": "titusville",
+        "name": "City of Titusville",
+        "type": "city",
+        "municode_url": "https://library.municode.com/fl/titusville",
+        "gis_layer": "Titusville Zoning",
+        "status": "100%"
+      },
+      {
+        "id": "cocoa",
+        "name": "City of Cocoa",
+        "type": "city",
+        "municode_url": "https://library.municode.com/fl/cocoa",
+        "gis_layer": "Cocoa Zoning",
+        "status": "100%"
+      },
+      {
+        "id": "rockledge",
+        "name": "City of Rockledge",
+        "type": "city",
+        "municode_url": "https://library.municode.com/fl/rockledge",
+        "gis_layer": "Rockledge Zoning",
+        "status": "100%"
+      },
+      {
+        "id": "merritt_island",
+        "name": "Merritt Island",
+        "type": "unincorporated",
+        "municode_url": "https://library.municode.com/fl/brevard_county",
+        "gis_layer": "Brevard County Zoning",
+        "status": "100%"
+      },
+      {
+        "id": "satellite_beach",
+        "name": "City of Satellite Beach",
+        "type": "city",
+        "municode_url": "https://library.municode.com/fl/satellite_beach",
+        "gis_layer": "Satellite Beach Zoning",
+        "status": "100%"
+      },
+      {
+        "id": "indian_harbour_beach",
+        "name": "City of Indian Harbour Beach",
+        "type": "city",
+        "municode_url": "https://library.municode.com/fl/indian_harbour_beach",
+        "gis_layer": "Indian Harbour Beach Zoning",
+        "status": "100%"
+      },
+      {
+        "id": "melbourne_beach",
+        "name": "Town of Melbourne Beach",
+        "type": "town",
+        "municode_url": "https://library.municode.com/fl/melbourne_beach",
+        "gis_layer": "Melbourne Beach Zoning",
+        "status": "100%"
+      },
+      {
+        "id": "indialantic",
+        "name": "Town of Indialantic",
+        "type": "town",
+        "municode_url": "https://library.municode.com/fl/indialantic",
+        "gis_layer": "Indialantic Zoning",
+        "status": "100%"
+      },
+      {
+        "id": "west_melbourne",
+        "name": "City of West Melbourne",
+        "type": "city",
+        "municode_url": "https://library.municode.com/fl/west_melbourne",
+        "gis_layer": "West Melbourne Zoning",
+        "status": "100%"
+      },
+      {
+        "id": "cocoa_beach",
+        "name": "City of Cocoa Beach",
+        "type": "city",
+        "municode_url": "https://library.municode.com/fl/cocoa_beach",
+        "gis_layer": "Cocoa Beach Zoning",
+        "status": "100%"
+      },
+      {
+        "id": "cape_canaveral",
+        "name": "City of Cape Canaveral",
+        "type": "city",
+        "municode_url": "https://library.municode.com/fl/cape_canaveral",
+        "gis_layer": "Cape Canaveral Zoning",
+        "status": "100%"
+      },
+      {
+        "id": "malabar",
+        "name": "Town of Malabar",
+        "type": "town",
+        "municode_url": "https://library.municode.com/fl/malabar",
+        "gis_layer": "Malabar Zoning",
+        "status": "100%"
+      },
+      {
+        "id": "grant_valkaria",
+        "name": "Town of Grant-Valkaria",
+        "type": "town",
+        "municode_url": "https://library.municode.com/fl/grant-valkaria",
+        "gis_layer": "Grant-Valkaria Zoning",
+        "status": "100%"
+      },
+      {
+        "id": "melbourne_village",
+        "name": "Town of Melbourne Village",
+        "type": "town",
+        "municode_url": "https://library.municode.com/fl/melbourne_village",
+        "gis_layer": "Melbourne Village Zoning",
+        "status": "100%"
+      }
+    ]
+  },
+  "gis_stats": {
+    "total_polygons": 10092,
+    "total_zoning_codes": 56,
+    "total_districts": 301,
+    "source": "gis.brevardfl.gov/gissrv/rest/services/Planning_Development/Zoning_WKID2881/MapServer/0"
+  }
+}

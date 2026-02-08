@@ -22,6 +22,7 @@ export default defineConfig({
     outDir: 'dist',
     emptyDirBeforeWrite: true,
     sourcemap: true,
+    chunkSizeWarningLimit: 2000,
   },
   optimizeDeps: {
     include: ['react', 'react-dom'],

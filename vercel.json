@@ -7,6 +7,8 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
+    { "source": "/chat", "destination": "/index.html" },
+    { "source": "/dashboard", "destination": "/index.html" },
     { "source": "/login", "destination": "/index.html" },
     { "source": "/signup", "destination": "/index.html" },
     { "source": "/terms", "destination": "/index.html" },

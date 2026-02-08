@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "bunx vite build --config apps/viewer/vite.config.ts && node zonewise/branding/inject-branding.mjs",
+  "buildCommand": "cd apps/viewer && bunx vite build && cd ../.. && node zonewise/branding/inject-branding.mjs",
   "outputDirectory": "apps/viewer/dist",
   "installCommand": "bun install",
   "framework": null,

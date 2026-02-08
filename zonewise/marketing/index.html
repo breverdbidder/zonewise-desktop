@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZoneWise.AI - Florida Real Estate Intelligence</title>
+  <meta name="description" content="AI-powered real estate intelligence across all 67 Florida counties. Distressed assets decoded.">
+  <meta name="theme-color" content="#1E3A5F">
+  <meta property="og:title" content="ZoneWise.AI">
+  <meta property="og:description" content="Florida's AI-Powered Real Estate Intelligence Platform">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zonewise.ai">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: #1a1a2e; background: #fff; }
+    .nav { position: sticky; top: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; z-index: 50; }
+    .nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; }
+    .logo-icon { width: 32px; height: 32px; background: #1E3A5F; border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative; }
+    .logo-icon span { color: white; font-weight: 700; font-size: 14px; }
+    .logo-dot { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: #F59E0B; border-radius: 50%; }
+    .logo-text { font-size: 1.25rem; font-weight: 700; color: #1a1a2e; }
+    .nav-links { display: flex; align-items: center; gap: 1.5rem; }
+    .nav-links a { text-decoration: none; color: #475569; font-size: 0.9rem; }
+    .nav-links a:hover { color: #1E3A5F; }
+    .btn-primary { background: #1E3A5F; color: white; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-weight: 500; font-size: 0.9rem; }
+    .btn-primary:hover { background: #162D4A; }
+    .hero { padding: 5rem 1.5rem; text-align: center; background: linear-gradient(180deg, #f8fafc 0%, #fff 100%); }
+    .hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; color: #1a1a2e; line-height: 1.1; margin-bottom: 1.5rem; }
+    .hero h1 span { color: #1E3A5F; display: block; margin-top: 0.25rem; }
+    .hero p { font-size: 1.2rem; color: #475569; max-width: 600px; margin: 0 auto 1rem; }
+    .hero .founder { font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.5rem; }
+    .everest-badge { display: inline-flex; align-items: center; gap: 0.5rem; border: 1px solid rgba(30,58,95,0.2); border-radius: 9999px; padding: 0.375rem 1rem; font-size: 0.85rem; color: #1E3A5F; font-weight: 500; text-decoration: none; margin-bottom: 2rem; }
+    .everest-badge:hover { background: rgba(30,58,95,0.05); }
+    .btn-hero { display: inline-block; background: #1E3A5F; color: white; padding: 1rem 2.5rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; text-decoration: none; }
+    .btn-hero:hover { background: #162D4A; }
+    .stats { padding: 3rem 1.5rem; background: #1E3A5F; }
+    .stats-inner { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; text-align: center; }
+    .stat-num { font-size: 2rem; font-weight: 800; color: #F59E0B; }
+    .stat-label { color: #cbd5e1; font-size: 0.9rem; margin-top: 0.25rem; }
+    .features { padding: 5rem 1.5rem; }
+    .features h2 { text-align: center; font-size: 2rem; font-weight: 700; margin-bottom: 3rem; }
+    .features-grid { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; }
+    .feature-card { text-align: center; padding: 1.5rem; border-radius: 12px; border: 1px solid #f1f5f9; }
+    .feature-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    .feature-icon { width: 48px; height: 48px; background: rgba(30,58,95,0.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.5rem; }
+    .feature-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .feature-card p { font-size: 0.85rem; color: #64748b; line-height: 1.5; }
+    .preview { padding: 5rem 1.5rem; background: #f8fafc; }
+    .preview h2 { text-align: center; font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .preview-sub { text-align: center; color: #64748b; margin-bottom: 3rem; }
+    .preview-box { max-width: 900px; margin: 0 auto; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 8px 32px rgba(0,0,0,0.1); background: white; min-height: 400px; display: flex; }
+    .preview-chat { width: 40%; background: #1E3A5F; color: white; padding: 1rem; display: flex; flex-direction: column; }
+    .preview-chat-header { display: flex; align-items: center; gap: 0.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem; }
+    .preview-chat-icon { width: 24px; height: 24px; background: rgba(255,255,255,0.2); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; }
+    .preview-chat-title { font-size: 0.85rem; font-weight: 500; }
+    .chat-bubble { padding: 0.5rem 0.75rem; border-radius: 12px; font-size: 0.8rem; line-height: 1.4; margin-bottom: 0.5rem; max-width: 90%; }
+    .chat-user { background: rgba(255,255,255,0.2); border-bottom-right-radius: 4px; margin-left: auto; }
+    .chat-ai { background: #162D4A; border: 1px solid rgba(255,255,255,0.1); border-bottom-left-radius: 4px; }
+    .preview-artifacts { width: 60%; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+    .artifact-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; }
+    .artifact-label { font-size: 0.7rem; font-weight: 600; color: #1E3A5F; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .artifact-content { font-size: 0.8rem; color: #475569; line-height: 1.5; }
+    .pricing { padding: 5rem 1.5rem; }
+    .pricing h2 { text-align: center; font-size: 2rem; font-weight: 700; margin-bottom: 3rem; }
+    .pricing-grid { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    .price-card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem 1.5rem; text-align: center; }
+    .price-card.featured { border-color: #1E3A5F; box-shadow: 0 4px 16px rgba(30,58,95,0.15); position: relative; }
+    .price-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #1E3A5F; color: white; font-size: 0.7rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 9999px; }
+    .price-name { font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem; }
+    .price-amount { font-size: 2.5rem; font-weight: 800; color: #1E3A5F; }
+    .price-period { font-size: 0.85rem; color: #94a3b8; }
+    .price-features { list-style: none; margin: 1.5rem 0; text-align: left; }
+    .price-features li { padding: 0.4rem 0; font-size: 0.85rem; color: #475569; }
+    .price-features li::before { content: "✓ "; color: #0D9488; font-weight: 600; }
+    .price-btn { display: block; padding: 0.75rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+    .price-btn-outline { border: 1px solid #1E3A5F; color: #1E3A5F; }
+    .price-btn-filled { background: #1E3A5F; color: white; }
+    footer { padding: 2rem 1.5rem; border-top: 1px solid #e2e8f0; text-align: center; }
+    footer p { font-size: 0.8rem; color: #94a3b8; }
+    footer a { color: #64748b; text-decoration: none; }
+    .craft-credit { font-size: 0.75rem; color: #94a3b8; margin-top: 0.5rem; }
+    @media (max-width: 768px) {
+      .stats-inner { grid-template-columns: repeat(2, 1fr); }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
+      .preview-box { flex-direction: column; }
+      .preview-chat, .preview-artifacts { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="logo">
+        <div class="logo-icon"><span>Z</span><div class="logo-dot"></div></div>
+        <span class="logo-text">ZoneWise.AI</span>
+      </a>
+      <div class="nav-links">
+        <a href="#pricing">Pricing</a>
+        <a href="/login">Login</a>
+        <a href="/signup" class="btn-primary">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1>Florida's AI-Powered Real Estate<span>Intelligence</span></h1>
+    <p>Distressed Assets Decoded. For Everyone. Everywhere.</p>
+    <p class="founder">Founded by Ariel Shapira, Inventor & Founder</p>
+    <a href="https://everestcapitalusa.com" target="_blank" rel="noopener" class="everest-badge">Powering Everest Capital USA →</a>
+    <div><a href="/signup" class="btn-hero">Start Free</a></div>
+  </section>
+
+  <section class="stats">
+    <div class="stats-inner">
+      <div><p class="stat-num">67</p><p class="stat-label">Counties</p></div>
+      <div><p class="stat-num">298</p><p class="stat-label">KPIs</p></div>
+      <div><p class="stat-num">10.8M</p><p class="stat-label">Parcels</p></div>
+      <div><p class="stat-num">AI+ML</p><p class="stat-label">Powered</p></div>
+    </div>
+  </section>
+
+  <section class="features">
+    <h2>Our Edge</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🏠</div>
+        <h3>Foreclosure Intelligence</h3>
+        <p>Real-time tracking of lis pendens, default judgments, and auction schedules across all 67 counties.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📋</div>
+        <h3>Tax Deed Analysis</h3>
+        <p>Automated due diligence on tax deed sales with title search integration and lien analysis.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🗺️</div>
+        <h3>Zoning Coverage</h3>
+        <p>Comprehensive zoning data with setbacks, permitted uses, and building envelope calculations statewide.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📈</div>
+        <h3>ML Predictions</h3>
+        <p>Machine learning models predict property values, market trends, and investment opportunities.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="preview">
+    <h2>Platform Preview</h2>
+    <p class="preview-sub">See how ZoneWise.AI brings real estate intelligence to life</p>
+    <div class="preview-box">
+      <div class="preview-chat">
+        <div class="preview-chat-header">
+          <div class="preview-chat-icon">Z</div>
+          <span class="preview-chat-title">AI Assistant</span>
+        </div>
+        <div class="chat-bubble chat-user">What foreclosures are happening in Duval County this month?</div>
+        <div class="chat-bubble chat-ai">I found 47 active foreclosure cases in Duval County for February 2026. Here are the highlights:<br><br>• 12 residential properties under $200K<br>• 8 with upcoming auction dates<br>• 3 with senior lien issues to flag</div>
+        <div class="chat-bubble chat-user">Show me the ones under $200K with clear title</div>
+        <div class="chat-bubble chat-ai">Here are 9 properties with clear title status and judgment amounts under $200K. I've sorted by bid-to-judgment ratio...</div>
+      </div>
+      <div class="preview-artifacts">
+        <div class="artifact-card">
+          <div class="artifact-label">📊 Auction Report</div>
+          <div class="artifact-content">Duval County - Feb 2026 Foreclosure Summary<br>Total cases: 47 | Residential: 31 | Commercial: 16<br>Avg judgment: $187,450 | Median ARV: $245,000</div>
+        </div>
+        <div class="artifact-card">
+          <div class="artifact-label">🗺️ Map View</div>
+          <div class="artifact-content" style="height:120px;background:linear-gradient(135deg,#e8f4f8,#d1e7dd);border-radius:4px;display:flex;align-items:center;justify-content:center;color:#64748b;font-style:italic;">Interactive Mapbox view with parcel overlays</div>
+        </div>
+        <div class="artifact-card">
+          <div class="artifact-label">📋 Lien Analysis</div>
+          <div class="artifact-content">9 properties passed title review<br>✓ No senior mortgages surviving<br>✓ HOA liens subordinate to judgment<br>✓ Tax certificates current</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pricing" id="pricing">
+    <h2>Simple Pricing</h2>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <p class="price-name">Starter</p>
+        <p class="price-amount">Free</p>
+        <p class="price-period">forever</p>
+        <ul class="price-features">
+          <li>1 county</li>
+          <li>Basic property search</li>
+          <li>5 AI queries/day</li>
+          <li>Community support</li>
+        </ul>
+        <a href="/signup" class="price-btn price-btn-outline">Get Started</a>
+      </div>
+      <div class="price-card featured">
+        <span class="price-badge">Most Popular</span>
+        <p class="price-name">Professional</p>
+        <p class="price-amount">$49</p>
+        <p class="price-period">/month</p>
+        <ul class="price-features">
+          <li>All 67 counties</li>
+          <li>Unlimited AI queries</li>
+          <li>Foreclosure & tax deed alerts</li>
+          <li>ML predictions</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="/signup?plan=pro" class="price-btn price-btn-filled">Start Free Trial</a>
+      </div>
+      <div class="price-card">
+        <p class="price-name">Enterprise</p>
+        <p class="price-amount">Custom</p>
+        <p class="price-period">contact us</p>
+        <ul class="price-features">
+          <li>Everything in Pro</li>
+          <li>API access</li>
+          <li>Custom MCP sources</li>
+          <li>White-label option</li>
+          <li>Dedicated support</li>
+        </ul>
+        <a href="mailto:ariel@everestcapitalusa.com" class="price-btn price-btn-outline">Contact Sales</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 Everest Capital USA. All rights reserved. | <a href="/terms">Terms</a> | <a href="/privacy">Privacy</a> | <a href="/disclaimer">Disclaimer</a></p>
+    <p class="craft-credit">Powered by <a href="https://github.com/lukilabs/craft-agents-oss" target="_blank" rel="noopener">Craft Agents</a> technology (Apache 2.0)</p>
+  </footer>
+</body>
+</html>

@@ -1,7 +1,32 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "echo PWD=$PWD && ls -la && echo --- && ls apps/ 2>/dev/null || echo NO_APPS_DIR && echo --- && ls -la /vercel/path0/ 2>/dev/null | head -20",
-  "outputDirectory": "apps/viewer/dist",
+  "buildCommand": "bunx vite build && node ../../zonewise/branding/inject-branding.mjs",
+  "outputDirectory": "dist",
   "installCommand": "bun install",
-  "framework": null
+  "framework": null,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/login", "destination": "/index.html" },
+    { "source": "/signup", "destination": "/index.html" },
+    { "source": "/terms", "destination": "/index.html" },
+    { "source": "/privacy", "destination": "/index.html" },
+    { "source": "/disclaimer", "destination": "/index.html" },
+    { "source": "/s/:path*", "destination": "/s/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/s/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    }
+  ]
 }

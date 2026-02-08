@@ -1,0 +1,146 @@
+{
+  "id": "zonewise_supabase_a7f3e9b2",
+  "name": "ZoneWise Supabase",
+  "slug": "zonewise-supabase",
+  "provider": "supabase",
+  "type": "api",
+  "icon": "🏠",
+  "tagline": "Florida real estate intelligence database — 67 counties, 808+ jurisdictions, 1,542+ zoning districts, 10.8M parcels",
+  "description": "ZoneWise.AI's core data layer. PostgreSQL database via Supabase REST API containing zoning codes, dimensional standards, jurisdictions, overlay districts, and parcel-to-zone mappings for all 67 Florida counties.",
+
+  "api": {
+    "baseUrl": "https://mocerqjnksmhcjzxrewo.supabase.co/rest/v1",
+    "auth": {
+      "type": "header",
+      "headers": {
+        "apikey": "${SUPABASE_KEY}",
+        "Authorization": "Bearer ${SUPABASE_KEY}"
+      }
+    },
+    "defaultHeaders": {
+      "Content-Type": "application/json",
+      "Prefer": "return=representation"
+    },
+
+    "tools": [
+      {
+        "name": "list_jurisdictions",
+        "description": "List Florida jurisdictions (cities, counties, CDPs). Filter by county name or minimum data completeness. Returns id, name, county, data_completeness, municode_url.",
+        "method": "GET",
+        "path": "/jurisdictions",
+        "parameters": {
+          "select": "id,name,county,data_completeness,data_source,municode_url",
+          "order": "county,name",
+          "limit": 100
+        },
+        "queryParams": [
+          { "name": "county", "description": "Filter by county (ilike match)", "format": "county=ilike.%25{value}%25" },
+          { "name": "min_completeness", "description": "Minimum data completeness (0-100)", "format": "data_completeness=gte.{value}" }
+        ]
+      },
+      {
+        "name": "search_jurisdictions",
+        "description": "Search jurisdictions by name. Use for finding a city or county when the user mentions a Florida location.",
+        "method": "GET",
+        "path": "/jurisdictions",
+        "parameters": {
+          "select": "id,name,county,data_completeness,municode_url"
+        },
+        "queryParams": [
+          { "name": "name", "description": "Jurisdiction name (ilike match)", "format": "or=(name.ilike.%25{value}%25,county.ilike.%25{value}%25)" }
+        ]
+      },
+      {
+        "name": "list_zoning_districts",
+        "description": "List all zoning districts for a jurisdiction. Returns code, name, category. Use the jurisdiction_id from list_jurisdictions.",
+        "method": "GET",
+        "path": "/zoning_districts",
+        "parameters": {
+          "select": "id,code,name,category,jurisdiction_id",
+          "order": "category,code",
+          "limit": 200
+        },
+        "queryParams": [
+          { "name": "jurisdiction_id", "description": "Jurisdiction ID (exact match)", "format": "jurisdiction_id=eq.{value}" },
+          { "name": "code", "description": "Zoning code (ilike match)", "format": "code=ilike.{value}" },
+          { "name": "category", "description": "Category filter: Residential, Commercial, Industrial, Agricultural, Mixed-Use, Special", "format": "category=eq.{value}" }
+        ]
+      },
+      {
+        "name": "get_zone_standards",
+        "description": "Get dimensional standards (setbacks, height, FAR, lot size) for a zoning district. Use the zoning_district id from list_zoning_districts.",
+        "method": "GET",
+        "path": "/zone_standards",
+        "parameters": {
+          "select": "*"
+        },
+        "queryParams": [
+          { "name": "zoning_district_id", "description": "Zoning district ID (exact match)", "format": "zoning_district_id=eq.{value}" },
+          { "name": "zoning_district_ids", "description": "Multiple district IDs for batch lookup", "format": "zoning_district_id=in.({value})" }
+        ]
+      },
+      {
+        "name": "get_overlay_districts",
+        "description": "Get overlay districts (flood zones, historic districts, etc.) for a jurisdiction.",
+        "method": "GET",
+        "path": "/overlay_districts",
+        "parameters": {
+          "select": "*"
+        },
+        "queryParams": [
+          { "name": "jurisdiction_id", "description": "Jurisdiction ID", "format": "jurisdiction_id=eq.{value}" }
+        ]
+      },
+      {
+        "name": "lookup_parcel",
+        "description": "Look up zoning for a specific parcel by parcel ID or address.",
+        "method": "GET",
+        "path": "/parcel_zones",
+        "parameters": {
+          "select": "*"
+        },
+        "queryParams": [
+          { "name": "parcel_id", "description": "BCPAO account number or county parcel ID", "format": "parcel_id=eq.{value}" },
+          { "name": "address", "description": "Street address (ilike match)", "format": "address=ilike.%25{value}%25" }
+        ]
+      },
+      {
+        "name": "count_records",
+        "description": "Count records in any table. Use Prefer: count=exact header.",
+        "method": "GET",
+        "path": "/{table}",
+        "parameters": {
+          "select": "id"
+        },
+        "headers": {
+          "Prefer": "count=exact",
+          "Range": "0-0"
+        }
+      }
+    ]
+  },
+
+  "documentation": {
+    "tables": {
+      "jurisdictions": "808+ Florida municipalities, counties, CDPs with data completeness scores and Municode URLs",
+      "zoning_districts": "1,542+ zoning classifications with codes, names, categories linked to jurisdictions",
+      "zone_standards": "Dimensional standards: setbacks (front/side/rear), height limits, FAR, lot coverage, density",
+      "overlay_districts": "Special overlay zones (historic, flood, etc.) with additional restrictions",
+      "parcel_zones": "Parcel-to-zone mappings with addresses for direct property lookups"
+    },
+    "queryPatterns": {
+      "filterByCounty": "?county=ilike.%25Brevard%25",
+      "filterByCode": "?code=ilike.RS-2",
+      "joinTables": "Use jurisdiction_id to chain: jurisdictions → zoning_districts → zone_standards",
+      "pagination": "?limit=50&offset=0",
+      "ordering": "?order=name.asc or ?order=data_completeness.desc"
+    },
+    "notes": [
+      "Supabase REST API uses PostgREST query syntax",
+      "ilike = case-insensitive LIKE, use %25 for URL-encoded %",
+      "eq = exact match, gte = greater than or equal, in = set membership",
+      "Always include select= to limit response fields for performance",
+      "Use Prefer: count=exact header to get row counts without full data"
+    ]
+  }
+}

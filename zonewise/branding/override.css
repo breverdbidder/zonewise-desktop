@@ -1,0 +1,48 @@
+/* ZoneWise.AI Branding Overrides
+ * Applied on top of Craft Agents default styles
+ * NEVER modify upstream CSS files - only add overrides here
+ * Per TRADEMARK.md: Apache 2.0 allows rebranding with attribution
+ */
+
+:root {
+  /* ZoneWise Navy/Teal/Amber palette */
+  --zw-primary: #1E3A5F;
+  --zw-primary-dark: #162D4A;
+  --zw-teal: #0D9488;
+  --zw-amber: #F59E0B;
+  --zw-cyan: #00D9FF;
+  
+  /* Override Craft Agents accent colors */
+  --accent: var(--zw-teal);
+  --accent-foreground: #FFFFFF;
+}
+
+/* Header branding override */
+[data-testid="header"], .app-header, header {
+  background-color: var(--zw-primary) !important;
+}
+
+/* Logo area - hide Craft Agents logo, show ZoneWise */
+.logo-text::after {
+  content: "ZoneWise.AI";
+  font-weight: 700;
+  color: white;
+}
+
+/* Powered-by attribution (TRADEMARK.md compliance) */
+footer::after {
+  content: "Powered by Craft Agents technology | © 2026 Everest Capital USA";
+  display: block;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  padding: 0.5rem;
+}
+
+/* Session viewer accent colors */
+.activity-tool-badge {
+  background-color: var(--zw-teal) !important;
+}
+
+/* ZoneWise favicon injection handled by build script */
+

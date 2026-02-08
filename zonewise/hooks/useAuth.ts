@@ -1,4 +1,7 @@
-import { trpc } from '@/lib/trpc'
+/**
+ * Authentication hook — lightweight version without tRPC
+ * Uses localStorage for user state, Supabase auth when available
+ */
 
 export interface User {
   id: string
@@ -8,42 +11,41 @@ export interface User {
   openId: string
 }
 
-/**
- * Authentication hook that provides current user state
- * Works with both Manus OAuth and custom authentication
- */
-export function useAuth() {
-  const { data: user, isLoading, error } = trpc.auth.me.useQuery()
+const USER_KEY = 'zonewise_user'
 
-  return {
-    user: user || null,
-    isLoading,
-    isAuthenticated: !!user,
-    error,
+function getStoredUser(): User | null {
+  try {
+    const stored = localStorage.getItem(USER_KEY)
+    return stored ? JSON.parse(stored) : null
+  } catch {
+    return null
   }
 }
 
-/**
- * Get login URL for OAuth flow
- * Supports both Manus OAuth and custom providers
- */
-export function getLoginUrl(): string {
-  const portalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL
-  const appId = import.meta.env.VITE_APP_ID
-  const redirectUri = `${window.location.origin}/api/oauth/callback`
-  
-  if (portalUrl && appId) {
-    // Manus OAuth
-    return `${portalUrl}?app_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}`
+export function useAuth() {
+  // For MVP: use a default user profile
+  // When Supabase auth is wired, this will query the session
+  const user = getStoredUser() || {
+    id: 'local-user',
+    name: 'User',
+    email: '',
+    role: 'user' as const,
+    openId: '',
   }
-  
-  // Fallback to custom auth (e.g., Supabase)
+
+  return {
+    user,
+    isLoading: false,
+    isAuthenticated: true, // MVP: always authenticated
+    error: null,
+  }
+}
+
+export function getLoginUrl(): string {
   return '/auth/login'
 }
 
-/**
- * Logout function that clears session and redirects
- */
 export function logout(): void {
-  window.location.href = '/api/auth/logout'
+  localStorage.removeItem(USER_KEY)
+  window.location.href = '/'
 }

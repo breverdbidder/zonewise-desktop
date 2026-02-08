@@ -1,13 +1,19 @@
-# Sync Upstream Craft Agents OSS
+# Sync Upstream Craft Agents OSS + Auto-Deploy
 # Keeps breverdbidder/zonewise-desktop in sync with lukilabs/craft-agents-oss
-# Runs daily at 6 AM UTC (1 AM EST) and on manual trigger
+# Runs every 6 hours and on manual trigger
+# On successful sync, triggers Vercel redeploy
 
 name: Sync Upstream Craft Agents
 
 on:
   schedule:
-    - cron: '0 6 * * *'
+    - cron: '0 */6 * * *'  # Every 6 hours
   workflow_dispatch:
+    inputs:
+      force_sync:
+        description: 'Force sync even if no changes'
+        required: false
+        default: 'false'
 
 permissions:
   contents: write
@@ -16,39 +22,87 @@ permissions:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    outputs:
+      synced: ${{ steps.sync.outputs.synced }}
+      version: ${{ steps.sync.outputs.version }}
     steps:
       - name: Checkout Fork
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
+          token: ${{ secrets.GH_PAT }}
+
       - name: Configure Git
         run: |
           git config user.name "ZoneWise Sync Bot"
           git config user.email "sync@zonewise.ai"
-      
+
       - name: Add Upstream Remote
         run: |
           git remote add upstream https://github.com/lukilabs/craft-agents-oss.git || true
-      
+
       - name: Fetch Upstream
         run: git fetch upstream --tags
-      
+
       - name: Check Sync Status
         id: check
         run: |
           BEHIND=$(git rev-list --count HEAD..upstream/main 2>/dev/null || echo "0")
+          AHEAD=$(git rev-list --count upstream/main..HEAD 2>/dev/null || echo "0")
+          UPSTREAM_VER=$(git describe --tags upstream/main 2>/dev/null || echo "unknown")
           echo "behind=$BEHIND" >> $GITHUB_OUTPUT
+          echo "ahead=$AHEAD" >> $GITHUB_OUTPUT
+          echo "upstream_ver=$UPSTREAM_VER" >> $GITHUB_OUTPUT
+          echo "========================================"
           echo "Commits behind upstream: $BEHIND"
-      
-      - name: Merge Upstream
-        if: steps.check.outputs.behind != '0'
+          echo "Commits ahead of upstream: $AHEAD"  
+          echo "Upstream version: $UPSTREAM_VER"
+          echo "========================================"
+
+      - name: Sync Upstream
+        id: sync
+        if: steps.check.outputs.behind != '0' || github.event.inputs.force_sync == 'true'
         run: |
           git checkout main
-          git merge upstream/main --no-edit -m "chore: sync upstream craft-agents-oss"
-          git push origin main
-      
-      - name: Summary
+          
+          # Try rebase first (cleaner history)
+          if git rebase upstream/main; then
+            echo "✅ Rebase successful"
+            git push origin main --force-with-lease
+          else
+            echo "⚠️ Rebase failed, falling back to merge"
+            git rebase --abort
+            git merge upstream/main --no-edit -m "sync: upstream ${{ steps.check.outputs.upstream_ver }}"
+            git push origin main
+          fi
+          
+          echo "synced=true" >> $GITHUB_OUTPUT
+          echo "version=${{ steps.check.outputs.upstream_ver }}" >> $GITHUB_OUTPUT
+
+      - name: Trigger Vercel Deploy
+        if: steps.sync.outputs.synced == 'true'
         run: |
-          echo "✅ Sync complete. Behind: ${{ steps.check.outputs.behind }} commits merged."
+          if [ -n "${{ secrets.VERCEL_DEPLOY_HOOK }}" ]; then
+            curl -s -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"
+            echo "🚀 Vercel deploy triggered"
+          else
+            echo "⚠️ No VERCEL_DEPLOY_HOOK secret configured - skipping deploy trigger"
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "========================================"
+          echo "📋 ZoneWise Upstream Sync Summary"
+          echo "========================================"
+          echo "Behind: ${{ steps.check.outputs.behind }} commits"
+          echo "Ahead: ${{ steps.check.outputs.ahead }} commits"
+          echo "Upstream: ${{ steps.check.outputs.upstream_ver }}"
+          if [ "${{ steps.sync.outputs.synced }}" = "true" ]; then
+            echo "Status: ✅ Synced & deployed"
+          elif [ "${{ steps.check.outputs.behind }}" = "0" ]; then
+            echo "Status: ✅ Already in sync"
+          else
+            echo "Status: ❌ Sync needed but failed"
+          fi
+          echo "========================================"

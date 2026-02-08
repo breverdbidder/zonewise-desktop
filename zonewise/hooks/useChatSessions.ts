@@ -1,225 +1,274 @@
 import { useState, useEffect, useCallback } from 'react'
-import { trpc } from '@/lib/trpc'
 import type { ChatSession, ChatMessage } from '@/components/CraftAgentLayout'
 
+const API_BASE = import.meta.env.VITE_API_URL || 'https://zonewise-agents.onrender.com'
+const STORAGE_KEY = 'zonewise_sessions'
+const MESSAGES_KEY = 'zonewise_messages'
+
+function generateId(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+}
+
+function loadSessions(): ChatSession[] {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    return stored ? JSON.parse(stored) : []
+  } catch {
+    return []
+  }
+}
+
+function saveSessions(sessions: ChatSession[]) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions))
+}
+
+function loadMessages(sessionId: string): ChatMessage[] {
+  try {
+    const stored = localStorage.getItem(`${MESSAGES_KEY}_${sessionId}`)
+    return stored ? JSON.parse(stored) : []
+  } catch {
+    return []
+  }
+}
+
+function saveMessages(sessionId: string, messages: ChatMessage[]) {
+  localStorage.setItem(`${MESSAGES_KEY}_${sessionId}`, JSON.stringify(messages))
+}
+
 /**
- * Custom hook for managing chat sessions and messages
- * Integrates with tRPC backend and provides localStorage fallback
+ * Chat sessions hook — localStorage for persistence,
+ * zonewise-agents REST API for AI responses via SSE streaming
  */
 export function useChatSessions() {
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null)
-  const [sessions, setSessions] = useState<ChatSession[]>([])
+  const [sessions, setSessions] = useState<ChatSession[]>(() => loadSessions())
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(() => {
+    const stored = loadSessions()
+    return stored[0]?.id || null
+  })
   const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [isLoading, setIsLoading] = useState(false)
 
-  // tRPC queries
-  const { data: sessionsData, refetch: refetchSessions } = trpc.chat.getSessions.useQuery(
-    undefined,
-    {
-      // Fallback to localStorage on error
-      onError: () => {
-        const stored = localStorage.getItem('zonewise_sessions')
-        if (stored) {
-          try {
-            setSessions(JSON.parse(stored))
-          } catch (e) {
-            console.error('Failed to parse stored sessions:', e)
-          }
-        }
-      },
-    }
-  )
-
-  const { data: messagesData, refetch: refetchMessages } = trpc.chat.getMessages.useQuery(
-    { sessionId: Number(activeSessionId) || 0 },
-    {
-      enabled: !!activeSessionId,
-      // Fallback to localStorage on error
-      onError: () => {
-        if (activeSessionId) {
-          const stored = localStorage.getItem(`zonewise_messages_${activeSessionId}`)
-          if (stored) {
-            try {
-              setMessages(JSON.parse(stored))
-            } catch (e) {
-              console.error('Failed to parse stored messages:', e)
-            }
-          }
-        }
-      },
-    }
-  )
-
-  // tRPC mutations
-  const createSessionMutation = trpc.chat.createSession.useMutation()
-  const updateSessionMutation = trpc.chat.updateSession.useMutation()
-  const deleteSessionMutation = trpc.chat.deleteSession.useMutation()
-  const sendMessageMutation = trpc.chat.sendMessage.useMutation()
-
-  // Load sessions from backend
+  // Load messages when active session changes
   useEffect(() => {
-    if (sessionsData) {
-      const mapped = sessionsData.map((s) => ({
-        id: String(s.id),
-        title: s.title,
-        createdAt: new Date(s.createdAt).getTime(),
-        updatedAt: new Date(s.updatedAt).getTime(),
-        messageCount: s.messageCount,
-        preview: s.lastMessagePreview || undefined,
-        propertyAddress: s.propertyAddress || undefined,
-        jurisdiction: s.jurisdiction || undefined,
-        zoningDistrict: s.zoningDistrict || undefined,
-      }))
-      setSessions(mapped)
-      
-      // Save to localStorage as backup
-      localStorage.setItem('zonewise_sessions', JSON.stringify(mapped))
-      
-      if (mapped.length > 0 && !activeSessionId) {
-        setActiveSessionId(mapped[0].id)
-      }
+    if (activeSessionId) {
+      setMessages(loadMessages(activeSessionId))
+    } else {
+      setMessages([])
     }
-  }, [sessionsData, activeSessionId])
+  }, [activeSessionId])
 
-  // Load messages from backend
+  // Persist sessions
   useEffect(() => {
-    if (messagesData) {
-      const mapped = messagesData.map((m) => ({
-        id: String(m.id),
-        sessionId: String(m.sessionId),
-        role: m.role as 'user' | 'assistant' | 'system',
-        content: m.content,
-        timestamp: new Date(m.createdAt).getTime(),
-        attachments: m.attachments,
-        metadata: m.metadata,
-      }))
-      setMessages(mapped)
-      
-      // Save to localStorage as backup
-      if (activeSessionId) {
-        localStorage.setItem(`zonewise_messages_${activeSessionId}`, JSON.stringify(mapped))
-      }
+    saveSessions(sessions)
+  }, [sessions])
+
+  // Persist messages
+  useEffect(() => {
+    if (activeSessionId && messages.length > 0) {
+      saveMessages(activeSessionId, messages)
     }
-  }, [messagesData, activeSessionId])
+  }, [messages, activeSessionId])
 
   // Create new session
   const createSession = useCallback(
-    async (title?: string) => {
-      try {
-        const result = await createSessionMutation.mutateAsync({
-          title: title || `Session ${sessions.length + 1}`,
-        })
-        await refetchSessions()
-        setActiveSessionId(String(result.id))
-        setMessages([])
-        return String(result.id)
-      } catch (error) {
-        console.error('Failed to create session:', error)
-        // Fallback to localStorage
+    (title?: string) => {
+      const newSession: ChatSession = {
+        id: generateId(),
+        title: title || `New Chat`,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        messageCount: 0,
+      }
+      setSessions((prev) => [newSession, ...prev])
+      setActiveSessionId(newSession.id)
+      setMessages([])
+      return newSession.id
+    },
+    []
+  )
+
+  // Update session
+  const updateSession = useCallback(
+    (sessionId: string, updates: Partial<ChatSession>) => {
+      setSessions((prev) =>
+        prev.map((s) =>
+          s.id === sessionId ? { ...s, ...updates, updatedAt: Date.now() } : s
+        )
+      )
+    },
+    []
+  )
+
+  // Delete session
+  const deleteSession = useCallback(
+    (sessionId: string) => {
+      setSessions((prev) => prev.filter((s) => s.id !== sessionId))
+      localStorage.removeItem(`${MESSAGES_KEY}_${sessionId}`)
+      if (activeSessionId === sessionId) {
+        const remaining = sessions.filter((s) => s.id !== sessionId)
+        setActiveSessionId(remaining[0]?.id || null)
+      }
+    },
+    [activeSessionId, sessions]
+  )
+
+  // Send message — calls zonewise-agents /chat/stream via SSE
+  const sendMessage = useCallback(
+    async (content: string, attachments?: ChatMessage['attachments']) => {
+      if (!activeSessionId) {
+        // Auto-create session
+        const newId = generateId()
         const newSession: ChatSession = {
-          id: `session-${Date.now()}`,
-          title: title || `Session ${sessions.length + 1}`,
+          id: newId,
+          title: content.slice(0, 50) + (content.length > 50 ? '...' : ''),
           createdAt: Date.now(),
           updatedAt: Date.now(),
           messageCount: 0,
         }
         setSessions((prev) => [newSession, ...prev])
-        setActiveSessionId(newSession.id)
-        setMessages([])
-        return newSession.id
+        setActiveSessionId(newId)
       }
-    },
-    [sessions.length, createSessionMutation, refetchSessions]
-  )
 
-  // Update session
-  const updateSession = useCallback(
-    async (sessionId: string, updates: Partial<ChatSession>) => {
+      const sessionId = activeSessionId || generateId()
+
+      // Add user message
+      const userMsg: ChatMessage = {
+        id: generateId(),
+        sessionId,
+        role: 'user',
+        content,
+        timestamp: Date.now(),
+        attachments,
+      }
+      setMessages((prev) => [...prev, userMsg])
+      setIsLoading(true)
+
       try {
-        await updateSessionMutation.mutateAsync({
-          sessionId: Number(sessionId),
-          title: updates.title,
-          propertyAddress: updates.propertyAddress,
-          jurisdiction: updates.jurisdiction,
-          zoningDistrict: updates.zoningDistrict,
+        // Call streaming endpoint
+        const response = await fetch(`${API_BASE}/chat/stream`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: content }),
         })
-        await refetchSessions()
-      } catch (error) {
-        console.error('Failed to update session:', error)
-        // Fallback to localStorage
+
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`)
+        }
+
+        const reader = response.body?.getReader()
+        const decoder = new TextDecoder()
+        let answer = ''
+        let intent = ''
+        const suggestions: string[] = []
+        let assistantData: unknown = null
+
+        if (reader) {
+          let buffer = ''
+
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+
+            buffer += decoder.decode(value, { stream: true })
+            const lines = buffer.split('\n')
+            buffer = lines.pop() || '' // Keep incomplete line in buffer
+
+            for (const line of lines) {
+              if (!line.startsWith('data: ')) continue
+              try {
+                const parsed = JSON.parse(line.slice(6))
+                switch (parsed.type) {
+                  case 'answer':
+                    answer = parsed.value
+                    break
+                  case 'intent':
+                    intent = parsed.value
+                    break
+                  case 'suggestion':
+                    suggestions.push(parsed.value)
+                    break
+                  case 'data':
+                    assistantData = parsed.value
+                    break
+                  case 'thinking':
+                    // Could update a thinking state here
+                    break
+                  case 'done':
+                    break
+                }
+              } catch {
+                // Skip malformed lines
+              }
+            }
+          }
+        }
+
+        // Add assistant message
+        const assistantMsg: ChatMessage = {
+          id: generateId(),
+          sessionId,
+          role: 'assistant',
+          content: answer || 'Sorry, I couldn\'t process that query. Please try again.',
+          timestamp: Date.now(),
+          metadata: {
+            toolCalls: assistantData
+              ? [{ name: intent || 'query', args: {}, result: assistantData }]
+              : undefined,
+          },
+        }
+        setMessages((prev) => [...prev, assistantMsg])
+
+        // Update session title from first message
         setSessions((prev) =>
           prev.map((s) =>
-            s.id === sessionId ? { ...s, ...updates, updatedAt: Date.now() } : s
+            s.id === sessionId
+              ? {
+                  ...s,
+                  title: s.messageCount === 0
+                    ? content.slice(0, 50) + (content.length > 50 ? '...' : '')
+                    : s.title,
+                  updatedAt: Date.now(),
+                  messageCount: s.messageCount + 2,
+                  preview: (answer || '').slice(0, 80),
+                }
+              : s
           )
         )
-      }
-    },
-    [updateSessionMutation, refetchSessions]
-  )
-
-  // Delete session
-  const deleteSession = useCallback(
-    async (sessionId: string) => {
-      try {
-        await deleteSessionMutation.mutateAsync({ sessionId: Number(sessionId) })
-        await refetchSessions()
-        if (activeSessionId === sessionId) {
-          const remaining = sessions.filter((s) => s.id !== sessionId)
-          setActiveSessionId(remaining[0]?.id || null)
-        }
       } catch (error) {
-        console.error('Failed to delete session:', error)
-        // Fallback to localStorage
-        setSessions((prev) => prev.filter((s) => s.id !== sessionId))
-        localStorage.removeItem(`zonewise_messages_${sessionId}`)
-        if (activeSessionId === sessionId) {
-          const remaining = sessions.filter((s) => s.id !== sessionId)
-          setActiveSessionId(remaining[0]?.id || null)
-        }
-      }
-    },
-    [activeSessionId, sessions, deleteSessionMutation, refetchSessions]
-  )
+        console.error('Chat API error:', error)
 
-  // Send message
-  const sendMessage = useCallback(
-    async (content: string, attachments?: ChatMessage['attachments']) => {
-      if (!activeSessionId) return
+        // Fallback: try non-streaming endpoint
+        try {
+          const fallbackRes = await fetch(`${API_BASE}/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: content }),
+          })
+          const fallbackData = await fallbackRes.json()
 
-      try {
-        await sendMessageMutation.mutateAsync({
-          sessionId: Number(activeSessionId),
-          content,
-          attachments,
-        })
-        await refetchMessages()
-        await refetchSessions()
-      } catch (error) {
-        console.error('Failed to send message:', error)
-        // Fallback to localStorage
-        const userMessage: ChatMessage = {
-          id: `msg-${Date.now()}`,
-          sessionId: activeSessionId,
-          role: 'user',
-          content,
-          timestamp: Date.now(),
-          attachments,
-        }
-        setMessages((prev) => [...prev, userMessage])
-        
-        // Simulate assistant response
-        setTimeout(() => {
-          const assistantMessage: ChatMessage = {
-            id: `msg-${Date.now() + 1}`,
-            sessionId: activeSessionId,
+          const assistantMsg: ChatMessage = {
+            id: generateId(),
+            sessionId,
             role: 'assistant',
-            content: 'I understand you want to analyze a property. Let me help you with that...',
+            content: fallbackData.answer || 'I encountered an error processing your query.',
             timestamp: Date.now(),
           }
-          setMessages((prev) => [...prev, assistantMessage])
-        }, 500)
+          setMessages((prev) => [...prev, assistantMsg])
+        } catch {
+          const errorMsg: ChatMessage = {
+            id: generateId(),
+            sessionId,
+            role: 'assistant',
+            content: '⚠️ Connection error. The backend may be warming up (Render cold start ~30s). Please try again in a moment.',
+            timestamp: Date.now(),
+          }
+          setMessages((prev) => [...prev, errorMsg])
+        }
+      } finally {
+        setIsLoading(false)
       }
     },
-    [activeSessionId, sendMessageMutation, refetchMessages, refetchSessions]
+    [activeSessionId]
   )
 
   return {
@@ -231,6 +280,6 @@ export function useChatSessions() {
     updateSession,
     deleteSession,
     sendMessage,
-    isLoading: createSessionMutation.isPending || sendMessageMutation.isPending,
+    isLoading,
   }
 }

@@ -1,0 +1,80 @@
+{
+  "version": "1.0",
+  "description": "ZoneWise.AI Workspace — Florida Real Estate Intelligence",
+
+  "workspace": {
+    "name": "ZoneWise.AI",
+    "icon": "🏠",
+    "description": "The AI for Real Estate Intelligence — 67 FL counties, multilingual, NLP-driven",
+
+    "defaults": {
+      "thinkingLevel": "think",
+      "permissionMode": "safe",
+      "cyclablePermissionModes": ["safe", "allow-all"],
+      "colorTheme": "zonewise-navy",
+      "defaultConnection": "anthropic"
+    },
+
+    "connections": {
+      "primary": {
+        "provider": "anthropic",
+        "model": "claude-sonnet-4-5-20250929",
+        "label": "Claude Sonnet 4.5 (Default)"
+      },
+      "advanced": {
+        "provider": "anthropic",
+        "model": "claude-opus-4-6",
+        "label": "Claude Opus 4.6 (Deep Reasoning)"
+      },
+      "fast": {
+        "provider": "anthropic",
+        "model": "claude-haiku-4-5-20251001",
+        "label": "Claude Haiku 4.5 (Batch Processing)"
+      }
+    },
+
+    "sources": [
+      "zonewise-supabase",
+      "zonewise-agents"
+    ],
+
+    "skills": [
+      "zonewise-intelligence",
+      "zoning-analysis",
+      "property-valuation",
+      "permit-lookup",
+      "sun-analysis",
+      "envelope-development",
+      "bcpao-integration",
+      "mapbox-integration",
+      "threejs-fundamentals",
+      "threejs-geometry",
+      "threejs-materials",
+      "threejs-lighting",
+      "threejs-interaction"
+    ],
+
+    "statuses": [
+      { "name": "New Query", "color": "#1E3A5F", "icon": "🔍" },
+      { "name": "Analyzing", "color": "#F47B20", "icon": "🧠" },
+      { "name": "Data Found", "color": "#4CAF50", "icon": "📊" },
+      { "name": "Report Ready", "color": "#2196F3", "icon": "📄" },
+      { "name": "Needs Verification", "color": "#FF9800", "icon": "⚠️" },
+      { "name": "Archived", "color": "#9E9E9E", "icon": "📁" }
+    ],
+
+    "labels": [
+      { "name": "Zoning", "color": "#1E3A5F" },
+      { "name": "Foreclosure", "color": "#F44336" },
+      { "name": "Tax Deed", "color": "#FF9800" },
+      { "name": "Envelope", "color": "#9C27B0" },
+      { "name": "Valuation", "color": "#4CAF50" },
+      { "name": "Parcel", "color": "#2196F3" },
+      { "name": "Multi-County", "color": "#607D8B" }
+    ]
+  },
+
+  "localMcpServers": {
+    "enabled": true
+  }
+}

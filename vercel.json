@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "bun install && bun run viewer:build",
+  "buildCommand": "bun install && bun run viewer:build && node zonewise/branding/inject-branding.mjs",
   "outputDirectory": "apps/viewer/dist",
   "installCommand": "bun install",
   "framework": "vite",

@@ -44,7 +44,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: zonewise-desktop
+          projectName: zonewise-web
           directory: apps/viewer/dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           branch: main
@@ -75,6 +75,6 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: zonewise-marketing
+          projectName: zonewise-web
           directory: apps/marketing/dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}

@@ -62,4 +62,11 @@ if (existsSync(marketingIndex) && indexPath.includes("/s/")) {
   console.log("  Marketing page copied to root");
 }
 
+// Copy chat.html to dist for /chat route
+const chatPage = resolve(ROOT, "zonewise/marketing/chat.html");
+if (existsSync(chatPage)) {
+  writeFileSync(resolve(DIST, "chat.html"), readFileSync(chatPage));
+  console.log("  Chat page copied to dist/chat.html");
+}
+
 console.log("Done!");

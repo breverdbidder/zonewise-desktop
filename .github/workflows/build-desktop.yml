@@ -42,7 +42,8 @@ jobs:
         shell: bash
 
       - name: Package with electron-builder
-        run: npx electron-builder --config electron-builder.yml --project apps/electron --win
+        run: npx electron-builder --config electron-builder.yml --win
+        working-directory: apps/electron
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -75,7 +76,8 @@ jobs:
         run: bun run electron:build
 
       - name: Package with electron-builder (arm64 + x64)
-        run: npx electron-builder --config electron-builder.yml --project apps/electron --mac
+        run: npx electron-builder --config electron-builder.yml --mac
+        working-directory: apps/electron
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -110,7 +112,8 @@ jobs:
         run: bun run electron:build
 
       - name: Package with electron-builder
-        run: npx electron-builder --config electron-builder.yml --project apps/electron --linux
+        run: npx electron-builder --config electron-builder.yml --linux
+        working-directory: apps/electron
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

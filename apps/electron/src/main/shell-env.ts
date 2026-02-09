@@ -12,6 +12,50 @@
 import { execSync } from 'child_process'
 import { mainLog } from './logger'
 
+/**
+ * SEC-007: Whitelist of known safe shell paths to prevent command injection.
+ * If process.env.SHELL is set to a malicious value (e.g., via a crafted
+ * .desktop file or launch agent), it could execute arbitrary commands.
+ */
+const ALLOWED_SHELLS = new Set([
+  '/bin/bash',
+  '/bin/zsh',
+  '/bin/sh',
+  '/bin/dash',
+  '/bin/fish',
+  '/usr/bin/bash',
+  '/usr/bin/zsh',
+  '/usr/bin/sh',
+  '/usr/bin/fish',
+  '/usr/local/bin/bash',
+  '/usr/local/bin/zsh',
+  '/usr/local/bin/fish',
+  '/opt/homebrew/bin/bash',
+  '/opt/homebrew/bin/zsh',
+  '/opt/homebrew/bin/fish',
+])
+
+/**
+ * SEC-007: Validate and return a safe shell path.
+ * Falls back to /bin/zsh if the configured shell is not in the whitelist.
+ */
+function getSafeShell(): string {
+  const shell = process.env.SHELL || '/bin/zsh'
+
+  // Reject shells with suspicious characters (spaces, semicolons, pipes, etc.)
+  if (/[^a-zA-Z0-9/_.-]/.test(shell)) {
+    mainLog.warn(`[shell-env] SEC-007: Rejected shell with suspicious characters: ${shell}`)
+    return '/bin/zsh'
+  }
+
+  if (!ALLOWED_SHELLS.has(shell)) {
+    mainLog.warn(`[shell-env] SEC-007: Shell not in whitelist: ${shell}, falling back to /bin/zsh`)
+    return '/bin/zsh'
+  }
+
+  return shell
+}
+
 // Environment variables that should NOT be imported from the shell
 // VITE_* vars from dev mode would make packaged app try to load from localhost
 const shouldSkipEnvVar = (key: string): boolean => {
@@ -37,7 +81,8 @@ export function loadShellEnv(): void {
     return
   }
 
-  const shell = process.env.SHELL || '/bin/zsh'
+  // SEC-007: Use validated shell path to prevent command injection
+  const shell = getSafeShell()
   mainLog.info(`[shell-env] Loading environment from ${shell}`)
 
   try {

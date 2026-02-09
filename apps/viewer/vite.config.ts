@@ -31,9 +31,9 @@ export default defineConfig({
     port: 5174, // Different from Electron dev server
     open: true,
     proxy: {
-      // Proxy API requests to production R2 during local dev
-      '/s/api': {
-        target: 'https://agents.craft.do',
+      // Proxy API requests during local dev
+      '/api': {
+        target: 'https://zonewise-agents.onrender.com',
         changeOrigin: true,
         secure: true,
       },

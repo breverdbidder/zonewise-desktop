@@ -8,13 +8,7 @@
   "trailingSlash": false,
   "rewrites": [
     { "source": "/chat", "destination": "/chat.html" },
-    { "source": "/dashboard", "destination": "/index.html" },
-    { "source": "/login", "destination": "/index.html" },
-    { "source": "/signup", "destination": "/index.html" },
-    { "source": "/terms", "destination": "/index.html" },
-    { "source": "/privacy", "destination": "/index.html" },
-    { "source": "/disclaimer", "destination": "/index.html" },
-    { "source": "/s/:path*", "destination": "/s/index.html" }
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
     {

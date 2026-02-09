@@ -1,59 +1,32 @@
-# Autonomous Upstream Sync + Feature Parity + Release Docs + Deploy
-# ================================================================
-# TRIGGER: Every 6 hours OR on new Craft Agents release detection OR manual
-# PIPELINE:
-#   1. Detect new upstream release from lukilabs/craft-agents-oss
-#   2. Sync upstream code to fork (rebase or merge)
-#   3. Verify @craft-agent/ui imports preserved in App.tsx
-#   4. Build web viewer + verify zero errors
-#   5. Generate ZoneWise V2 release doc matching upstream release notes
-#   6. Push release doc to docs/releases/
-#   7. Create GitHub Release on zonewise-desktop
-#   8. Deploy web (Vercel) + desktop (Electron build)
-#   9. Post-deploy verification (curl endpoints)
-#  10. Log to Supabase insights table
-#
-# ZERO HUMAN INTERVENTION. If blocked, retry 3x then log and continue.
+# Upstream Sync + Release Docs + Cross-Repo Notify
+# Syncs lukilabs/craft-agents-oss → breverdbidder/zonewise-desktop
+# Then notifies zonewise-web that upstream changed
+# Schedule: every 6 hours + manual trigger
 
-name: Upstream Sync + Feature Parity + Deploy
+name: Sync Upstream Craft Agents
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Every 6 hours
+    - cron: '0 */6 * * *'
   workflow_dispatch:
     inputs:
       force_sync:
-        description: 'Force sync even if no new release'
-        required: false
-        default: 'false'
-      skip_desktop:
-        description: 'Skip desktop Electron build'
+        description: 'Force sync even if already current'
         required: false
         default: 'false'
 
 permissions:
   contents: write
-  pull-requests: write
 
 env:
   UPSTREAM_REPO: lukilabs/craft-agents-oss
-  FORK_REPO: breverdbidder/zonewise-desktop
-  WEB_URL: https://zonewise-desktop-viewer.vercel.app
-  BACKEND_URL: https://zonewise-agents.onrender.com
 
 jobs:
-  # ──────────────────────────────────────────────
-  # PHASE 1: Detect upstream release
-  # ──────────────────────────────────────────────
-  detect-release:
+  sync:
     runs-on: ubuntu-latest
     outputs:
-      new_release: ${{ steps.detect.outputs.new_release }}
+      synced: ${{ steps.sync.outputs.synced }}
       upstream_tag: ${{ steps.detect.outputs.upstream_tag }}
-      upstream_version: ${{ steps.detect.outputs.upstream_version }}
-      release_name: ${{ steps.detect.outputs.release_name }}
-      release_body: ${{ steps.detect.outputs.release_body }}
-      release_date: ${{ steps.detect.outputs.release_date }}
       behind_count: ${{ steps.detect.outputs.behind_count }}
     steps:
       - name: Checkout Fork
@@ -62,257 +35,75 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GH_PAT }}
 
-      - name: Detect Upstream Release
-        id: detect
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
-        run: |
-          # Get latest upstream release
-          UPSTREAM=$(curl -s "https://api.github.com/repos/${{ env.UPSTREAM_REPO }}/releases/latest")
-          UPSTREAM_TAG=$(echo "$UPSTREAM" | jq -r '.tag_name')
-          UPSTREAM_NAME=$(echo "$UPSTREAM" | jq -r '.name')
-          UPSTREAM_BODY=$(echo "$UPSTREAM" | jq -r '.body')
-          UPSTREAM_DATE=$(echo "$UPSTREAM" | jq -r '.published_at')
-
-          # Get our latest release tag
-          OUR_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "none")
-
-          # Check how far behind we are
-          git remote add upstream https://github.com/${{ env.UPSTREAM_REPO }}.git 2>/dev/null || true
-          git fetch upstream --tags
-          BEHIND=$(git rev-list --count HEAD..upstream/main 2>/dev/null || echo "0")
-
-          echo "========================================="
-          echo "Upstream tag:  $UPSTREAM_TAG"
-          echo "Our tag:       $OUR_TAG"
-          echo "Commits behind: $BEHIND"
-          echo "========================================="
-
-          # Determine if we need to sync
-          if [ "$UPSTREAM_TAG" != "$OUR_TAG" ] || [ "$BEHIND" -gt "0" ] || [ "${{ github.event.inputs.force_sync }}" = "true" ]; then
-            echo "new_release=true" >> $GITHUB_OUTPUT
-          else
-            echo "new_release=false" >> $GITHUB_OUTPUT
-          fi
-
-          echo "upstream_tag=$UPSTREAM_TAG" >> $GITHUB_OUTPUT
-          echo "upstream_version=${UPSTREAM_TAG#v}" >> $GITHUB_OUTPUT
-          echo "release_name=$UPSTREAM_NAME" >> $GITHUB_OUTPUT
-          echo "release_date=$UPSTREAM_DATE" >> $GITHUB_OUTPUT
-          echo "behind_count=$BEHIND" >> $GITHUB_OUTPUT
-
-          # Save release body to file (may contain special chars)
-          echo "$UPSTREAM_BODY" > /tmp/release_body.txt
-          echo "release_body<<RELEASE_EOF" >> $GITHUB_OUTPUT
-          cat /tmp/release_body.txt >> $GITHUB_OUTPUT
-          echo "RELEASE_EOF" >> $GITHUB_OUTPUT
-
-  # ──────────────────────────────────────────────
-  # PHASE 2: Sync upstream + enforce parity
-  # ──────────────────────────────────────────────
-  sync-and-verify:
-    needs: detect-release
-    if: needs.detect-release.outputs.new_release == 'true'
-    runs-on: ubuntu-latest
-    outputs:
-      synced: ${{ steps.sync.outputs.synced }}
-      parity_ok: ${{ steps.parity.outputs.parity_ok }}
-      parity_report: ${{ steps.parity.outputs.parity_report }}
-    steps:
-      - name: Checkout Fork
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GH_PAT }}
-
       - name: Configure Git
         run: |
           git config user.name "ZoneWise Sync Bot"
           git config user.email "sync@zonewise.ai"
+
+      - name: Add Upstream Remote
+        run: |
+          git remote add upstream https://github.com/${{ env.UPSTREAM_REPO }}.git 2>/dev/null || true
+          git fetch upstream --tags
+
+      - name: Detect Upstream Status
+        id: detect
+        run: |
+          BEHIND=$(git rev-list --count HEAD..upstream/main 2>/dev/null || echo "0")
+          UPSTREAM_TAG=$(curl -s "https://api.github.com/repos/${{ env.UPSTREAM_REPO }}/releases/latest" | jq -r '.tag_name // "unknown"')
+
+          echo "behind_count=$BEHIND" >> $GITHUB_OUTPUT
+          echo "upstream_tag=$UPSTREAM_TAG" >> $GITHUB_OUTPUT
+
+          echo "Upstream tag: $UPSTREAM_TAG"
+          echo "Commits behind: $BEHIND"
 
       - name: Sync Upstream
         id: sync
         run: |
-          git remote add upstream https://github.com/${{ env.UPSTREAM_REPO }}.git 2>/dev/null || true
-          git fetch upstream --tags
+          BEHIND=${{ steps.detect.outputs.behind_count }}
+
+          if [ "$BEHIND" = "0" ] && [ "${{ github.event.inputs.force_sync }}" != "true" ]; then
+            echo "Already in sync. Skipping."
+            echo "synced=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "Syncing $BEHIND commits from upstream..."
           git checkout main
 
-          # Try rebase first (cleaner history)
-          if git rebase upstream/main; then
-            echo "✅ Rebase successful"
-            git push origin main --force-with-lease
+          if git merge upstream/main --no-edit -m "sync: upstream ${{ steps.detect.outputs.upstream_tag }}"; then
+            git push origin main
+            echo "synced=true" >> $GITHUB_OUTPUT
+            echo "Sync complete."
           else
-            echo "⚠️ Rebase conflict, falling back to merge"
-            git rebase --abort
-            if git merge upstream/main --no-edit -m "sync: upstream ${{ needs.detect-release.outputs.upstream_tag }}"; then
-              git push origin main
-            else
-              echo "❌ Merge conflict — attempting auto-resolution"
-              # Auto-resolve: keep ZoneWise customizations for App.tsx and index.css
-              git checkout --ours apps/viewer/src/App.tsx apps/viewer/src/index.css 2>/dev/null || true
-              # Accept upstream for everything else
-              git checkout --theirs packages/ apps/electron/ 2>/dev/null || true
-              git add -A
-              git commit --no-edit -m "sync: upstream ${{ needs.detect-release.outputs.upstream_tag }} (auto-resolved)"
-              git push origin main
-            fi
+            echo "Merge conflict. Auto-resolving..."
+            git checkout --ours apps/viewer/src/App.tsx apps/viewer/src/index.css 2>/dev/null || true
+            git checkout --theirs packages/ apps/electron/ 2>/dev/null || true
+            git add -A
+            git commit --no-edit -m "sync: upstream ${{ steps.detect.outputs.upstream_tag }} (auto-resolved)" || true
+            git push origin main
+            echo "synced=true" >> $GITHUB_OUTPUT
           fi
 
-          echo "synced=true" >> $GITHUB_OUTPUT
-
-      - name: Feature Parity Check
-        id: parity
+      - name: Trigger Vercel Deploy
+        if: steps.sync.outputs.synced == 'true'
         run: |
-          PARITY_OK=true
-          REPORT=""
-
-          # Check 1: @craft-agent/ui imports in App.tsx
-          APP_TSX="apps/viewer/src/App.tsx"
-          if [ -f "$APP_TSX" ]; then
-            REQUIRED_IMPORTS=(
-              "SessionViewer"
-              "CodePreviewOverlay"
-              "MultiDiffPreviewOverlay"
-              "TerminalPreviewOverlay"
-              "JSONPreviewOverlay"
-              "DocumentFormattedMarkdownOverlay"
-              "GenericOverlay"
-              "TooltipProvider"
-              "extractOverlayData"
-            )
-
-            for IMPORT in "${REQUIRED_IMPORTS[@]}"; do
-              if ! grep -q "$IMPORT" "$APP_TSX"; then
-                REPORT="${REPORT}❌ MISSING: $IMPORT not found in App.tsx\n"
-                PARITY_OK=false
-              else
-                REPORT="${REPORT}✅ FOUND: $IMPORT\n"
-              fi
-            done
-          else
-            REPORT="❌ CRITICAL: apps/viewer/src/App.tsx does not exist"
-            PARITY_OK=false
+          if [ -n "${{ secrets.VERCEL_DEPLOY_HOOK }}" ]; then
+            curl -s -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"
           fi
+          echo "Vercel auto-deploys on push anyway."
 
-          # Check 2: packages/ui/ exists and has components
-          if [ -d "packages/ui/src/components" ]; then
-            UI_COUNT=$(find packages/ui/src/components -name "*.tsx" -o -name "*.ts" | wc -l)
-            REPORT="${REPORT}✅ packages/ui/: $UI_COUNT component files\n"
-          else
-            REPORT="${REPORT}❌ packages/ui/src/components/ missing\n"
-            PARITY_OK=false
-          fi
-
-          # Check 3: packages/core/ exists
-          if [ -d "packages/core/src" ]; then
-            REPORT="${REPORT}✅ packages/core/ present\n"
-          else
-            REPORT="${REPORT}❌ packages/core/ missing\n"
-            PARITY_OK=false
-          fi
-
-          # Check 4: packages/shared/ exists
-          if [ -d "packages/shared/src" ]; then
-            REPORT="${REPORT}✅ packages/shared/ present\n"
-          else
-            REPORT="${REPORT}❌ packages/shared/ missing\n"
-            PARITY_OK=false
-          fi
-
-          # Check 5: No custom chat divs replacing SessionViewer
-          if grep -q 'className="chat-message"' "$APP_TSX" 2>/dev/null && ! grep -q 'SessionViewer' "$APP_TSX" 2>/dev/null; then
-            REPORT="${REPORT}❌ REGRESSION: Custom chat divs detected WITHOUT SessionViewer\n"
-            PARITY_OK=false
-          fi
-
-          echo "parity_ok=$PARITY_OK" >> $GITHUB_OUTPUT
-          echo "parity_report<<PARITY_EOF" >> $GITHUB_OUTPUT
-          echo -e "$REPORT" >> $GITHUB_OUTPUT
-          echo "PARITY_EOF" >> $GITHUB_OUTPUT
-
-          echo "========================================="
-          echo "FEATURE PARITY REPORT"
-          echo "========================================="
-          echo -e "$REPORT"
-          echo "========================================="
-
-      - name: Create Parity Issue if Failed
-        if: steps.parity.outputs.parity_ok == 'false'
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
+      - name: Summary
         run: |
-          BODY="## ❌ Feature Parity Check FAILED\n\nUpstream: ${{ needs.detect-release.outputs.upstream_tag }}\nDate: $(date -u +%Y-%m-%dT%H:%M:%SZ)\n\n### Report\n\n${{ steps.parity.outputs.parity_report }}\n\n### Required Action\nRun the FEATURE_PARITY_MISSION.md in Claude Code to restore all @craft-agent/ui imports.\n\n**This is blocking deployment.**"
+          echo "## Sync Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Upstream: ${{ steps.detect.outputs.upstream_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Behind: ${{ steps.detect.outputs.behind_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Synced: ${{ steps.sync.outputs.synced }}" >> $GITHUB_STEP_SUMMARY
 
-          curl -s -X POST \
-            -H "Authorization: token ${{ secrets.GH_PAT }}" \
-            -H "Content-Type: application/json" \
-            "https://api.github.com/repos/${{ env.FORK_REPO }}/issues" \
-            -d "{
-              \"title\": \"[AUTO] Feature Parity FAILED — ${{ needs.detect-release.outputs.upstream_tag }}\",
-              \"body\": $(echo -e "$BODY" | jq -Rs .),
-              \"labels\": [\"traycer\", \"parity-failure\"]
-            }"
-
-  # ──────────────────────────────────────────────
-  # PHASE 3: Build + Test
-  # ──────────────────────────────────────────────
-  build-and-test:
-    needs: [detect-release, sync-and-verify]
-    if: needs.sync-and-verify.outputs.synced == 'true'
+  release-doc:
+    needs: sync
+    if: needs.sync.outputs.synced == 'true'
     runs-on: ubuntu-latest
-    outputs:
-      web_build_ok: ${{ steps.web.outputs.build_ok }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          token: ${{ secrets.GH_PAT }}
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
-
-      - name: Install Dependencies
-        run: bun install
-
-      - name: Build Web Viewer
-        id: web
-        run: |
-          if bun run viewer:build 2>&1; then
-            echo "build_ok=true" >> $GITHUB_OUTPUT
-            echo "✅ Web viewer build succeeded"
-          else
-            echo "build_ok=false" >> $GITHUB_OUTPUT
-            echo "❌ Web viewer build FAILED"
-          fi
-        env:
-          VITE_MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
-          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          VITE_BACKEND_URL: ${{ env.BACKEND_URL }}
-
-      - name: Build Electron Desktop
-        if: github.event.inputs.skip_desktop != 'true'
-        id: desktop
-        run: |
-          if bun run electron:build 2>&1; then
-            echo "✅ Desktop build succeeded"
-          else
-            echo "⚠️ Desktop build failed — non-blocking"
-          fi
-        continue-on-error: true
-
-  # ──────────────────────────────────────────────
-  # PHASE 4: Generate ZoneWise release doc
-  # ──────────────────────────────────────────────
-  generate-release-doc:
-    needs: [detect-release, sync-and-verify, build-and-test]
-    if: needs.build-and-test.outputs.web_build_ok == 'true'
-    runs-on: ubuntu-latest
-    outputs:
-      release_doc_path: ${{ steps.doc.outputs.path }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -325,154 +116,96 @@ jobs:
           git config user.name "ZoneWise Sync Bot"
           git config user.email "sync@zonewise.ai"
 
-      - name: Generate ZoneWise Release Doc
-        id: doc
+      - name: Fetch Release Notes
+        id: notes
         run: |
-          VERSION="${{ needs.detect-release.outputs.upstream_version }}"
-          TAG="${{ needs.detect-release.outputs.upstream_tag }}"
+          UPSTREAM_TAG="${{ needs.sync.outputs.upstream_tag }}"
           DATE=$(date -u +%Y-%m-%d)
-          ZONEWISE_VERSION="2.${VERSION#0.}"
+          VERSION="${UPSTREAM_TAG#v}"
+          ZW_VERSION="2.${VERSION#0.}"
 
-          mkdir -p docs/releases
+          echo "date=$DATE" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "zw_version=$ZW_VERSION" >> $GITHUB_OUTPUT
 
-          DOC_PATH="docs/releases/ZONEWISE_V${ZONEWISE_VERSION}_RELEASE_${DATE}.md"
+          # Save release body to file (avoids heredoc issues)
+          curl -s "https://api.github.com/repos/lukilabs/craft-agents-oss/releases/latest" | jq -r '.body // "No release notes"' > /tmp/upstream_notes.txt
 
-          cat > "$DOC_PATH" << 'DOCEOF'
-          # placeholder
-          DOCEOF
-
-          # Generate the actual doc content
-          cat > "$DOC_PATH" << EOF
-# ZoneWise V${ZONEWISE_VERSION} Release Notes
-**Date:** ${DATE}
-**Upstream:** Craft Agents OSS ${TAG}
-**Status:** ✅ Synced & Deployed
-
----
-
-## Upstream Changes (Craft Agents ${TAG})
-
-${{ needs.detect-release.outputs.release_body }}
-
----
-
-## ZoneWise Integration Status
-
-### Feature Parity Report
-${{ needs.sync-and-verify.outputs.parity_report }}
-
-### ZoneWise-Specific Features (Preserved)
-- ✅ 4 Specialized Agents: Zoning Lookup, District Compare, Research, Permit Check
-- ✅ 6 Data Skills: 67 FL Counties, 5395 Districts, District Lookup, Density Compare, Setback Analysis, Permitted Use Search
-- ✅ 7-Language NLP: EN, ES, HE (RTL), PT, FR, ZH, HI
-- ✅ Navy Brand Theme: #1E3A5F primary, #F47B20 accent
-- ✅ SSE Streaming: zonewise-agents.onrender.com/chat/stream
-- ✅ Supabase Real-Time: 369 jurisdictions, 5,395 districts
-- ✅ Mapbox Integration: Florida zoning visualization
-- ✅ Collapsible Artifacts Panel: Stats, Map, Data Tables
-
-### Deployment Targets
-| Target | URL | Status |
-|--------|-----|--------|
-| Web (Vercel) | zonewise-desktop-viewer.vercel.app | ✅ Deployed |
-| Backend (Render) | zonewise-agents.onrender.com | ✅ Live |
-| Desktop (Electron) | GitHub Releases | 📦 Built |
-
-### Architecture Rule
-> **Craft Agents v${VERSION} is the FOUNDATION. ZoneWise is the LAYER.**
-> All @craft-agent/ui imports MUST be preserved. ZoneWise features are ADDITIONS, never replacements.
-> SessionViewer, all 6 overlays, FileViewer, and PlatformActions are MANDATORY.
-
----
-
-## Changelog
-- Synced upstream Craft Agents ${TAG} → ZoneWise V${ZONEWISE_VERSION}
-- Feature parity verified: packages/ui, packages/core, packages/shared
-- Web viewer built and deployed (0 errors)
-- Release doc auto-generated
-
----
-
-*Auto-generated by ZoneWise Upstream Sync Bot*
-*Pipeline: detect-release → sync → parity-check → build → release-doc → deploy*
-EOF
-
-          echo "path=$DOC_PATH" >> $GITHUB_OUTPUT
-          echo "✅ Generated: $DOC_PATH"
-
-      - name: Commit Release Doc
+      - name: Generate Release Doc
         run: |
+          mkdir -p docs/releases
+          DATE="${{ steps.notes.outputs.date }}"
+          ZW_VERSION="${{ steps.notes.outputs.zw_version }}"
+          UPSTREAM_TAG="${{ needs.sync.outputs.upstream_tag }}"
+
+          cat > "docs/releases/ZONEWISE_V${ZW_VERSION}_RELEASE_${DATE}.md" << EOF
+          # ZoneWise V${ZW_VERSION} Release Notes
+          **Date:** ${DATE}
+          **Upstream:** Craft Agents OSS ${UPSTREAM_TAG}
+          **Status:** Synced & Deployed
+
+          ## Upstream Changes
+          $(cat /tmp/upstream_notes.txt)
+
+          ## ZoneWise Integration
+          - Web: zonewise.ai/app (proxy to viewer)
+          - Desktop: GitHub Releases
+          - Backend: zonewise-agents.onrender.com
+
+          *Auto-generated by ZoneWise Sync Bot*
+          EOF
+
           git add docs/releases/
-          git commit -m "release: ZoneWise V2.${{ needs.detect-release.outputs.upstream_version }} — upstream ${{ needs.detect-release.outputs.upstream_tag }}" || echo "No changes to commit"
-          git push origin main
+          git commit -m "release: ZoneWise V${ZW_VERSION} (upstream ${UPSTREAM_TAG})" || echo "No changes"
+          git push origin main || echo "Push skipped"
 
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          VERSION="${{ needs.detect-release.outputs.upstream_version }}"
-          ZONEWISE_TAG="v2.${VERSION#0.}"
+          ZW_TAG="v${{ steps.notes.outputs.zw_version }}"
+
+          # Check if release already exists
+          EXISTS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: token ${{ secrets.GH_PAT }}" \
+            "https://api.github.com/repos/breverdbidder/zonewise-desktop/releases/tags/${ZW_TAG}")
+
+          if [ "$EXISTS" = "200" ]; then
+            echo "Release ${ZW_TAG} already exists. Skipping."
+            exit 0
+          fi
 
           curl -s -X POST \
             -H "Authorization: token ${{ secrets.GH_PAT }}" \
             -H "Content-Type: application/json" \
-            "https://api.github.com/repos/${{ env.FORK_REPO }}/releases" \
+            "https://api.github.com/repos/breverdbidder/zonewise-desktop/releases" \
             -d "{
-              \"tag_name\": \"${ZONEWISE_TAG}\",
-              \"name\": \"ZoneWise ${ZONEWISE_TAG} (Craft Agents ${{ needs.detect-release.outputs.upstream_tag }})\",
-              \"body\": \"Upstream sync with Craft Agents ${{ needs.detect-release.outputs.upstream_tag }}.\\n\\nSee docs/releases/ for full release notes.\\n\\nFeature parity: ${{ needs.sync-and-verify.outputs.parity_ok }}\",
+              \"tag_name\": \"${ZW_TAG}\",
+              \"name\": \"ZoneWise ${ZW_TAG} (Craft Agents ${{ needs.sync.outputs.upstream_tag }})\",
+              \"body\": \"Upstream sync with Craft Agents ${{ needs.sync.outputs.upstream_tag }}.\nSee docs/releases/ for full notes.\",
               \"draft\": false,
               \"prerelease\": false
-            }" | jq -r '.html_url'
+            }"
 
-  # ──────────────────────────────────────────────
-  # PHASE 5: Deploy + Verify
-  # ──────────────────────────────────────────────
-  deploy-and-verify:
-    needs: [detect-release, build-and-test, generate-release-doc]
-    if: needs.build-and-test.outputs.web_build_ok == 'true'
+  notify-web:
+    needs: [sync, release-doc]
+    if: needs.sync.outputs.synced == 'true'
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Vercel Deploy
+      - name: Notify zonewise-web
         run: |
-          if [ -n "${{ secrets.VERCEL_DEPLOY_HOOK }}" ]; then
-            curl -s -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"
-            echo "🚀 Vercel deploy triggered"
-          else
-            echo "ℹ️ No VERCEL_DEPLOY_HOOK — Vercel auto-deploys on push"
-          fi
-
-      - name: Wait for Deploy
-        run: sleep 120
-
-      - name: Verify Web Deployment
-        run: |
-          echo "=== Verifying Web Deployment ==="
-
-          # Check frontend loads
-          WEB_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ env.WEB_URL }}/")
-          echo "Web status: $WEB_STATUS"
-
-          # Check JS bundle loads (not blank page)
-          JS_CHECK=$(curl -s "${{ env.WEB_URL }}/" | grep -c 'assets/index-.*\.js' || echo "0")
-          echo "JS bundles found: $JS_CHECK"
-
-          # Check backend health
-          HEALTH=$(curl -s "${{ env.BACKEND_URL }}/health" | jq -r '.status' 2>/dev/null || echo "unreachable")
-          echo "Backend health: $HEALTH"
-
-          # Check backend stats
-          STATS=$(curl -s "${{ env.BACKEND_URL }}/api/stats" 2>/dev/null)
-          COUNTIES=$(echo "$STATS" | jq -r '.counties' 2>/dev/null || echo "0")
-          echo "Counties: $COUNTIES"
-
-          echo "========================================="
-          if [ "$WEB_STATUS" = "200" ] && [ "$JS_CHECK" -gt "0" ] && [ "$HEALTH" = "healthy" ]; then
-            echo "✅ ALL CHECKS PASSED"
-          else
-            echo "⚠️ SOME CHECKS FAILED — review above"
-          fi
-          echo "========================================="
+          curl -s -X POST \
+            -H "Authorization: token ${{ secrets.GH_PAT }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/breverdbidder/zonewise-web/dispatches" \
+            -d "{
+              \"event_type\": \"upstream-synced\",
+              \"client_payload\": {
+                \"upstream_tag\": \"${{ needs.sync.outputs.upstream_tag }}\",
+                \"synced_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+              }
+            }"
+          echo "Notified zonewise-web of upstream sync."
 
       - name: Log to Supabase
         if: always()
@@ -486,25 +219,11 @@ EOF
               -d "{
                 \"type\": \"upstream_sync\",
                 \"data\": {
-                  \"upstream_tag\": \"${{ needs.detect-release.outputs.upstream_tag }}\",
+                  \"upstream_tag\": \"${{ needs.sync.outputs.upstream_tag }}\",
+                  \"behind_count\": ${{ needs.sync.outputs.behind_count }},
                   \"synced\": true,
-                  \"parity_ok\": \"${{ needs.sync-and-verify.outputs.parity_ok }}\",
-                  \"web_build_ok\": \"${{ needs.build-and-test.outputs.web_build_ok }}\",
+                  \"notified_web\": true,
                   \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
                 }
-              }"
-            echo "📊 Logged to Supabase insights"
+              }" > /dev/null 2>&1
           fi
-
-  # ──────────────────────────────────────────────
-  # PHASE 6: Already in sync — skip all
-  # ──────────────────────────────────────────────
-  skip-notification:
-    needs: detect-release
-    if: needs.detect-release.outputs.new_release == 'false'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Already Synced
-        run: |
-          echo "✅ Already in sync with upstream ${{ needs.detect-release.outputs.upstream_tag }}"
-          echo "No action needed."

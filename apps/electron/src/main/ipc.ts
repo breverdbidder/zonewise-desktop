@@ -20,11 +20,42 @@ import { getCredentialManager } from '@craft-agent/shared/credentials'
 import { MarkItDown } from 'markitdown-js'
 
 /**
+ * SEC-010: Allowed file extensions for attachments.
+ * Prevents uploading of executable or dangerous file types.
+ */
+const ALLOWED_ATTACHMENT_EXTENSIONS = new Set([
+  // Images
+  'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'tiff', 'tif', 'ico', 'icns', 'heic', 'heif', 'svg',
+  // Documents
+  'pdf', 'docx', 'xlsx', 'pptx', 'doc', 'xls', 'ppt', 'txt', 'md', 'rtf', 'csv', 'tsv',
+  // Code
+  'js', 'ts', 'tsx', 'jsx', 'py', 'json', 'css', 'html', 'xml', 'yaml', 'yml', 'sh', 'sql',
+  'go', 'rs', 'rb', 'php', 'java', 'c', 'cpp', 'h', 'swift', 'kt', 'toml', 'ini', 'cfg',
+  // Archives (read-only inspection)
+  'zip', 'tar', 'gz',
+])
+
+/**
+ * SEC-010: Allowed MIME type prefixes for thumbnail generation.
+ */
+const ALLOWED_THUMBNAIL_MIMETYPES = new Set([
+  'image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/bmp',
+  'image/tiff', 'image/heic', 'image/heif', 'image/svg+xml',
+  'application/pdf',
+])
+
+/**
  * Sanitizes a filename to prevent path traversal and filesystem issues.
- * Removes dangerous characters and limits length.
+ * SEC-010: Also strips null bytes, normalizes Unicode (NFKC), and validates extension.
  */
 function sanitizeFilename(name: string): string {
-  return name
+  // SEC-010: Strip null bytes first (can bypass extension checks)
+  let sanitized = name.replace(/\0/g, '')
+
+  // SEC-010: Normalize Unicode to NFKC (prevents homoglyph attacks)
+  sanitized = sanitized.normalize('NFKC')
+
+  sanitized = sanitized
     // Remove path separators and traversal patterns
     .replace(/[/\\]/g, '_')
     // Remove Windows-forbidden characters: < > : " | ? *
@@ -39,6 +70,23 @@ function sanitizeFilename(name: string): string {
     .slice(0, 200)
     // Fallback if name is empty after sanitization
     || 'unnamed'
+
+  return sanitized
+}
+
+/**
+ * SEC-010: Validate that a file extension is in the allowed set.
+ * Returns the extension (lowercase) if allowed, throws if not.
+ */
+function validateFileExtension(filename: string): string {
+  const dotIndex = filename.lastIndexOf('.')
+  if (dotIndex < 0) return '' // No extension is acceptable for text content
+
+  const ext = filename.slice(dotIndex + 1).toLowerCase()
+  if (ext && !ALLOWED_ATTACHMENT_EXTENSIONS.has(ext)) {
+    throw new Error(`File type not allowed: .${ext}`)
+  }
+  return ext
 }
 
 /**
@@ -660,9 +708,16 @@ export function registerIpcHandlers(sessionManager: SessionManager, windowManage
 
   // Generate thumbnail from base64 data (for drag-drop files where we don't have a path)
   ipcMain.handle(IPC_CHANNELS.GENERATE_THUMBNAIL, async (_event, base64: string, mimeType: string): Promise<string | null> => {
+    // SEC-010: Validate mimeType against allowed thumbnailable types
+    if (!mimeType || typeof mimeType !== 'string' || !ALLOWED_THUMBNAIL_MIMETYPES.has(mimeType)) {
+      ipcLog.warn(`SEC-010: Rejected thumbnail for disallowed mimeType: ${mimeType}`)
+      return null
+    }
+
     // Save to temp file, generate thumbnail, clean up
     const tempDir = tmpdir()
-    const ext = mimeType.split('/')[1] || 'bin'
+    // SEC-010: Sanitize extension from validated mimeType (strip special chars)
+    const ext = (mimeType.split('/')[1] || 'bin').replace(/[^a-z0-9]/gi, '')
     const tempPath = join(tempDir, `craft-thumb-${randomUUID()}.${ext}`)
 
     try {
@@ -722,6 +777,8 @@ export function registerIpcHandlers(sessionManager: SessionManager, windowManage
       // Generate unique ID for this attachment
       const id = randomUUID()
       const safeName = sanitizeFilename(attachment.name)
+      // SEC-010: Validate file extension against allowed types
+      validateFileExtension(safeName)
       const storedFileName = `${id}_${safeName}`
       const storedPath = join(attachmentsDir, storedFileName)
 

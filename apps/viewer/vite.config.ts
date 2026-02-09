@@ -7,8 +7,8 @@ import { resolve } from 'path'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   root: __dirname,
-  // Base path for production - assets go to /s/assets/* to avoid conflict with marketing site
-  base: '/s/',
+  // Base path for production - assets served from root
+  base: '/',
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),

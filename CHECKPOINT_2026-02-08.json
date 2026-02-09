@@ -1,0 +1,27 @@
+{
+  "checkpoint_id": "CKPT-2026-02-08-CRAFTAGENTS-V4",
+  "created": "2026-02-08T20:15:00-05:00",
+  "author": "Claude AI Architect (Opus 4.6)",
+  "prior_checkpoint": "CHECKPOINT_2026-02-01.json",
+  "overall_status": "PARTIAL",
+  "summary": "Craft Agents v0.4.0 synced to zonewise-desktop V2.4.0. Traycer Issue #1 CLOSED (plan generated, not executed). Rebrand branch DIVERGED (1 ahead, 19 behind main). Web rebrand NOT deployed. Desktop fork current.",
+  "components": {
+    "craft_agents_upstream": { "status": "DONE", "version": "v0.4.0", "source": "lukilabs/craft-agents-oss" },
+    "zonewise_desktop": { "status": "DONE", "version": "V2.4.0", "last_commit": "39626f6", "date": "2026-02-09T01:04:01Z" },
+    "traycer_issue_1": { "status": "CLOSED", "comments": 3, "plan_generated": true, "plan_executed": false },
+    "rebrand_branch": { "status": "DIVERGED", "branch": "rebrand/navy-orange-statewide", "ahead": 1, "behind": 19, "merged": false },
+    "zonewise_web_main": { "status": "LIVE", "last_commit": "b35e89d", "homepage_redesign": "2026-02-08" },
+    "vercel_deploy": { "status": "PARTIAL", "site_live": true, "serves": "main (not rebrand)" },
+    "stripe": { "status": "PENDING", "keys_configured": false }
+  },
+  "blockers": [
+    "DECISION NEEDED: Merge rebrand branch to main (resolve 18 file conflicts) OR abandon and cherry-pick key components",
+    "Opus 4.6 Agent Teams 7hr mission never executed",
+    "Stripe keys not configured in Vercel"
+  ],
+  "key_conversations": [
+    "https://claude.ai/chat/2129c8f1-80ed-4528-923e-d1e552b66ef3",
+    "https://claude.ai/chat/afba0f9f-0c74-4250-ad23-c5a7ecb80b34",
+    "https://claude.ai/chat/e73d3b6f-124e-4ca4-a116-cae0aeeddb20"
+  ]
+}

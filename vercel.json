@@ -1,8 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "bun run viewer:build && node zonewise/branding/inject-branding.mjs",
-  "outputDirectory": "apps/viewer/dist",
-  "installCommand": "bun install",
+  "buildCommand": "cd ../.. && bun run viewer:build && node zonewise/branding/inject-branding.mjs",
+  "outputDirectory": "dist",
+  "installCommand": "cd ../.. && bun install",
   "framework": null,
   "cleanUrls": true,
   "trailingSlash": false,

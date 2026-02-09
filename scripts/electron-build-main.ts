@@ -220,11 +220,21 @@ async function main(): Promise<void> {
   verifySessionToolsCore();
 
   // Build bridge server (needed for API sources in Codex sessions)
-  await buildBridgeServer();
+  // Skip if package directory doesn't exist (e.g. in ZoneWise fork)
+  if (existsSync(join(BRIDGE_SERVER_DIR, "src"))) {
+    await buildBridgeServer();
+  } else {
+    console.log("⏩ Skipping Bridge MCP Server (not present in this fork)");
+  }
 
   // Build session server (provides session-scoped tools like SubmitPlan for Codex sessions)
   // Depends on session-tools-core being built first
-  await buildSessionServer();
+  // Skip if package directory doesn't exist (e.g. in ZoneWise fork)
+  if (existsSync(join(SESSION_SERVER_DIR, "src"))) {
+    await buildSessionServer();
+  } else {
+    console.log("⏩ Skipping Session MCP Server (not present in this fork)");
+  }
 
   const buildDefines = getBuildDefines();
 

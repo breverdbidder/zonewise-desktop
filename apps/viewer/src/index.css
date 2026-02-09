@@ -14,14 +14,49 @@
 
 /* Viewer-specific overrides */
 
-/* Override background to pure white (cards/buttons pop on the off-white page) */
+/* ZoneWise Navy Brand Theme */
 :root {
   --background: white;
+  --zw-navy: #1E3A5F;
+  --zw-navy-light: #2A4A73;
+  --zw-navy-dark: #152C4A;
+  --zw-accent: #F47B20;
+  --zw-accent-light: #F69345;
+  --zw-accent-dark: #D9691A;
+  --zw-sidebar-bg: #1E3A5F;
+  --zw-sidebar-text: #CBD5E1;
+  --zw-sidebar-active: rgba(244, 123, 32, 0.15);
+  --zw-sidebar-hover: rgba(255, 255, 255, 0.08);
+  --accent: #F47B20;
+  --accent-foreground: white;
 }
 
 .dark {
   --background: oklch(0.26 0.01 270);
+  --zw-sidebar-bg: #0F1D30;
+  --zw-navy: #162D4A;
+  --zw-navy-light: #1E3A5F;
+  --zw-navy-dark: #0C1829;
 }
+
+/* ZoneWise sidebar scrollbar */
+.zw-sidebar::-webkit-scrollbar { width: 4px; }
+.zw-sidebar::-webkit-scrollbar-track { background: transparent; }
+.zw-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+.zw-sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+
+/* RTL support */
+[dir="rtl"] .zw-sidebar { direction: rtl; }
+[dir="rtl"] .zw-chat-input { direction: rtl; text-align: right; }
+
+/* Typing indicator animation */
+@keyframes zw-bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-4px); }
+}
+.zw-typing-dot { animation: zw-bounce 1.4s ease-in-out infinite; }
+.zw-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.zw-typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
 html, body, #root {
   height: 100%;

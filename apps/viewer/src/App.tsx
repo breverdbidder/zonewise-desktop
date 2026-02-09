@@ -1,23 +1,53 @@
 /**
  * ZoneWise.AI — Florida Zoning Intelligence Platform
  *
- * CraftAgents OSS fork with full split-screen:
- *  - Left:  Session sidebar + NLP chat (SSE streaming to zonewise-agents backend)
- *  - Right: Tabbed panels — Map (Mapbox), 3D envelope, Analytics, Export
+ * Craft Agents-inspired sidebar layout:
+ *  - Left (280px): Logo, Agents, Skills, History
+ *  - Right (flex-1): Chat with SSE streaming + collapsible Artifacts panel
  *
- * Powered by Claude Opus 4.6 · 67 Florida Counties · Real-Time Data
+ * Navy brand: #1E3A5F primary, #F47B20 accent
+ * 7 languages (EN, ES, HE/RTL, PT, FR, ZH, HI)
  *
  * @module ZoneWise
- * @version 2.0.0
+ * @version 3.0.0
  */
 
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import {
   Markdown,
   Spinner,
   cn,
   TooltipProvider,
 } from '@craft-agent/ui'
+import {
+  Search,
+  MapPin,
+  GitCompare,
+  FlaskConical,
+  ClipboardCheck,
+  Building2,
+  Ruler,
+  Scale,
+  FileSearch,
+  ChevronDown,
+  ChevronRight,
+  Plus,
+  Send,
+  Sun,
+  Moon,
+  Menu,
+  X,
+  MessageSquare,
+  Trash2,
+  Sparkles,
+  BarChart3,
+  Globe,
+  Map,
+  PanelRightOpen,
+  PanelRightClose,
+  Layers,
+  LayoutGrid,
+} from 'lucide-react'
 
 // ═══════════════════════════════════════════════════════════════
 // CONFIG
@@ -37,6 +67,7 @@ interface ChatSession {
   updatedAt: number
   messageCount: number
   preview?: string
+  agent?: string
 }
 
 interface ChatMessage {
@@ -48,18 +79,88 @@ interface ChatMessage {
   data?: unknown
 }
 
-type RightTab = 'map' | '3d' | 'stats' | 'export'
-type Lang = 'en' | 'he' | 'es' | 'pt' | 'fr' | 'ar' | 'ht'
+interface Agent {
+  id: string
+  name: string
+  icon: typeof MapPin
+  description: string
+  placeholder: string
+  systemPrompt: string
+}
+
+interface Skill {
+  id: string
+  name: string
+  icon: typeof Building2
+  value: string
+}
+
+type Lang = 'en' | 'es' | 'he' | 'pt' | 'fr' | 'zh' | 'hi'
 
 const LANGS: Record<Lang, { flag: string; name: string; dir: 'ltr' | 'rtl'; placeholder: string }> = {
   en: { flag: '🇺🇸', name: 'English', dir: 'ltr', placeholder: 'Ask about any Florida property, zoning code, or district...' },
-  he: { flag: '🇮🇱', name: 'עברית', dir: 'rtl', placeholder: '...שאל על נכס, אזור, או היתר בנייה' },
   es: { flag: '🇪🇸', name: 'Español', dir: 'ltr', placeholder: 'Pregunte sobre cualquier propiedad en Florida...' },
+  he: { flag: '🇮🇱', name: 'עברית', dir: 'rtl', placeholder: '...שאל על נכס, אזור, או היתר בנייה' },
   pt: { flag: '🇧🇷', name: 'Português', dir: 'ltr', placeholder: 'Pergunte sobre qualquer propriedade na Flórida...' },
   fr: { flag: '🇫🇷', name: 'Français', dir: 'ltr', placeholder: 'Posez une question sur n\'importe quelle propriété en Floride...' },
-  ar: { flag: '🇸🇦', name: 'العربية', dir: 'rtl', placeholder: '...اسأل عن أي عقار في فلوريدا' },
-  ht: { flag: '🇭🇹', name: 'Kreyòl', dir: 'ltr', placeholder: 'Mande sou nenpòt pwopriyete nan Florid...' },
+  zh: { flag: '🇨🇳', name: '中文', dir: 'ltr', placeholder: '询问佛罗里达州的任何房产、分区代码或地区...' },
+  hi: { flag: '🇮🇳', name: 'हिन्दी', dir: 'ltr', placeholder: 'फ्लोरिडा की किसी भी संपत्ति के बारे में पूछें...' },
 }
+
+// ═══════════════════════════════════════════════════════════════
+// DATA: AGENTS & SKILLS
+// ═══════════════════════════════════════════════════════════════
+
+const AGENTS: Agent[] = [
+  {
+    id: 'zoning-lookup',
+    name: 'Zoning Lookup',
+    icon: MapPin,
+    description: 'Find zones in any city',
+    placeholder: 'What zones are in [city]?',
+    systemPrompt: 'You are a zoning lookup agent. Help users find zoning districts for any Florida city or county.',
+  },
+  {
+    id: 'district-compare',
+    name: 'District Compare',
+    icon: GitCompare,
+    description: 'Compare districts side by side',
+    placeholder: 'Compare [city A] vs [city B] residential density',
+    systemPrompt: 'You are a district comparison agent. Compare zoning districts between different Florida jurisdictions.',
+  },
+  {
+    id: 'research',
+    name: 'Research',
+    icon: FlaskConical,
+    description: 'Open-ended zoning intelligence',
+    placeholder: 'Ask any zoning research question...',
+    systemPrompt: 'You are a zoning research agent with deep knowledge of Florida zoning codes. Answer open-ended questions.',
+  },
+  {
+    id: 'permit-check',
+    name: 'Permit Check',
+    icon: ClipboardCheck,
+    description: 'Check permitted uses',
+    placeholder: "What's allowed in [district] [city]?",
+    systemPrompt: 'You are a permit check agent. Help users understand what uses are permitted in specific zoning districts.',
+  },
+]
+
+const SKILLS: Skill[] = [
+  { id: 'counties', name: '67 FL Counties', icon: Map, value: '369 jurisdictions' },
+  { id: 'districts', name: '5,395 Districts', icon: Layers, value: 'Indexed & searchable' },
+  { id: 'district-lookup', name: 'District Lookup', icon: Search, value: 'Instant regex path' },
+  { id: 'density', name: 'Density Compare', icon: LayoutGrid, value: 'Claude Sonnet 4.5' },
+  { id: 'setback', name: 'Setback Analysis', icon: Ruler, value: 'Front/side/rear' },
+  { id: 'permitted-use', name: 'Permitted Use Search', icon: FileSearch, value: 'By-right & conditional' },
+]
+
+const STARTERS = [
+  { text: 'What can I build at 625 Ocean St, Satellite Beach?' },
+  { text: 'Show me all zoning districts in Brevard County' },
+  { text: 'Compare setbacks: R-1 vs R-2 in Melbourne' },
+  { text: "What's permitted in Palm Bay RM-15?" },
+]
 
 // ═══════════════════════════════════════════════════════════════
 // HELPERS
@@ -75,244 +176,374 @@ const storage = {
   deleteMessages(id: string) { localStorage.removeItem(`zw_msg_${id}`) },
 }
 
-const STARTERS = [
-  { emoji: '🏠', text: 'What can I build at 625 Ocean St, Satellite Beach?' },
-  { emoji: '📊', text: 'Show me all zoning districts in Brevard County' },
-  { emoji: '📋', text: 'Create a full report for Palm Bay R-1 zone' },
-  { emoji: '🔍', text: 'Compare setbacks: R-1 vs R-2 in Melbourne' },
-]
+function timeAgo(ts: number): string {
+  const d = Date.now() - ts
+  if (d < 60000) return 'Just now'
+  if (d < 3600000) return `${Math.floor(d / 60000)}m ago`
+  if (d < 86400000) return `${Math.floor(d / 3600000)}h ago`
+  return new Date(ts).toLocaleDateString()
+}
 
 // ═══════════════════════════════════════════════════════════════
-// ICONS (Lucide-compatible inline SVG)
+// ZONEWISE LOGO
 // ═══════════════════════════════════════════════════════════════
 
-function SvgIcon({ d, size = 16, className = '' }: { d: string; size?: number; className?: string }) {
+function ZoneWiseLogo({ size = 32 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d={d} />
+    <svg width={size} height={size} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="10" fill="#F47B20" />
+      <path d="M10 14h20v3H15.5l14.5 9v3H10v-3h14.5L10 17v-3z" fill="white" />
     </svg>
   )
 }
 
-const ICON = {
-  plus: 'M12 5v14M5 12h14',
-  send: 'M22 2L11 13M22 2l-7 20-4-9-9-4z',
-  map: 'M1 6v16l7-4 8 4 7-4V2l-7 4-8-4z',
-  building: 'M3 21h18M5 21V7l8-4v18M19 21V11l-6-4',
-  chart: 'M18 20V10M12 20V4M6 20v-6',
-  x: 'M18 6L6 18M6 6l12 12',
-  menu: 'M3 12h18M3 6h18M3 18h18',
-  chevL: 'M15 18l-6-6 6-6',
-  chevR: 'M9 18l6-6-6 6',
-  search: 'M11 17.25a6.25 6.25 0 110-12.5 6.25 6.25 0 010 12.5zM16 16l4.5 4.5',
-  trash: 'M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2',
-  sparkle: 'M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01z',
-  file: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6',
-  msg: 'M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z',
-}
-
 // ═══════════════════════════════════════════════════════════════
-// SESSION SIDEBAR
+// SIDEBAR SECTION (collapsible)
 // ═══════════════════════════════════════════════════════════════
 
-function SessionSidebar({
-  sessions, activeId, onSelect, onNew, onDelete, collapsed, onToggle,
+function SidebarSection({
+  title, children, defaultOpen = true,
 }: {
-  sessions: ChatSession[]; activeId: string | null
-  onSelect: (id: string) => void; onNew: () => void
-  onDelete: (id: string) => void; collapsed: boolean; onToggle: () => void
+  title: string; children: React.ReactNode; defaultOpen?: boolean
 }) {
-  const [search, setSearch] = useState('')
-  const filtered = sessions.filter(s => !search || s.title.toLowerCase().includes(search.toLowerCase()))
-
-  if (collapsed) return (
-    <div className="w-12 border-r border-border bg-foreground-2 flex flex-col items-center py-4 gap-2">
-      <button onClick={onToggle} className="p-2 rounded-lg hover:bg-foreground/5 text-muted-foreground">
-        <SvgIcon d={ICON.chevR} />
-      </button>
-      <button onClick={onNew} className="p-2 rounded-lg hover:bg-foreground/5 text-muted-foreground">
-        <SvgIcon d={ICON.plus} />
-      </button>
-    </div>
-  )
-
+  const [open, setOpen] = useState(defaultOpen)
   return (
-    <div className="w-64 border-r border-border bg-foreground-2 flex flex-col">
-      <div className="p-3 border-b border-border">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sessions</span>
-          <div className="flex gap-1">
-            <button onClick={onNew} className="p-1.5 rounded-md hover:bg-foreground/5 text-muted-foreground" title="New chat">
-              <SvgIcon d={ICON.plus} size={14} />
-            </button>
-            <button onClick={onToggle} className="p-1.5 rounded-md hover:bg-foreground/5 text-muted-foreground">
-              <SvgIcon d={ICON.chevL} size={14} />
-            </button>
-          </div>
-        </div>
-        <div className="relative">
-          <SvgIcon d={ICON.search} size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input
-            value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search..."
-            className="w-full pl-7 pr-2 py-1.5 text-xs rounded-md bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent"
-          />
-        </div>
-      </div>
-      <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
-        {filtered.length === 0 ? (
-          <p className="text-center text-xs text-muted-foreground py-8">
-            {search ? 'No matches' : 'No sessions yet'}
-          </p>
-        ) : filtered.map(s => (
-          <div key={s.id} onClick={() => onSelect(s.id)}
-            className={cn(
-              'group relative px-3 py-2 rounded-lg cursor-pointer transition-colors',
-              s.id === activeId ? 'bg-accent text-accent-foreground' : 'hover:bg-foreground/5 text-foreground'
-            )}>
-            <div className="flex items-start gap-2">
-              <SvgIcon d={ICON.msg} size={14} className="mt-0.5 shrink-0 text-muted-foreground" />
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium truncate pr-5">{s.title}</div>
-                {s.preview && <div className="text-[11px] text-muted-foreground truncate mt-0.5">{s.preview}</div>}
-                <div className="text-[10px] text-muted-foreground mt-0.5">{new Date(s.updatedAt).toLocaleDateString()}</div>
-              </div>
-            </div>
-            <button onClick={e => { e.stopPropagation(); onDelete(s.id) }}
-              className="absolute right-2 top-2 p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all">
-              <SvgIcon d={ICON.trash} size={12} />
-            </button>
-          </div>
-        ))}
-      </div>
-      <div className="p-3 border-t border-border text-center">
-        <span className="text-[10px] text-muted-foreground">ZoneWise.AI · 67 FL Counties · Opus 4.6</span>
-      </div>
+    <div className="mb-1">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center gap-1.5 px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400 hover:text-slate-300 transition-colors"
+      >
+        {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+        {title}
+      </button>
+      {open && <div className="px-2">{children}</div>}
     </div>
   )
 }
 
 // ═══════════════════════════════════════════════════════════════
-// RIGHT PANEL
+// LEFT SIDEBAR
 // ═══════════════════════════════════════════════════════════════
 
-function RightPanel({ visible, onClose }: { visible: boolean; onClose: () => void }) {
-  const [tab, setTab] = useState<RightTab>('map')
-  const [stats, setStats] = useState<Record<string, unknown> | null>(null)
+function Sidebar({
+  activeAgent, onSelectAgent, sessions, activeSessionId, onSelectSession, onNewSession,
+  onDeleteSession, isDark, onToggleDark, lang, onLangChange, mobileOpen, onMobileClose,
+}: {
+  activeAgent: string | null
+  onSelectAgent: (id: string) => void
+  sessions: ChatSession[]
+  activeSessionId: string | null
+  onSelectSession: (id: string) => void
+  onNewSession: () => void
+  onDeleteSession: (id: string) => void
+  isDark: boolean
+  onToggleDark: () => void
+  lang: Lang
+  onLangChange: (l: Lang) => void
+  mobileOpen: boolean
+  onMobileClose: () => void
+}) {
+  const [langOpen, setLangOpen] = useState(false)
 
-  useEffect(() => {
-    if (tab === 'stats') {
-      fetch(`${API_BASE}/api/stats`).then(r => r.json()).then(setStats).catch(() => {})
-    }
-  }, [tab])
-
-  if (!visible) return null
-
-  const tabs: { id: RightTab; icon: string; label: string }[] = [
-    { id: 'map', icon: ICON.map, label: 'Map' },
-    { id: '3d', icon: ICON.building, label: '3D' },
-    { id: 'stats', icon: ICON.chart, label: 'Stats' },
-    { id: 'export', icon: ICON.file, label: 'Export' },
-  ]
-
-  const mapUrl = `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/-80.61,28.39,10,0/500x400@2x?access_token=${MAPBOX_TOKEN}`
-
-  return (
-    <div className="w-80 xl:w-96 border-l border-border bg-foreground-2 flex flex-col">
-      <div className="flex border-b border-border">
-        {tabs.map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)}
-            className={cn(
-              'flex-1 flex items-center justify-center gap-1.5 px-2 py-2.5 text-[11px] font-medium border-b-2 transition-colors',
-              tab === t.id ? 'border-accent text-accent-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'
-            )}>
-            <SvgIcon d={t.icon} size={14} /><span className="hidden xl:inline">{t.label}</span>
+  const sidebarContent = (
+    <div className="h-full flex flex-col bg-[var(--zw-sidebar-bg)] text-slate-300 zw-sidebar">
+      {/* Header: Logo + Brand + Controls */}
+      <div className="px-4 py-4 flex items-center justify-between border-b border-white/10">
+        <div className="flex items-center gap-2.5">
+          <ZoneWiseLogo size={28} />
+          <div>
+            <div className="text-sm font-bold text-white tracking-tight">ZoneWise<span className="text-[#F47B20]">.AI</span></div>
+            <div className="text-[9px] text-slate-400 tracking-wider uppercase">Florida Zoning Intel</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          {/* Language selector */}
+          <div className="relative">
+            <button
+              onClick={() => setLangOpen(!langOpen)}
+              className="p-1.5 rounded-md hover:bg-white/10 text-slate-400 hover:text-white transition-colors text-xs"
+              title="Language"
+            >
+              <Globe size={14} />
+            </button>
+            {langOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setLangOpen(false)} />
+                <div className="absolute left-0 top-full mt-1 z-50 bg-[var(--zw-navy-dark)] border border-white/10 rounded-lg shadow-xl py-1 min-w-[140px]">
+                  {(Object.keys(LANGS) as Lang[]).map(code => (
+                    <button
+                      key={code}
+                      onClick={() => { onLangChange(code); setLangOpen(false) }}
+                      className={cn(
+                        'w-full flex items-center gap-2 px-3 py-1.5 text-xs transition-colors',
+                        lang === code ? 'text-[#F47B20] bg-white/5' : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                      )}
+                    >
+                      <span>{LANGS[code].flag}</span>
+                      <span>{LANGS[code].name}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+          {/* Dark/Light toggle */}
+          <button
+            onClick={onToggleDark}
+            className="p-1.5 rounded-md hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+            title={isDark ? 'Light mode' : 'Dark mode'}
+          >
+            {isDark ? <Sun size={14} /> : <Moon size={14} />}
           </button>
-        ))}
-        <button onClick={onClose} className="px-2 text-muted-foreground hover:text-foreground">
-          <SvgIcon d={ICON.x} size={14} />
+          {/* Mobile close */}
+          <button
+            onClick={onMobileClose}
+            className="p-1.5 rounded-md hover:bg-white/10 text-slate-400 hover:text-white transition-colors md:hidden"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      </div>
+
+      {/* New Chat button */}
+      <div className="px-3 pt-3 pb-1">
+        <button
+          onClick={onNewSession}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-[#F47B20] hover:bg-[#F69345] text-white text-sm font-medium transition-colors"
+        >
+          <Plus size={14} />
+          New Chat
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4">
-        {tab === 'map' && (
-          <div className="space-y-3">
-            <div className="rounded-lg overflow-hidden border border-border">
-              <img src={mapUrl} alt="Brevard County Map" className="w-full h-48 object-cover" loading="lazy" />
-            </div>
-            <div className="bg-background rounded-lg p-3 text-xs text-muted-foreground border border-border">
-              <p className="font-medium text-foreground mb-1">📍 Brevard County, FL</p>
-              <p>28.3900, -80.6100</p>
-            </div>
-            <p className="text-[10px] text-muted-foreground text-center">Interactive Mapbox GL JS · Parcel overlay in next sprint</p>
-          </div>
-        )}
+      {/* Scrollable sections */}
+      <div className="flex-1 overflow-y-auto py-2">
+        {/* AGENTS */}
+        <SidebarSection title="Agents">
+          {AGENTS.map(agent => {
+            const Icon = agent.icon
+            const isActive = activeAgent === agent.id
+            return (
+              <button
+                key={agent.id}
+                onClick={() => onSelectAgent(agent.id)}
+                className={cn(
+                  'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-all mb-0.5',
+                  isActive
+                    ? 'bg-[var(--zw-sidebar-active)] text-[#F47B20]'
+                    : 'text-slate-300 hover:bg-[var(--zw-sidebar-hover)] hover:text-white'
+                )}
+              >
+                <Icon size={16} className={isActive ? 'text-[#F47B20]' : 'text-slate-400'} />
+                <div className="flex-1 min-w-0">
+                  <div className="text-[13px] font-medium truncate">{agent.name}</div>
+                  <div className="text-[10px] text-slate-500 truncate">{agent.description}</div>
+                </div>
+              </button>
+            )
+          })}
+        </SidebarSection>
 
-        {tab === '3d' && (
-          <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
-            <div className="w-32 h-32 bg-accent/10 border-2 border-accent/30 rounded-xl flex items-center justify-center"
-              style={{ transform: 'perspective(300px) rotateX(15deg) rotateY(-20deg)' }}>
-              <SvgIcon d={ICON.building} size={40} className="text-accent/40" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-foreground">3D Building Envelope</p>
-              <p className="text-xs text-muted-foreground mt-1">React Three Fiber · EnvelopeViewer · SunShadowViewer</p>
-              <p className="text-xs text-muted-foreground mt-1">Ask about setbacks to generate 3D envelope</p>
-            </div>
-          </div>
-        )}
-
-        {tab === 'stats' && (
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">Platform Data</h3>
-            {stats ? (
-              <div className="grid grid-cols-2 gap-2">
-                {Object.entries(stats).map(([k, v]) => (
-                  <div key={k} className="bg-background border border-border rounded-lg p-3 text-center">
-                    <p className="text-lg font-bold text-accent">
-                      {typeof v === 'number' ? v.toLocaleString() : String(v)}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                      {k.replace(/_/g, ' ')}
-                    </p>
-                  </div>
-                ))}
+        {/* SKILLS */}
+        <SidebarSection title="Skills">
+          {SKILLS.map(skill => {
+            const Icon = skill.icon
+            return (
+              <div
+                key={skill.id}
+                className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-slate-400 mb-0.5"
+              >
+                <Icon size={14} className="text-slate-500 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-[12px] text-slate-300">{skill.name}</div>
+                </div>
+                <span className="text-[9px] text-slate-500 shrink-0">{skill.value}</span>
               </div>
-            ) : <Spinner size={20} />}
-          </div>
-        )}
+            )
+          })}
+        </SidebarSection>
 
-        {tab === 'export' && (
-          <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
-            <SvgIcon d={ICON.file} size={40} className="text-muted-foreground/30" />
-            <div>
-              <p className="text-sm font-medium text-foreground">Export Reports</p>
-              <p className="text-xs text-muted-foreground mt-1 max-w-xs">
-                Ask the AI to "create a full report" for any property · PDF & DOCX exports
-              </p>
-            </div>
+        {/* HISTORY */}
+        <SidebarSection title="History" defaultOpen={sessions.length > 0}>
+          {sessions.length === 0 ? (
+            <p className="text-center text-[11px] text-slate-500 py-4">No chat history yet</p>
+          ) : (
+            sessions.slice(0, 20).map(s => (
+              <div
+                key={s.id}
+                onClick={() => { onSelectSession(s.id); onMobileClose() }}
+                className={cn(
+                  'group flex items-start gap-2 px-3 py-2 rounded-lg cursor-pointer transition-all mb-0.5',
+                  s.id === activeSessionId
+                    ? 'bg-[var(--zw-sidebar-active)] text-white'
+                    : 'text-slate-300 hover:bg-[var(--zw-sidebar-hover)] hover:text-white'
+                )}
+              >
+                <MessageSquare size={13} className="mt-0.5 shrink-0 text-slate-500" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-[12px] font-medium truncate">{s.title}</div>
+                  <div className="text-[10px] text-slate-500">{timeAgo(s.updatedAt)}</div>
+                </div>
+                <button
+                  onClick={e => { e.stopPropagation(); onDeleteSession(s.id) }}
+                  className="p-0.5 rounded opacity-0 group-hover:opacity-100 hover:bg-red-500/20 text-slate-500 hover:text-red-400 transition-all shrink-0"
+                >
+                  <Trash2 size={11} />
+                </button>
+              </div>
+            ))
+          )}
+        </SidebarSection>
+      </div>
+
+      {/* Footer */}
+      <div className="px-4 py-3 border-t border-white/10 text-center">
+        <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-500">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+          <span>Powered by Claude Opus 4.6</span>
+        </div>
+      </div>
+    </div>
+  )
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <div className="hidden md:block w-[280px] shrink-0 h-full border-r border-white/5">
+        {sidebarContent}
+      </div>
+
+      {/* Mobile sidebar overlay */}
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onMobileClose} />
+          <div className="relative w-[280px] h-full">
+            {sidebarContent}
           </div>
-        )}
+        </div>
+      )}
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ARTIFACTS PANEL (collapsible right side)
+// ═══════════════════════════════════════════════════════════════
+
+function ArtifactsPanel({
+  visible, onClose,
+}: {
+  visible: boolean; onClose: () => void
+}) {
+  const [stats, setStats] = useState<Record<string, unknown> | null>(null)
+  const [statsLoading, setStatsLoading] = useState(false)
+
+  useEffect(() => {
+    if (visible && !stats) {
+      setStatsLoading(true)
+      fetch(`${API_BASE}/api/stats`)
+        .then(r => r.json())
+        .then(d => { setStats(d); setStatsLoading(false) })
+        .catch(() => setStatsLoading(false))
+    }
+  }, [visible, stats])
+
+  if (!visible) return null
+
+  const mapUrl = `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/-81.5,28.0,6.5,0/480x280@2x?access_token=${MAPBOX_TOKEN}`
+
+  return (
+    <div className="w-80 xl:w-96 shrink-0 h-full border-l border-border bg-background flex flex-col">
+      {/* Header */}
+      <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <BarChart3 size={14} className="text-[#F47B20]" />
+          <span className="text-sm font-semibold text-foreground">Artifacts</span>
+        </div>
+        <button onClick={onClose} className="p-1 rounded-md hover:bg-foreground/5 text-muted-foreground hover:text-foreground transition-colors">
+          <X size={14} />
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* Stats Cards */}
+        <div>
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Platform Data</h3>
+          {statsLoading ? (
+            <div className="flex justify-center py-8"><Spinner size={20} /></div>
+          ) : stats ? (
+            <div className="grid grid-cols-2 gap-2">
+              {Object.entries(stats).map(([k, v]) => (
+                <div key={k} className="bg-foreground/3 border border-border rounded-lg p-3 text-center">
+                  <p className="text-lg font-bold text-[#F47B20]">
+                    {typeof v === 'number' ? v.toLocaleString() : String(v)}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">
+                    {k.replace(/_/g, ' ')}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              {[{ label: 'Jurisdictions', value: '369' }, { label: 'Districts', value: '5,395' }, { label: 'Standards', value: '59' }, { label: 'Uses', value: '350+' }].map(item => (
+                <div key={item.label} className="bg-foreground/3 border border-border rounded-lg p-3 text-center">
+                  <p className="text-lg font-bold text-[#F47B20]">{item.value}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{item.label}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Map Preview */}
+        <div>
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Florida Coverage</h3>
+          <div className="rounded-lg overflow-hidden border border-border">
+            <img src={mapUrl} alt="Florida Coverage Map" className="w-full h-36 object-cover" loading="lazy" />
+          </div>
+          <p className="text-[10px] text-muted-foreground text-center mt-1.5">67 counties covered with interactive Mapbox GL JS</p>
+        </div>
+
+        {/* Data table placeholder */}
+        <div>
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Recent Results</h3>
+          <div className="bg-foreground/3 border border-border rounded-lg p-6 text-center">
+            <Scale size={24} className="mx-auto text-muted-foreground/30 mb-2" />
+            <p className="text-xs text-muted-foreground">Query data will appear here</p>
+            <p className="text-[10px] text-muted-foreground mt-1">Tables, charts, and comparison views</p>
+          </div>
+        </div>
       </div>
     </div>
   )
 }
 
 // ═══════════════════════════════════════════════════════════════
-// CHAT CENTER
+// CHAT AREA
 // ═══════════════════════════════════════════════════════════════
 
-function ChatCenter({
-  messages, onSend, isLoading, thinkText, session, lang, onLangChange,
+function ChatArea({
+  messages, onSend, isLoading, thinkText, session, activeAgent, lang, artifactsOpen, onToggleArtifacts,
+  onMobileMenuOpen,
 }: {
-  messages: ChatMessage[]; onSend: (text: string) => void; isLoading: boolean
-  thinkText: string; session: ChatSession | null; lang: Lang; onLangChange: (l: Lang) => void
+  messages: ChatMessage[]
+  onSend: (text: string) => void
+  isLoading: boolean
+  thinkText: string
+  session: ChatSession | null
+  activeAgent: Agent | null
+  lang: Lang
+  artifactsOpen: boolean
+  onToggleArtifacts: () => void
+  onMobileMenuOpen: () => void
 }) {
   const [input, setInput] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const dir = LANGS[lang].dir
+  const placeholder = activeAgent?.placeholder || LANGS[lang].placeholder
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
@@ -329,52 +560,63 @@ function ChatCenter({
   const display = messages.filter(m => m.role !== 'system')
 
   return (
-    <div className="flex-1 flex flex-col min-w-0" dir={dir}>
-      {/* Header */}
-      <div className="px-4 py-2.5 border-b border-border flex items-center justify-between bg-background/95 backdrop-blur-sm">
+    <div className="flex-1 flex flex-col min-w-0 bg-background" dir={dir}>
+      {/* Chat header */}
+      <div className="px-4 py-2.5 border-b border-border flex items-center justify-between bg-background/95 backdrop-blur-sm shrink-0">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
-            <span className="text-accent-foreground text-xs font-bold">Z</span>
+          {/* Mobile hamburger */}
+          <button onClick={onMobileMenuOpen} className="p-1.5 rounded-md hover:bg-foreground/5 text-muted-foreground md:hidden">
+            <Menu size={16} />
+          </button>
+          <div className="w-7 h-7 rounded-lg bg-[#F47B20] flex items-center justify-center">
+            {activeAgent ? (
+              <activeAgent.icon size={14} className="text-white" />
+            ) : (
+              <Sparkles size={14} className="text-white" />
+            )}
           </div>
           <div>
-            <h1 className="text-sm font-semibold text-foreground">{session?.title || 'ZoneWise AI'}</h1>
-            <p className="text-[10px] text-muted-foreground">67 Counties · Opus 4.6 · Supabase</p>
+            <h1 className="text-sm font-semibold text-foreground">
+              {activeAgent?.name || session?.title || 'ZoneWise AI'}
+            </h1>
+            <p className="text-[10px] text-muted-foreground">
+              {activeAgent?.description || '67 Counties · Claude Opus 4.6 · Real-Time Data'}
+            </p>
           </div>
         </div>
-        <div className="flex items-center gap-1">
-          {(Object.keys(LANGS) as Lang[]).map(code => (
-            <button key={code} onClick={() => onLangChange(code)}
-              className={cn(
-                'px-1.5 py-0.5 text-xs rounded transition-colors',
-                lang === code ? 'bg-accent text-accent-foreground font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-foreground/5'
-              )}>
-              {LANGS[code].flag}
-            </button>
-          ))}
-          <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 text-[10px]">
+        <div className="flex items-center gap-1.5">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 text-[10px]">
             <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />Live
           </span>
+          <button
+            onClick={onToggleArtifacts}
+            className="hidden lg:flex p-1.5 rounded-md hover:bg-foreground/5 text-muted-foreground hover:text-foreground transition-colors"
+            title={artifactsOpen ? 'Hide artifacts' : 'Show artifacts'}
+          >
+            {artifactsOpen ? <PanelRightClose size={16} /> : <PanelRightOpen size={16} />}
+          </button>
         </div>
       </div>
 
       {/* Messages or Empty State */}
       {display.length === 0 && !isLoading ? (
-        <div className="flex-1 flex flex-col items-center justify-center gap-8 px-4">
+        <div className="flex-1 flex flex-col items-center justify-center gap-6 px-4">
           <div className="text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent/10 mb-4">
-              <SvgIcon d={ICON.sparkle} size={32} className="text-accent" />
-            </div>
-            <h2 className="text-xl font-semibold text-foreground mb-2">ZoneWise AI</h2>
+            <ZoneWiseLogo size={48} />
+            <h2 className="text-xl font-semibold text-foreground mt-4 mb-2">
+              {activeAgent ? activeAgent.name : 'ZoneWise AI'}
+            </h2>
             <p className="text-sm text-muted-foreground max-w-md">
-              Florida's zoning intelligence platform. Ask about any property, zoning district,
-              setbacks, or permitted uses across all 67 counties.
+              {activeAgent
+                ? activeAgent.description
+                : "Florida's zoning intelligence platform. Ask about any property, zoning district, setbacks, or permitted uses across all 67 counties."}
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-lg w-full">
             {STARTERS.map((s, i) => (
               <button key={i} onClick={() => send(s.text)}
-                className="text-left px-4 py-3 rounded-xl border border-border bg-background hover:bg-foreground/5 transition-colors text-sm text-foreground">
-                <span className="mr-1">{s.emoji}</span>{s.text}
+                className="text-left px-4 py-3 rounded-xl border border-border bg-background hover:bg-foreground/3 transition-colors text-sm text-foreground hover:border-[#F47B20]/30">
+                {s.text}
               </button>
             ))}
           </div>
@@ -384,15 +626,15 @@ function ChatCenter({
           {display.map((m, i) => (
             <div key={m.id || i} className={cn('flex gap-3', m.role === 'user' ? 'justify-end' : 'justify-start')}>
               {m.role === 'assistant' && (
-                <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
-                  <SvgIcon d={ICON.sparkle} size={14} className="text-accent" />
+                <div className="w-7 h-7 rounded-full bg-[#F47B20]/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <Sparkles size={14} className="text-[#F47B20]" />
                 </div>
               )}
               <div className={cn(
                 'max-w-[80%] rounded-xl px-4 py-2.5 text-sm leading-relaxed',
                 m.role === 'user'
-                  ? 'bg-accent text-accent-foreground'
-                  : 'bg-foreground/5 text-foreground border border-border'
+                  ? 'bg-[#1E3A5F] text-white'
+                  : 'bg-foreground/3 text-foreground border border-border'
               )}>
                 {m.role === 'assistant' ? (
                   <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
@@ -406,30 +648,39 @@ function ChatCenter({
           ))}
           {isLoading && (
             <div className="flex gap-3">
-              <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
+              <div className="w-7 h-7 rounded-full bg-[#F47B20]/10 flex items-center justify-center shrink-0 mt-0.5">
                 <Spinner size={14} />
               </div>
-              <div className="bg-foreground/5 border border-border rounded-xl px-4 py-2.5 text-sm text-muted-foreground">
-                {thinkText || 'Thinking...'}
+              <div className="bg-foreground/3 border border-border rounded-xl px-4 py-2.5 text-sm text-muted-foreground">
+                {thinkText || (
+                  <span className="flex items-center gap-1">
+                    Thinking
+                    <span className="flex gap-0.5 ml-1">
+                      <span className="w-1 h-1 rounded-full bg-muted-foreground zw-typing-dot" />
+                      <span className="w-1 h-1 rounded-full bg-muted-foreground zw-typing-dot" />
+                      <span className="w-1 h-1 rounded-full bg-muted-foreground zw-typing-dot" />
+                    </span>
+                  </span>
+                )}
               </div>
             </div>
           )}
         </div>
       )}
 
-      {/* Input */}
-      <div className="p-3 border-t border-border bg-background/95 backdrop-blur-sm">
+      {/* Input bar */}
+      <div className="p-3 border-t border-border bg-background/95 backdrop-blur-sm shrink-0">
         <form onSubmit={e => { e.preventDefault(); send() }} className="flex gap-2 items-end">
           <textarea
             ref={inputRef} value={input} onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
-            placeholder={LANGS[lang].placeholder}
-            className="flex-1 resize-none min-h-[40px] max-h-32 px-4 py-2.5 rounded-xl bg-foreground/5 border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
+            placeholder={placeholder}
+            className="zw-chat-input flex-1 resize-none min-h-[42px] max-h-32 px-4 py-2.5 rounded-xl bg-foreground/3 border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#F47B20]/30 focus:border-[#F47B20]/50 transition-all"
             rows={1} dir={dir}
           />
           <button type="submit" disabled={!input.trim() || isLoading}
-            className="shrink-0 w-10 h-10 rounded-xl bg-accent hover:bg-accent/90 disabled:bg-muted disabled:text-muted-foreground text-accent-foreground flex items-center justify-center transition-colors">
-            <SvgIcon d={ICON.send} size={16} />
+            className="shrink-0 w-10 h-10 rounded-xl bg-[#F47B20] hover:bg-[#F69345] disabled:bg-muted disabled:text-muted-foreground text-white flex items-center justify-center transition-colors">
+            <Send size={16} />
           </button>
         </form>
       </div>
@@ -447,8 +698,8 @@ export function App() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [thinkText, setThinkText] = useState('')
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const [rightOpen, setRightOpen] = useState(true)
+  const [activeAgent, setActiveAgent] = useState<string | null>(null)
+  const [artifactsOpen, setArtifactsOpen] = useState(true)
   const [lang, setLang] = useState<Lang>('en')
   const [mobileMenu, setMobileMenu] = useState(false)
   const [isDark, setIsDark] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches)
@@ -476,12 +727,22 @@ export function App() {
     if (activeId && messages.length > 0) storage.saveMessages(activeId, messages)
   }, [messages, activeId])
 
+  // Apply RTL on lang change
+  useEffect(() => {
+    document.documentElement.dir = LANGS[lang].dir
+  }, [lang])
+
+  const currentAgent = AGENTS.find(a => a.id === activeAgent) || null
+
   const newSession = useCallback(() => {
-    const s: ChatSession = { id: uid(), title: 'New Chat', createdAt: Date.now(), updatedAt: Date.now(), messageCount: 0 }
+    const s: ChatSession = {
+      id: uid(), title: 'New Chat', createdAt: Date.now(), updatedAt: Date.now(),
+      messageCount: 0, agent: activeAgent || undefined,
+    }
     setSessions(prev => [s, ...prev])
     setActiveId(s.id)
     setMessages([])
-  }, [])
+  }, [activeAgent])
 
   const deleteSession = useCallback((id: string) => {
     setSessions(prev => prev.filter(s => s.id !== id))
@@ -492,10 +753,29 @@ export function App() {
     }
   }, [activeId, sessions])
 
+  const selectAgent = useCallback((agentId: string) => {
+    setActiveAgent(prev => prev === agentId ? null : agentId)
+    // Start a new session with this agent context
+    const agent = AGENTS.find(a => a.id === agentId)
+    if (agent) {
+      const s: ChatSession = {
+        id: uid(), title: agent.name, createdAt: Date.now(), updatedAt: Date.now(),
+        messageCount: 0, agent: agentId,
+      }
+      setSessions(prev => [s, ...prev])
+      setActiveId(s.id)
+      setMessages([])
+    }
+    setMobileMenu(false)
+  }, [])
+
   const sendMessage = useCallback(async (content: string) => {
     let sid = activeId
     if (!sid) {
-      const s: ChatSession = { id: uid(), title: content.slice(0, 50), createdAt: Date.now(), updatedAt: Date.now(), messageCount: 0 }
+      const s: ChatSession = {
+        id: uid(), title: content.slice(0, 50), createdAt: Date.now(), updatedAt: Date.now(),
+        messageCount: 0, agent: activeAgent || undefined,
+      }
       setSessions(prev => [s, ...prev])
       setActiveId(s.id)
       sid = s.id
@@ -510,7 +790,11 @@ export function App() {
       const res = await fetch(`${API_BASE}/chat/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: content }),
+        body: JSON.stringify({
+          query: content,
+          agent: activeAgent || undefined,
+          lang: lang,
+        }),
       })
 
       if (!res.ok) throw new Error(`${res.status}`)
@@ -554,80 +838,64 @@ export function App() {
       try {
         const fb = await fetch(`${API_BASE}/chat`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: content }),
+          body: JSON.stringify({ query: content, agent: activeAgent || undefined, lang }),
         })
         const data = await fb.json()
         setMessages(prev => [...prev, { id: uid(), role: 'assistant', content: data.answer || 'Error.', timestamp: Date.now() }])
       } catch {
         setMessages(prev => [...prev, {
           id: uid(), role: 'assistant', timestamp: Date.now(),
-          content: '⚠️ Backend warming up (~30s cold start on Render). Please try again.',
+          content: 'Backend warming up (~30s cold start on Render). Please try again.',
         }])
       }
     } finally {
       setIsLoading(false)
       setThinkText('')
     }
-  }, [activeId])
+  }, [activeId, activeAgent, lang])
 
   const activeSession = sessions.find(s => s.id === activeId) || null
 
   return (
     <TooltipProvider>
-      <div className="h-full flex flex-col bg-foreground-2 text-foreground">
-        {/* Mobile header */}
-        <div className="lg:hidden border-b border-border p-3 flex items-center justify-between bg-background">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
-              <span className="text-accent-foreground text-xs font-bold">Z</span>
-            </div>
-            <span className="text-sm font-semibold text-foreground">ZoneWise AI</span>
-          </div>
-          <button onClick={() => setMobileMenu(!mobileMenu)} className="p-2 text-muted-foreground">
-            <SvgIcon d={ICON.menu} />
-          </button>
-        </div>
+      <div className="h-full flex bg-background text-foreground overflow-hidden">
+        {/* Left Sidebar */}
+        <Sidebar
+          activeAgent={activeAgent}
+          onSelectAgent={selectAgent}
+          sessions={sessions}
+          activeSessionId={activeId}
+          onSelectSession={setActiveId}
+          onNewSession={newSession}
+          onDeleteSession={deleteSession}
+          isDark={isDark}
+          onToggleDark={() => setIsDark(d => !d)}
+          lang={lang}
+          onLangChange={setLang}
+          mobileOpen={mobileMenu}
+          onMobileClose={() => setMobileMenu(false)}
+        />
 
-        <div className="flex-1 flex overflow-hidden">
-          {/* Desktop sidebar */}
-          <div className="hidden lg:block">
-            <SessionSidebar
-              sessions={sessions} activeId={activeId} onSelect={setActiveId}
-              onNew={newSession} onDelete={deleteSession}
-              collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-            />
-          </div>
+        {/* Chat Center */}
+        <ChatArea
+          messages={messages}
+          onSend={sendMessage}
+          isLoading={isLoading}
+          thinkText={thinkText}
+          session={activeSession}
+          activeAgent={currentAgent}
+          lang={lang}
+          artifactsOpen={artifactsOpen}
+          onToggleArtifacts={() => setArtifactsOpen(v => !v)}
+          onMobileMenuOpen={() => setMobileMenu(true)}
+        />
 
-          {/* Mobile sidebar overlay */}
-          {mobileMenu && (
-            <div className="lg:hidden fixed inset-0 z-50 bg-background/80 backdrop-blur-sm" onClick={() => setMobileMenu(false)}>
-              <div className="w-72 h-full" onClick={e => e.stopPropagation()}>
-                <SessionSidebar
-                  sessions={sessions} activeId={activeId}
-                  onSelect={id => { setActiveId(id); setMobileMenu(false) }}
-                  onNew={() => { newSession(); setMobileMenu(false) }}
-                  onDelete={deleteSession} collapsed={false} onToggle={() => setMobileMenu(false)}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Chat center */}
-          <ChatCenter
-            messages={messages} onSend={sendMessage} isLoading={isLoading}
-            thinkText={thinkText} session={activeSession} lang={lang} onLangChange={setLang}
+        {/* Right Artifacts Panel (desktop only) */}
+        <div className="hidden lg:block">
+          <ArtifactsPanel
+            visible={artifactsOpen}
+            onClose={() => setArtifactsOpen(false)}
           />
-
-          {/* Desktop right panel */}
-          <div className="hidden lg:block">
-            <RightPanel visible={rightOpen} onClose={() => setRightOpen(false)} />
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="border-t border-border px-4 py-1.5 bg-background/80 flex items-center justify-between text-[10px] text-muted-foreground">
-          <span>Powered by Claude Opus 4.6 · CraftAgents OSS · Supabase</span>
-          <span>zonewise.ai</span>
         </div>
       </div>
     </TooltipProvider>

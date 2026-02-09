@@ -1,12 +1,13 @@
 {
   "checkpoint_id": "CKPT-2026-02-08-FULLPARITY-V2.5",
   "created": "2026-02-08T22:00:00-05:00",
+  "updated": "2026-02-08T22:45:00-05:00",
   "author": "Claude Opus 4.6",
   "prior_checkpoint": "CHECKPOINT_2026-02-01.json",
   "overall_status": "COMPLETE — FULL PARITY MISSION",
   "release_tag": "v2.5.0",
 
-  "summary": "All 3 phases of the Full Parity Mission completed autonomously. Dual-mode viewer deployed (/ = ZoneWise chatbot, /s/{id} = SessionViewer). Agent showcase + desktop download added to zonewise-web. Electron-builder CI workflow created. Tagged v2.5.0.",
+  "summary": "All 3 phases of the Full Parity Mission completed autonomously. Dual-mode viewer deployed and verified at zonewise-desktop-viewer.vercel.app (/ = ZoneWise chatbot, /s/{id} = SessionViewer). Agent showcase + desktop download added to zonewise-web with direct release asset links. Electron-builder CI workflow created — all 3 platforms build successfully. Tagged v2.5.0 with GitHub Release containing 6 binaries.",
 
   "phases": {
     "phase_1_dual_mode_viewer": {
@@ -15,11 +16,13 @@
       "changes": [
         "apps/viewer/src/main.tsx — client-side router for / and /s/* routes",
         "apps/viewer/src/SessionViewPage.tsx — upstream SessionViewer wrapper with S3 loading",
-        "vercel.json — fixed buildCommand, outputDirectory, SPA rewrites"
+        "vercel.json — fixed buildCommand to cd ../.. for rootDirectory context",
+        "apps/viewer/vercel.json — SPA rewrites for /s/:path* routes"
       ],
       "verification": {
         "bun_run_viewer_build": "SUCCESS (42.81s)",
-        "branding_injection": "SUCCESS"
+        "branding_injection": "SUCCESS",
+        "vercel_deploy": "SUCCESS — all routes verified (/, /s, /s/{id} → HTTP 200)"
       }
     },
     "phase_2_marketing_site": {
@@ -27,8 +30,13 @@
       "priority": "P1",
       "repo": "breverdbidder/zonewise-web",
       "changes": [
-        "app/(marketing)/page.tsx — added Agent & Skill Showcase (4 agents, 6 skills) + Desktop Download section"
+        "app/(marketing)/page.tsx — added Agent & Skill Showcase (4 agents, 6 skills) + Desktop Download section",
+        "app/(marketing)/page.tsx — download links updated to actual v2.5.0 release asset URLs"
       ],
+      "download_links": {
+        "windows": "https://github.com/breverdbidder/zonewise-desktop/releases/download/v2.5.0/ZoneWise-AI-x64.exe",
+        "macos": "https://github.com/breverdbidder/zonewise-desktop/releases/download/v2.5.0/ZoneWise-AI-arm64.dmg"
+      },
       "merge_conflict_resolved": true,
       "rebrand_branch_merged": true
     },
@@ -37,19 +45,61 @@
       "priority": "P1",
       "changes": [
         ".github/workflows/build-desktop.yml — multi-platform build CI (Windows .exe, macOS .dmg, Linux .AppImage)",
-        "apps/electron/electron-builder.yml — rebranded to ZoneWise AI (appId, productName, artifactNames)"
+        "apps/electron/electron-builder.yml — rebranded to ZoneWise AI (appId, productName, artifactNames)",
+        "scripts/electron-build-main.ts — skip missing bridge/session MCP server packages",
+        "apps/electron/build/entitlements.mac.plist — added for electron-builder macOS builds"
       ],
-      "tag": "v2.5.0"
+      "tag": "v2.5.0",
+      "ci_iterations": 5,
+      "ci_fixes_applied": [
+        "Skip missing packages/bridge-mcp-server and packages/session-mcp-server in fork",
+        "Fix electron-builder config path (was doubled due to --project + --config)",
+        "Use working-directory: apps/electron so afterPack.cjs and resources resolve correctly",
+        "Add entitlements.mac.plist + CSC_IDENTITY_AUTO_DISCOVERY=false for unsigned macOS CI builds"
+      ],
+      "release_assets": [
+        "ZoneWise-AI-x64.exe (Windows)",
+        "ZoneWise-AI-arm64.dmg (macOS Apple Silicon)",
+        "ZoneWise-AI-x64.dmg (macOS Intel)",
+        "ZoneWise-AI-arm64.zip (macOS Apple Silicon)",
+        "ZoneWise-AI-x64.zip (macOS Intel)",
+        "ZoneWise-AI-x86_64.AppImage (Linux)"
+      ]
     }
+  },
+
+  "vercel_deployment": {
+    "status": "LIVE",
+    "url": "https://zonewise-desktop-viewer.vercel.app",
+    "routes_verified": {
+      "/": "HTTP 200 — ZoneWise AI chatbot",
+      "/s": "HTTP 200 — Session upload page",
+      "/s/{id}": "HTTP 200 — SessionViewer (read-only)"
+    },
+    "root_cause_of_failures": "Vercel project rootDirectory is apps/viewer — build config read from repo-root vercel.json but routing rules (rewrites/headers) must be in apps/viewer/vercel.json",
+    "fixes_applied": [
+      "vercel.json buildCommand: cd ../.. && bun run viewer:build (navigate to monorepo root)",
+      "vercel.json installCommand: cd ../.. && bun install (resolve workspace deps from root)",
+      "vercel.json outputDirectory: dist (relative to apps/viewer)",
+      "apps/viewer/vercel.json created with SPA rewrites for /s/:path* and /(.*) → /index.html"
+    ]
   },
 
   "commits_pushed": {
     "zonewise-desktop": [
       { "hash": "439851b", "message": "feat(viewer): dual-mode routing — / = ZoneWise chatbot, /s/{id} = SessionViewer" },
-      { "hash": "b0de48e", "message": "feat: electron-builder CI workflow + ZoneWise branding" }
+      { "hash": "b0de48e", "message": "feat: electron-builder CI workflow + ZoneWise branding" },
+      { "hash": "968fba9", "message": "checkpoint: Full Parity Mission complete — v2.5.0" },
+      { "hash": "60e5159", "message": "fix: skip missing bridge/session MCP servers in electron build" },
+      { "hash": "a88006f", "message": "fix: correct electron-builder config path in CI workflow" },
+      { "hash": "72f5ba9", "message": "fix: use working-directory instead of --project for electron-builder CI" },
+      { "hash": "9c3d210", "message": "fix: add entitlements.mac.plist + skip codesign in CI" },
+      { "hash": "9f211fe", "message": "fix(vercel): restore apps/viewer rootDirectory-relative paths" },
+      { "hash": "d04f4f4", "message": "fix(vercel): add vercel.json to apps/viewer for SPA rewrites" }
     ],
     "zonewise-web": [
-      { "hash": "182b69f", "message": "feat(marketing): add agent showcase + desktop download sections" }
+      { "hash": "182b69f", "message": "feat(marketing): add agent showcase + desktop download sections" },
+      { "hash": "fd73bf6", "message": "fix: point download links to actual v2.5.0 release assets" }
     ]
   },
 
@@ -62,23 +112,23 @@
     "backend": "zonewise-agents.onrender.com (UNCHANGED)",
     "branding": { "navy": "#1E3A5F", "orange": "#F47B20" },
     "deploy_targets": {
-      "viewer": "zonewise-desktop-viewer.vercel.app",
+      "viewer": "zonewise-desktop-viewer.vercel.app (VERIFIED LIVE)",
       "marketing": "zonewise-web on Cloudflare Pages",
-      "desktop_releases": "GitHub Releases (v2.5.0 tag triggers CI)"
+      "desktop_releases": "GitHub Releases v2.5.0 (6 binaries)"
     }
   },
 
   "next_steps": [
-    "Verify Vercel auto-deploy at zonewise-desktop-viewer.vercel.app",
-    "Verify GitHub Actions build-desktop.yml triggered by v2.5.0 tag",
-    "Configure GitHub secrets if needed (MAPBOX_TOKEN, SUPABASE_URL)",
     "Add macOS code signing (CSC_LINK, APPLE_ID, APPLE_TEAM_ID) for notarized builds",
-    "Update zonewise-web download links to actual GitHub Release asset URLs once CI completes"
+    "Configure Vercel environment variables (MAPBOX_TOKEN, SUPABASE_URL) if needed",
+    "Add Linux download link to zonewise-web marketing page"
   ],
 
   "blockers_resolved": [
     "Rebrand branch merged to main (was DIVERGED 1 ahead / 19 behind)",
-    "Vercel deploy config fixed (was PARTIAL)",
-    "Dual-mode routing implemented (was MISSING)"
+    "Vercel deploy fully working with SPA rewrites (was failing — rootDirectory mismatch)",
+    "Dual-mode routing implemented and verified (was MISSING)",
+    "Electron-builder CI green on all 3 platforms (took 5 iterations)",
+    "Download links point to actual release assets (was generic /releases/latest)"
   ]
 }

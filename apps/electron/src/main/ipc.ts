@@ -118,8 +118,9 @@ function createBuiltInConnection(slug: string, baseUrl?: string | null): LlmConn
 }
 
 /**
- * Validates that a file path is within allowed directories to prevent path traversal attacks.
- * Allowed directories: user's home directory and /tmp
+ * SEC-003: Validates that a file path is within WHITELISTED directories only.
+ * Uses a strict whitelist approach instead of allowing the entire home directory.
+ * Blocks access to sensitive files (.ssh, .aws, .env, private keys, etc.)
  */
 async function validateFilePath(filePath: string): Promise<string> {
   // Normalize the path to resolve . and .. components
@@ -135,7 +136,7 @@ async function validateFilePath(filePath: string): Promise<string> {
     throw new Error('Only absolute file paths are allowed')
   }
 
-  // Resolve symlinks to get the real path
+  // Resolve symlinks to get the real path (prevent symlink traversal)
   let realPath: string
   try {
     realPath = await realpath(normalizedPath)
@@ -144,11 +145,35 @@ async function validateFilePath(filePath: string): Promise<string> {
     realPath = normalizedPath
   }
 
-  // Define allowed base directories
+  // Re-normalize after realpath resolution
+  realPath = normalize(realPath)
+
+  // SEC-003: WHITELIST of allowed directories (not the entire home directory)
+  const home = homedir()
   const allowedDirs = [
-    homedir(),      // User's home directory
-    tmpdir(),       // Platform-appropriate temp directory
+    tmpdir(),                                    // Platform temp directory
+    join(home, 'Documents'),                     // User documents
+    join(home, 'Downloads'),                     // User downloads
+    join(home, 'Desktop'),                       // User desktop
+    join(home, '.craft-agent'),                  // App config directory
+    join(home, '.zonewise'),                     // ZoneWise config directory
+    join(home, 'Library', 'Application Support'), // macOS app data
+    join(home, 'AppData'),                       // Windows app data
+    join(home, '.local', 'share'),               // Linux app data
   ]
+
+  // Also allow the active workspace directory if one is set
+  try {
+    const config = loadStoredConfig()
+    if (config?.activeWorkspace) {
+      const workspace = getWorkspaceByNameOrId(config.activeWorkspace)
+      if (workspace?.path) {
+        allowedDirs.push(normalize(workspace.path))
+      }
+    }
+  } catch {
+    // Config loading failed — continue with static whitelist
+  }
 
   // Check if the real path is within an allowed directory (cross-platform)
   const isAllowed = allowedDirs.some(dir => {
@@ -161,21 +186,48 @@ async function validateFilePath(filePath: string): Promise<string> {
     throw new Error('Access denied: file path is outside allowed directories')
   }
 
-  // Block sensitive files even within home directory
+  // SEC-003: Comprehensive sensitive file pattern blocking
   const sensitivePatterns = [
-    /\.ssh\//,
-    /\.gnupg\//,
-    /\.aws\/credentials/,
-    /\.env$/,
-    /\.env\./,
-    /credentials\.json$/,
-    /secrets?\./i,
-    /\.pem$/,
-    /\.key$/,
+    // SSH and GPG keys
+    /[/\\]\.ssh[/\\]/i,
+    /[/\\]\.gnupg[/\\]/i,
+    // Cloud credentials
+    /[/\\]\.aws[/\\]/i,
+    /[/\\]\.config[/\\]gh[/\\]/i,
+    /[/\\]\.config[/\\]gcloud[/\\]/i,
+    /[/\\]\.azure[/\\]/i,
+    // Container and orchestration
+    /[/\\]\.kube[/\\]/i,
+    /[/\\]\.docker[/\\]/i,
+    // Environment and secrets files
+    /[/\\]\.env$/i,
+    /[/\\]\.env\.[^/\\]+$/i,
+    /[/\\]\.env\.local$/i,
+    /[/\\]credentials\.json$/i,
+    /[/\\]secrets?\./i,
+    // Private keys and certificates
+    /\.pem$/i,
+    /\.key$/i,
+    /\.pfx$/i,
+    /\.p12$/i,
+    /id_rsa/i,
+    /id_ed25519/i,
+    /id_ecdsa/i,
+    /id_dsa/i,
+    // Crypto wallets
+    /wallet\.dat$/i,
+    // Browser and password stores
+    /[/\\]\.password-store[/\\]/i,
+    /[/\\]\.mozilla[/\\].*logins/i,
+    /[/\\]Keychains[/\\]/i,
+    // Token files
+    /[/\\]\.npmrc$/i,
+    /[/\\]\.pypirc$/i,
+    /[/\\]\.netrc$/i,
   ]
 
   if (sensitivePatterns.some(pattern => pattern.test(realPath))) {
-    throw new Error('Access denied: cannot read sensitive files')
+    throw new Error('Access denied: cannot access sensitive files')
   }
 
   return realPath

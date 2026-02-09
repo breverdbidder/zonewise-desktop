@@ -1,13 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "bunx vite build && node ../../zonewise/branding/inject-branding.mjs",
-  "outputDirectory": "dist",
+  "buildCommand": "bun run viewer:build && node zonewise/branding/inject-branding.mjs",
+  "outputDirectory": "apps/viewer/dist",
   "installCommand": "bun install",
   "framework": null,
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/chat", "destination": "/chat.html" },
+    { "source": "/s/:path*", "destination": "/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [

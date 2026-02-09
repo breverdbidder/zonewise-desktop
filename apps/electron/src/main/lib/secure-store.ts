@@ -14,6 +14,7 @@
 import { safeStorage } from "electron";
 import * as fs from "fs";
 import * as path from "path";
+import * as crypto from "crypto";
 import { app } from "electron";
 
 // =============================================================================
@@ -303,32 +304,73 @@ export class SecureStore {
     }
   }
 
+  /**
+   * SEC-006: AES-256-GCM encryption fallback (replaces insecure XOR).
+   * Uses scryptSync for key derivation from machine-specific info.
+   * Format: [salt(16) + iv(12) + authTag(16) + ciphertext]
+   */
   private basicEncrypt(data: string): Buffer {
-    // Simple XOR encryption as fallback (not truly secure, but better than plaintext)
-    const key = this.getBasicKey();
-    const buffer = Buffer.from(data, "utf-8");
-    const encrypted = Buffer.alloc(buffer.length);
-    
-    for (let i = 0; i < buffer.length; i++) {
-      encrypted[i] = buffer[i] ^ key[i % key.length];
-    }
-    
-    return encrypted;
+    const salt = crypto.randomBytes(16);
+    const key = this.deriveKey(salt);
+    const iv = crypto.randomBytes(12);
+    const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
+
+    const encrypted = Buffer.concat([
+      cipher.update(data, "utf-8"),
+      cipher.final(),
+    ]);
+    const authTag = cipher.getAuthTag();
+
+    // Format: salt(16) + iv(12) + authTag(16) + ciphertext
+    return Buffer.concat([salt, iv, authTag, encrypted]);
   }
 
   private basicDecrypt(encrypted: Buffer): string {
-    const key = this.getBasicKey();
-    const decrypted = Buffer.alloc(encrypted.length);
-    
-    for (let i = 0; i < encrypted.length; i++) {
-      decrypted[i] = encrypted[i] ^ key[i % key.length];
+    // Try new AES-256-GCM format first (salt + iv + authTag + ciphertext)
+    if (encrypted.length >= 44) {
+      try {
+        const salt = encrypted.subarray(0, 16);
+        const iv = encrypted.subarray(16, 28);
+        const authTag = encrypted.subarray(28, 44);
+        const ciphertext = encrypted.subarray(44);
+
+        const key = this.deriveKey(salt);
+        const decipher = crypto.createDecipheriv("aes-256-gcm", key, iv);
+        decipher.setAuthTag(authTag);
+
+        const decrypted = Buffer.concat([
+          decipher.update(ciphertext),
+          decipher.final(),
+        ]);
+        return decrypted.toString("utf-8");
+      } catch {
+        // Fall through to legacy XOR decryption for migration
+      }
     }
-    
+
+    // Legacy XOR decryption (backward compat for existing encrypted data)
+    const legacyKey = this.getLegacyKey();
+    const decrypted = Buffer.alloc(encrypted.length);
+    for (let i = 0; i < encrypted.length; i++) {
+      decrypted[i] = encrypted[i] ^ legacyKey[i % legacyKey.length];
+    }
     return decrypted.toString("utf-8");
   }
 
-  private getBasicKey(): Buffer {
-    // Derive key from machine-specific info
+  /**
+   * Derive a 256-bit key using scrypt from machine-specific info.
+   */
+  private deriveKey(salt: Buffer): Buffer {
+    const machineId = process.env.USER || process.env.USERNAME || "zonewise";
+    const appPath = app.getPath("userData");
+    const passphrase = `${machineId}-${appPath}-${SERVICE_NAME}`;
+    return crypto.scryptSync(passphrase, salt, 32);
+  }
+
+  /**
+   * Legacy key for backward-compatible XOR decryption during migration.
+   */
+  private getLegacyKey(): Buffer {
     const machineId = process.env.USER || process.env.USERNAME || "zonewise";
     const appPath = app.getPath("userData");
     return Buffer.from(`${machineId}-${appPath}-${SERVICE_NAME}`, "utf-8");

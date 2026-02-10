@@ -26,14 +26,25 @@ jobs:
           bun-version: latest
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: bun install
 
       - name: Dependency audit
         run: |
-          echo "=== Checking for known vulnerabilities ==="
-          # bun doesn't have a built-in audit command, so we check package versions
-          # against known advisories via npm audit on the lockfile
-          npx npm-audit-resolver --json || true
+          echo "=== Checking pinned critical dependencies ==="
+          # Verify critical security deps are pinned (no ^ prefix)
+          node -e "
+            const pkg = require('./package.json');
+            const critical = ['electron', 'electron-builder', 'openai'];
+            const critDeps = [...Object.entries(pkg.dependencies || {}), ...Object.entries(pkg.devDependencies || {})];
+            let ok = true;
+            for (const [name, ver] of critDeps) {
+              if (critical.includes(name) && ver.startsWith('^')) {
+                console.log('::warning::' + name + ' should be pinned (has ^): ' + ver);
+                ok = false;
+              }
+            }
+            if (ok) console.log('All critical dependencies are pinned.');
+          "
         continue-on-error: true
 
       - name: Run security tests

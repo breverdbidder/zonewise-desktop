@@ -1,0 +1,3134 @@
+{
+  "source": "vibe-code-best-practices MCP Server",
+  "endpoint": "https://vibe-code-best-practices.vercel.app/api/mcp",
+  "total_tools": 627,
+  "scrape_method": "MCP API (direct structured JSON)",
+  "categories": [
+    {
+      "section_id": "ai-agents",
+      "marketplace_category": "Agent Frameworks & AI Tools",
+      "priority": "P0 - Core",
+      "tool_count": 20,
+      "subcategories": [
+        {
+          "id": "ai-sdk",
+          "name": "AI SDK",
+          "tool_count": 3,
+          "tools": [
+            {
+              "name": "AI SDK",
+              "url": "https://ai-sdk.dev/"
+            },
+            {
+              "name": "AI SDK Tools",
+              "url": "https://ai-sdk-tools.dev/"
+            },
+            {
+              "name": "Packrun (v1.run)",
+              "url": "https://v1.run/"
+            }
+          ]
+        },
+        {
+          "id": "agent-frameworks",
+          "name": "Agent Frameworks",
+          "tool_count": 2,
+          "tools": [
+            {
+              "name": "Mastra",
+              "url": "https://mastra.ai/"
+            },
+            {
+              "name": "Agno",
+              "url": "https://www.agno.com/"
+            }
+          ]
+        },
+        {
+          "id": "ai-memory",
+          "name": "זיכרון ו-RAG",
+          "tool_count": 1,
+          "tools": [
+            {
+              "name": "Mem0",
+              "url": "https://mem0.ai/"
+            }
+          ]
+        },
+        {
+          "id": "ai-ui",
+          "name": "AI UI",
+          "tool_count": 11,
+          "tools": [
+            {
+              "name": "assistant-ui",
+              "url": "https://www.assistant-ui.com/"
+            },
+            {
+              "name": "AI Elements",
+              "url": "https://elements.ai-sdk.dev/"
+            },
+            {
+              "name": "Prompt Kit",
+              "url": "https://www.prompt-kit.com/"
+            },
+            {
+              "name": "Tool UI",
+              "url": "https://www.tool-ui.com/"
+            },
+            {
+              "name": "Osmium",
+              "url": "https://osmium.intface.io/"
+            },
+            {
+              "name": "LangUI",
+              "url": "https://www.langui.dev/"
+            },
+            {
+              "name": "ElevenLabs UI",
+              "url": "https://ui.elevenlabs.io/"
+            },
+            {
+              "name": "Vapi Blocks",
+              "url": "https://www.vapiblocks.com/"
+            },
+            {
+              "name": "Asanshay",
+              "url": "https://ds.asanshay.com/"
+            },
+            {
+              "name": "AI UI Kit",
+              "url": "https://ai-ui-kit.vercel.app/"
+            },
+            {
+              "name": "Manifest",
+              "url": "https://manifest.build/"
+            }
+          ]
+        },
+        {
+          "id": "content-processing",
+          "name": "עיבוד תוכן",
+          "tool_count": 3,
+          "tools": [
+            {
+              "name": "Streamdown",
+              "url": "https://streamdown.ai/"
+            },
+            {
+              "name": "remark",
+              "url": "https://remark.js.org/"
+            },
+            {
+              "name": "KaTeX",
+              "url": "https://katex.org/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "skills",
+      "marketplace_category": "Skills Marketplace",
+      "priority": "P0 - Core",
+      "tool_count": 122,
+      "subcategories": [
+        {
+          "id": "skills-registries",
+          "name": "מאגרי Skills",
+          "tool_count": 4,
+          "tools": [
+            {
+              "name": "Skills.sh",
+              "url": "https://skills.sh/"
+            },
+            {
+              "name": "Smithery Skills",
+              "url": "https://smithery.ai/skills"
+            },
+            {
+              "name": "MCP Market Skills",
+              "url": "https://mcpmarket.com/tools/skills"
+            },
+            {
+              "name": "Context7 Skills",
+              "url": "https://context7.com/skills"
+            }
+          ]
+        },
+        {
+          "id": "skills-react-nextjs",
+          "name": "React & Next.js",
+          "tool_count": 11,
+          "tools": [
+            {
+              "name": "Vercel React Best Practices",
+              "url": "https://skills.sh/vercel-labs/agent-skills/vercel-react-best-practices"
+            },
+            {
+              "name": "React Composition Patterns",
+              "url": "https://skills.sh/vercel-labs/agent-skills/vercel-composition-patterns"
+            },
+            {
+              "name": "Component Engineering",
+              "url": "https://skills.sh/igorwarzocha/opencode-workflows"
+            },
+            {
+              "name": "React useEffect",
+              "url": "https://skills.sh/fluid-tools/claude-skills"
+            },
+            {
+              "name": "React State Management",
+              "url": "https://skills.sh/wshobson/agents"
+            },
+            {
+              "name": "React Modernization",
+              "url": "https://skills.sh/wshobson/agents"
+            },
+            {
+              "name": "React Hook Form + Zod",
+              "url": "https://skills.sh/jezweb/claude-skills/react-hook-form-zod"
+            },
+            {
+              "name": "Next.js Best Practices",
+              "url": "https://skills.sh/vercel-labs/next-skills/next-best-practices"
+            },
+            {
+              "name": "Next.js Cache Components",
+              "url": "https://skills.sh/vercel-labs/next-skills/next-cache-components"
+            },
+            {
+              "name": "Next.js Upgrade",
+              "url": "https://skills.sh/vercel-labs/next-skills/next-upgrade"
+            },
+            {
+              "name": "Next.js App Router Patterns",
+              "url": "https://skills.sh/wshobson/agents"
+            }
+          ]
+        },
+        {
+          "id": "skills-tanstack",
+          "name": "TanStack",
+          "tool_count": 4,
+          "tools": [
+            {
+              "name": "TanStack Start Best Practices",
+              "url": "https://skills.sh/deckardger/tanstack-agent-skills"
+            },
+            {
+              "name": "TanStack Query Best Practices",
+              "url": "https://skills.sh/deckardger/tanstack-agent-skills"
+            },
+            {
+              "name": "TanStack Router Best Practices",
+              "url": "https://skills.sh/deckardger/tanstack-agent-skills"
+            },
+            {
+              "name": "TanStack Integration Best Practices",
+              "url": "https://skills.sh/deckardger/tanstack-agent-skills"
+            }
+          ]
+        },
+        {
+          "id": "skills-react-native",
+          "name": "React Native & Expo",
+          "tool_count": 15,
+          "tools": [
+            {
+              "name": "React Native Skills",
+              "url": "https://skills.sh/vercel-labs/agent-skills/vercel-react-native-skills"
+            },
+            {
+              "name": "React Native Best Practices (Callstack)",
+              "url": "https://skills.sh/callstackincubator/agent-skills/react-native-best-practices"
+            },
+            {
+              "name": "React Native Architecture",
+              "url": "https://skills.sh/wshobson/agents"
+            },
+            {
+              "name": "Reanimated + Skia Performance",
+              "url": "https://skills.sh/andreev-danila/skills/reanimated-skia-performance"
+            },
+            {
+              "name": "React Native Design",
+              "url": "https://skills.sh/wshobson/agents"
+            },
+            {
+              "name": "Expo - Building Native UI",
+              "url": "https://skills.sh/expo/skills"
+            },
+            {
+              "name": "Expo - Upgrading SDK",
+              "url": "https://skills.sh/expo/skills"
+            },
+            {
+              "name": "Expo - Data Fetching",
+              "url": "https://skills.sh/expo/skills"
+            },
+            {
+              "name": "Expo - Dev Client",
+              "url": "https://skills.sh/expo/skills"
+            },
+            {
+              "name": "Expo - Tailwind Setup",
+              "url": "https://skills.sh/expo/skills"
+            },
+            {
+              "name": "Expo - Deployment",
+              "url": "https://skills.sh/expo/skills"
+            },
+            {
+              "name": "Expo - API Routes",
+              "url": "https://skills.sh/expo/skills"
+            },
+            {
+              "name": "Expo - CI/CD Workflows",
+              "url": "https://skills.sh/expo/skills"
+            },
+            {
+              "name": "Expo - use-dom",
+              "url": "https://skills.sh/expo/skills"
+            },
+            {
+              "name": "Agent Device",
+              "url": "https://github.com/callstackincubator/agent-device"
+            }
+          ]
+        },
+        {
+          "id": "skills-design-ui",
+          "name": "עיצוב ו-UI",
+          "tool_count": 16,
+          "tools": [
+            {
+              "name": "Frontend Design",
+              "url": "https://skills.sh/anthropics/skills/frontend-design"
+            },
+            {
+              "name": "Web Design Guidelines",
+              "url": "https://skills.sh/vercel-labs/agent-skills/web-design-guidelines"
+            },
+            {
+              "name": "UI/UX Pro Max",
+              "url": "https://skills.sh/nextlevelbuilder/ui-ux-pro-max-skill/ui-ux-pro-max"
+            },
+            {
+              "name": "UI Skills",
+              "url": "https://www.ui-skills.com/"
+            },
+            {
+              "name": "Tailwind Design System",
+              "url": "https://skills.sh/wshobson/agents/tailwind-design-system"
+            },
+            {
+              "name": "Design System Patterns",
+              "url": "https://skills.sh/wshobson/agents"
+            },
+            {
+              "name": "Responsive Design",
+              "url": "https://skills.sh/wshobson/agents"
+            },
+            {
+              "name": "shadcn/ui Integration",
+              "url": "https://skills.sh/google-labs-code/stitch-skills/shadcn-ui"
+            },
+            {
+              "name": "Vite + shadcn + Tailwind v4",
+              "url": "https://skills.sh/igorwarzocha/opencode-workflows"
+            },
+            {
+              "name": "Anthropic Brand Guidelines",
+              "url": "https://skills.sh/anthropics/skills/brand-guidelines"
+            },
+            {
+              "name": "Better Icons Skill",
+              "url": "https://github.com/nicepkg/better-icons"
+            },
+            {
+              "name": "Interaction Design (wshobson)",
+              "url": "https://skills.sh/wshobson/agents/interaction-design"
+            },
+            {
+              "name": "Interaction Design (aj-geddes)",
+              "url": "https://skills.sh/aj-geddes/useful-ai-prompts/interaction-design"
+            },
+            {
+              "name": "Micro-Interactions",
+              "url": "https://skills.sh/dylantarre/animation-principles/micro-interactions"
+            },
+            {
+              "name": "Animation Micro-Interaction Pack",
+              "url": "https://skills.sh/patricio0312rev/skills/animation-micro-interaction-pack"
+            },
+            {
+              "name": "Hover Interactions",
+              "url": "https://skills.sh/dylantarre/animation-principles/hover-interactions"
+            }
+          ]
+        },
+        {
+          "id": "skills-ai",
+          "name": "AI וסוכנים",
+          "tool_count": 18,
+          "tools": [
+            {
+              "name": "Vercel AI SDK v5",
+              "url": "https://skills.sh/fluid-tools/claude-skills"
+            },
+            {
+              "name": "Mastra Framework",
+              "url": "https://skills.sh/mastra-ai/skills/mastra"
+            },
+            {
+              "name": "AI Elements",
+              "url": "https://skills.sh/vercel/ai-elements/ai-elements"
+            },
+            {
+              "name": "Prompt Engineering Patterns",
+              "url": "https://skills.sh/wshobson/agents"
+            },
+            {
+              "name": "Convex Agents - Fundamentals",
+              "url": "https://skills.sh/sstobo/convex-skills"
+            },
+            {
+              "name": "Convex Agents - Tools",
+              "url": "https://skills.sh/sstobo/convex-skills"
+            },
+            {
+              "name": "Convex Agents - Workflows",
+              "url": "https://skills.sh/sstobo/convex-skills"
+            },
+            {
+              "name": "Convex Agents - RAG",
+              "url": "https://skills.sh/sstobo/convex-skills"
+            },
+            {
+              "name": "Convex Agents - Streaming",
+              "url": "https://skills.sh/sstobo/convex-skills"
+            },
+            {
+              "name": "Convex Agents - Messages",
+              "url": "https://skills.sh/sstobo/convex-skills"
+            },
+            {
+              "name": "Convex Agents - Threads",
+              "url": "https://skills.sh/sstobo/convex-skills"
+            },
+            {
+              "name": "Convex Agents - Rate Limiting",
+              "url": "https://skills.sh/sstobo/convex-skills"
+            },
+            {
+              "name": "Convex Agents - Files",
+              "url": "https://skills.sh/sstobo/convex-skills"
+            },
+            {
+              "name": "Convex Agents - Human-in-the-Loop",
+              "url": "https://skills.sh/sstobo/convex-skills"
+            },
+            {
+              "name": "Convex Agents - Context",
+              "url": "https://skills.sh/sstobo/convex-skills"
+            },
+            {
+              "name": "Convex Agents - Debugging",
+              "url": "https://skills.sh/sstobo/convex-skills"
+            },
+            {
+              "name": "Convex Agents - Playground",
+              "url": "https://skills.sh/sstobo/convex-skills"
+            },
+            {
+              "name": "Convex Agents - Usage Tracking",
+              "url": "https://skills.sh/sstobo/convex-skills"
+            }
+          ]
+        },
+        {
+          "id": "skills-database",
+          "name": "מסד נתונים",
+          "tool_count": 14,
+          "tools": [
+            {
+              "name": "Convex Skills (Umbrella)",
+              "url": "https://skills.sh/waynesutton/convexskills"
+            },
+            {
+              "name": "Convex Fundamentals",
+              "url": "https://skills.sh/fluid-tools/claude-skills"
+            },
+            {
+              "name": "Convex + TanStack Start",
+              "url": "https://skills.sh/sstobo/convex-skills"
+            },
+            {
+              "name": "Convex Schema & Validators",
+              "url": "https://skills.sh/fluid-tools/claude-skills"
+            },
+            {
+              "name": "Convex Queries",
+              "url": "https://skills.sh/sstobo/convex-skills"
+            },
+            {
+              "name": "Convex Mutations",
+              "url": "https://skills.sh/sstobo/convex-skills"
+            },
+            {
+              "name": "Convex Actions & HTTP",
+              "url": "https://skills.sh/sstobo/convex-skills"
+            },
+            {
+              "name": "Convex Actions & Scheduling",
+              "url": "https://skills.sh/fluid-tools/claude-skills"
+            },
+            {
+              "name": "Convex Performance Patterns",
+              "url": "https://skills.sh/fluid-tools/claude-skills"
+            },
+            {
+              "name": "Convex Anti-Patterns",
+              "url": "https://skills.sh/fluid-tools/claude-skills"
+            },
+            {
+              "name": "Convex Helpers Patterns",
+              "url": "https://skills.sh/fluid-tools/claude-skills"
+            },
+            {
+              "name": "Convex Components",
+              "url": "https://skills.sh/fluid-tools/claude-skills"
+            },
+            {
+              "name": "Supabase Postgres Best Practices",
+              "url": "https://skills.sh/supabase/agent-skills/supabase-postgres-best-practices"
+            },
+            {
+              "name": "PostgreSQL Table Design",
+              "url": "https://skills.sh/wshobson/agents"
+            }
+          ]
+        },
+        {
+          "id": "skills-auth-security",
+          "name": "אימות ואבטחה",
+          "tool_count": 10,
+          "tools": [
+            {
+              "name": "Better Auth Best Practices",
+              "url": "https://skills.sh/better-auth/skills/better-auth-best-practices"
+            },
+            {
+              "name": "Create Auth Skill",
+              "url": "https://skills.sh/better-auth/skills/create-auth-skill"
+            },
+            {
+              "name": "Better Auth + Convex + TanStack",
+              "url": "https://skills.sh/sstobo/convex-skills/betterauth-tanstack-convex"
+            },
+            {
+              "name": "Next.js + Supabase Auth",
+              "url": "https://skills.sh/sickn33/antigravity-awesome-skills/nextjs-supabase-auth"
+            },
+            {
+              "name": "Auth Implementation Patterns",
+              "url": "https://skills.sh/wshobson/agents"
+            },
+            {
+              "name": "Security Review",
+              "url": "https://skills.sh/sickn33/antigravity-awesome-skills/security-review"
+            },
+            {
+              "name": "Security - Next.js",
+              "url": "https://skills.sh/igorwarzocha/opencode-workflows"
+            },
+            {
+              "name": "Security - Bun",
+              "url": "https://skills.sh/igorwarzocha/opencode-workflows"
+            },
+            {
+              "name": "Security - Convex",
+              "url": "https://skills.sh/igorwarzocha/opencode-workflows"
+            },
+            {
+              "name": "Security - Vite",
+              "url": "https://skills.sh/igorwarzocha/opencode-workflows"
+            }
+          ]
+        },
+        {
+          "id": "skills-typescript",
+          "name": "TypeScript & JavaScript",
+          "tool_count": 5,
+          "tools": [
+            {
+              "name": "TypeScript Strict Mode",
+              "url": "https://skills.sh/fluid-tools/claude-skills"
+            },
+            {
+              "name": "TypeScript Expert",
+              "url": "https://skills.sh/sickn33/antigravity-awesome-skills/typescript-expert"
+            },
+            {
+              "name": "TypeScript Advanced Types",
+              "url": "https://skills.sh/wshobson/agents"
+            },
+            {
+              "name": "Modern JavaScript Patterns",
+              "url": "https://skills.sh/wshobson/agents"
+            },
+            {
+              "name": "Better Result Skill",
+              "url": "https://github.com/dmmulroy/better-result"
+            }
+          ]
+        },
+        {
+          "id": "skills-quality",
+          "name": "איכות קוד ובדיקות",
+          "tool_count": 8,
+          "tools": [
+            {
+              "name": "Clean Code",
+              "url": "https://skills.sh/sickn33/antigravity-awesome-skills/clean-code"
+            },
+            {
+              "name": "Ultracite Skill",
+              "url": "https://skills.sh/secondsky/claude-skills/ultracite"
+            },
+            {
+              "name": "Code Review Excellence",
+              "url": "https://skills.sh/wshobson/agents"
+            },
+            {
+              "name": "Error Handling Patterns",
+              "url": "https://skills.sh/wshobson/agents"
+            },
+            {
+              "name": "Debugging Strategies",
+              "url": "https://skills.sh/wshobson/agents"
+            },
+            {
+              "name": "Web App Testing",
+              "url": "https://skills.sh/anthropics/skills/webapp-testing"
+            },
+            {
+              "name": "JavaScript/TypeScript Testing Patterns",
+              "url": "https://skills.sh/wshobson/agents"
+            },
+            {
+              "name": "Accessibility Compliance (WCAG)",
+              "url": "https://skills.sh/wshobson/agents"
+            }
+          ]
+        },
+        {
+          "id": "skills-devtools",
+          "name": "כלי פיתוח",
+          "tool_count": 7,
+          "tools": [
+            {
+              "name": "Agent Browser",
+              "url": "https://skills.sh/vercel-labs/agent-browser/agent-browser"
+            },
+            {
+              "name": "Before & After Screenshots",
+              "url": "https://skills.sh/vercel-labs/before-and-after/before-and-after"
+            },
+            {
+              "name": "Skill Creator",
+              "url": "https://skills.sh/vercel-labs/agent-browser/skill-creator"
+            },
+            {
+              "name": "Find Skills",
+              "url": "https://skills.sh/vercel-labs/skills/find-skills"
+            },
+            {
+              "name": "Dependency Upgrade",
+              "url": "https://skills.sh/wshobson/agents"
+            },
+            {
+              "name": "Vercel Deploy",
+              "url": "https://skills.sh/vercel-labs/agent-skills/vercel-deploy"
+            },
+            {
+              "name": "Bun Development",
+              "url": "https://skills.sh/sickn33/antigravity-awesome-skills/bun-development"
+            }
+          ]
+        },
+        {
+          "id": "skills-planning",
+          "name": "תכנון וארכיטקטורה",
+          "tool_count": 5,
+          "tools": [
+            {
+              "name": "Brainstorming",
+              "url": "https://skills.sh/obra/superpowers/brainstorming"
+            },
+            {
+              "name": "Avoid Feature Creep",
+              "url": "https://skills.sh/waynesutton/convexskills"
+            },
+            {
+              "name": "Planning with Files",
+              "url": "https://skills.sh/fluid-tools/claude-skills"
+            },
+            {
+              "name": "Architecture Patterns",
+              "url": "https://skills.sh/wshobson/agents"
+            },
+            {
+              "name": "API Design Principles",
+              "url": "https://skills.sh/wshobson/agents"
+            }
+          ]
+        },
+        {
+          "id": "skills-seo-marketing",
+          "name": "SEO ושיווק",
+          "tool_count": 5,
+          "tools": [
+            {
+              "name": "Website Audit",
+              "url": "https://skills.sh/squirrelscan/skills/audit-website"
+            },
+            {
+              "name": "SEO Audit",
+              "url": "https://skills.sh/coreyhaines31/marketingskills/seo-audit"
+            },
+            {
+              "name": "Programmatic SEO",
+              "url": "https://skills.sh/coreyhaines31/marketingskills/programmatic-seo"
+            },
+            {
+              "name": "Copywriting",
+              "url": "https://skills.sh/coreyhaines31/marketingskills/copywriting"
+            },
+            {
+              "name": "Marketing Psychology",
+              "url": "https://skills.sh/coreyhaines31/marketingskills/marketing-psychology"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "mcp",
+      "marketplace_category": "MCP Server Marketplace",
+      "priority": "P0 - Core",
+      "tool_count": 24,
+      "subcategories": [
+        {
+          "id": "mcp-registries",
+          "name": "מאגרי MCP",
+          "tool_count": 8,
+          "tools": [
+            {
+              "name": "mcp.so",
+              "url": "https://mcp.so/"
+            },
+            {
+              "name": "PulseMCP",
+              "url": "https://www.pulsemcp.com/servers"
+            },
+            {
+              "name": "Supermachine",
+              "url": "https://supermachine.ai/public-mcp-servers"
+            },
+            {
+              "name": "Glama",
+              "url": "https://glama.ai/mcp/servers"
+            },
+            {
+              "name": "Cursor Directory",
+              "url": "https://cursor.directory/mcp"
+            },
+            {
+              "name": "OpenTools",
+              "url": "https://opentools.com/registry"
+            },
+            {
+              "name": "Smithery",
+              "url": "https://smithery.ai/servers"
+            },
+            {
+              "name": "MCP Market",
+              "url": "https://mcpmarket.com/server"
+            }
+          ]
+        },
+        {
+          "id": "mcp-code",
+          "name": "כלי פיתוח",
+          "tool_count": 5,
+          "tools": [
+            {
+              "name": "GitHub MCP",
+              "url": "https://github.com/github/github-mcp-server"
+            },
+            {
+              "name": "Octocode",
+              "url": "https://octocode.ai/"
+            },
+            {
+              "name": "Context7",
+              "url": "https://context7.com/"
+            },
+            {
+              "name": "DeepWiki",
+              "url": "https://docs.devin.ai/work-with-devin/deepwiki-mcp"
+            },
+            {
+              "name": "Ultracite MCP",
+              "url": "https://docs.ultracite.ai/mcp-server"
+            }
+          ]
+        },
+        {
+          "id": "mcp-dev",
+          "name": "פיתוח MCP",
+          "tool_count": 2,
+          "tools": [
+            {
+              "name": "xmcp",
+              "url": "https://xmcp.dev/"
+            },
+            {
+              "name": "MCP Apps",
+              "url": "https://modelcontextprotocol.io/docs/extensions/apps"
+            }
+          ]
+        },
+        {
+          "id": "mcp-infra",
+          "name": "ענן ובסיסי נתונים",
+          "tool_count": 3,
+          "tools": [
+            {
+              "name": "Vercel MCP",
+              "url": "https://vercel.com/docs/ai-resources/vercel-mcp"
+            },
+            {
+              "name": "Supabase MCP",
+              "url": "https://supabase.com/docs/guides/getting-started/mcp"
+            },
+            {
+              "name": "Convex MCP",
+              "url": "https://docs.convex.dev/ai/convex-mcp-server"
+            }
+          ]
+        },
+        {
+          "id": "mcp-ui",
+          "name": "עיצוב וממשק",
+          "tool_count": 4,
+          "tools": [
+            {
+              "name": "shadcn MCP",
+              "url": "https://ui.shadcn.com/docs/mcp"
+            },
+            {
+              "name": "Hugeicons MCP",
+              "url": "https://github.com/hugeicons/mcp-server"
+            },
+            {
+              "name": "Better Icons",
+              "url": "https://github.com/better-auth/better-icons"
+            },
+            {
+              "name": "Motion Studio",
+              "url": "https://motion.dev/docs/studio-install"
+            }
+          ]
+        },
+        {
+          "id": "mcp-search",
+          "name": "חיפוש ו-AI",
+          "tool_count": 2,
+          "tools": [
+            {
+              "name": "Tavily MCP",
+              "url": "https://github.com/tavily-ai/tavily-mcp"
+            },
+            {
+              "name": "Mastra MCP",
+              "url": "https://mastra.ai/docs/tools-mcp/mcp-overview"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "modern-stack",
+      "marketplace_category": "Modern Stack & Infrastructure",
+      "priority": "P1 - Important",
+      "tool_count": 69,
+      "subcategories": [
+        {
+          "id": "framework",
+          "name": "פריימוורק",
+          "tool_count": 5,
+          "tools": [
+            {
+              "name": "Next.js",
+              "url": "https://nextjs.org/"
+            },
+            {
+              "name": "TanStack Start",
+              "url": "https://tanstack.com/start/latest"
+            },
+            {
+              "name": "Elysia",
+              "url": "https://elysiajs.com/"
+            },
+            {
+              "name": "Expo",
+              "url": "https://expo.dev/"
+            },
+            {
+              "name": "Better-T Stack",
+              "url": "https://www.better-t-stack.dev/"
+            }
+          ]
+        },
+        {
+          "id": "runtime-hosting",
+          "name": "סביבת ריצה ופריסה",
+          "tool_count": 4,
+          "tools": [
+            {
+              "name": "Bun",
+              "url": "https://bun.sh/"
+            },
+            {
+              "name": "Vercel",
+              "url": "https://vercel.com/"
+            },
+            {
+              "name": "Netlify",
+              "url": "https://www.netlify.com/"
+            },
+            {
+              "name": "Render",
+              "url": "https://render.com/"
+            }
+          ]
+        },
+        {
+          "id": "i18n",
+          "name": "לוקליזציה",
+          "tool_count": 6,
+          "tools": [
+            {
+              "name": "next-intl",
+              "url": "https://next-intl.dev/"
+            },
+            {
+              "name": "Paraglide",
+              "url": "https://inlang.com/m/gerre34r/library-inlang-paraglideJs"
+            },
+            {
+              "name": "Lingui",
+              "url": "https://lingui.dev/"
+            },
+            {
+              "name": "date-fns",
+              "url": "https://date-fns.org/"
+            },
+            {
+              "name": "Luxon",
+              "url": "https://moment.github.io/luxon/#/"
+            },
+            {
+              "name": "i18next",
+              "url": "https://www.i18next.com/"
+            }
+          ]
+        },
+        {
+          "id": "styling",
+          "name": "סטיילינג",
+          "tool_count": 3,
+          "tools": [
+            {
+              "name": "Tailwind CSS",
+              "url": "https://tailwindcss.com/"
+            },
+            {
+              "name": "NativeWind",
+              "url": "https://www.nativewind.dev/"
+            },
+            {
+              "name": "Uniwind",
+              "url": "https://uniwind.dev/"
+            }
+          ]
+        },
+        {
+          "id": "ui",
+          "name": "UI",
+          "tool_count": 4,
+          "tools": [
+            {
+              "name": "shadcn/ui",
+              "url": "https://ui.shadcn.com/"
+            },
+            {
+              "name": "Hugeicons",
+              "url": "https://hugeicons.com/"
+            },
+            {
+              "name": "@hugeicons/migrate",
+              "url": "https://www.npmjs.com/package/@hugeicons/migrate"
+            },
+            {
+              "name": "Transfonter",
+              "url": "https://transfonter.org/"
+            }
+          ]
+        },
+        {
+          "id": "baas",
+          "name": "BaaS",
+          "tool_count": 4,
+          "tools": [
+            {
+              "name": "Supabase",
+              "url": "https://supabase.com/"
+            },
+            {
+              "name": "Convex",
+              "url": "https://www.convex.dev/"
+            },
+            {
+              "name": "BetterConvex",
+              "url": "https://www.better-convex.com/"
+            },
+            {
+              "name": "Qdrant",
+              "url": "https://qdrant.tech/"
+            }
+          ]
+        },
+        {
+          "id": "orm",
+          "name": "ORM",
+          "tool_count": 2,
+          "tools": [
+            {
+              "name": "Drizzle ORM",
+              "url": "https://orm.drizzle.team/"
+            },
+            {
+              "name": "Prisma",
+              "url": "https://www.prisma.io/"
+            }
+          ]
+        },
+        {
+          "id": "auth",
+          "name": "אימות",
+          "tool_count": 4,
+          "tools": [
+            {
+              "name": "Better Auth",
+              "url": "https://www.better-auth.com/"
+            },
+            {
+              "name": "Clerk",
+              "url": "https://clerk.com/"
+            },
+            {
+              "name": "Supabase Auth",
+              "url": "https://supabase.com/auth"
+            },
+            {
+              "name": "Convex Auth",
+              "url": "https://www.convex.dev/auth"
+            }
+          ]
+        },
+        {
+          "id": "state",
+          "name": "סטייט ושליפת נתונים",
+          "tool_count": 3,
+          "tools": [
+            {
+              "name": "TanStack Query",
+              "url": "https://tanstack.com/query/latest"
+            },
+            {
+              "name": "tRPC",
+              "url": "https://trpc.io/"
+            },
+            {
+              "name": "Zustand + Immer",
+              "url": "https://zustand.docs.pmnd.rs/"
+            }
+          ]
+        },
+        {
+          "id": "validation",
+          "name": "ולידציה",
+          "tool_count": 3,
+          "tools": [
+            {
+              "name": "Zod",
+              "url": "https://zod.dev/"
+            },
+            {
+              "name": "ArkType",
+              "url": "https://arktype.io/"
+            },
+            {
+              "name": "React Hook Form",
+              "url": "https://react-hook-form.com/"
+            }
+          ]
+        },
+        {
+          "id": "quality",
+          "name": "איכות קוד",
+          "tool_count": 8,
+          "tools": [
+            {
+              "name": "Ultracite",
+              "url": "https://ultracite.dev/"
+            },
+            {
+              "name": "Husky + lint-staged",
+              "url": "https://typicode.github.io/husky/"
+            },
+            {
+              "name": "better-all",
+              "url": "https://github.com/shuding/better-all"
+            },
+            {
+              "name": "better-result",
+              "url": "https://github.com/dmmulroy/better-result"
+            },
+            {
+              "name": "React Grab",
+              "url": "https://www.react-grab.com/"
+            },
+            {
+              "name": "React Scan",
+              "url": "https://react-scan.com/"
+            },
+            {
+              "name": "Effect",
+              "url": "https://effect.website/"
+            },
+            {
+              "name": "es-toolkit",
+              "url": "https://es-toolkit.slash.page/"
+            }
+          ]
+        },
+        {
+          "id": "testing",
+          "name": "בדיקות",
+          "tool_count": 1,
+          "tools": [
+            {
+              "name": "Maestro",
+              "url": "https://maestro.mobile.dev/"
+            }
+          ]
+        },
+        {
+          "id": "email",
+          "name": "מיילים",
+          "tool_count": 3,
+          "tools": [
+            {
+              "name": "Resend",
+              "url": "https://resend.com/"
+            },
+            {
+              "name": "React Email",
+              "url": "https://react.email/"
+            },
+            {
+              "name": "beehiiv",
+              "url": "https://www.beehiiv.com/"
+            }
+          ]
+        },
+        {
+          "id": "media",
+          "name": "מדיה וקבצים",
+          "tool_count": 3,
+          "tools": [
+            {
+              "name": "UploadThing",
+              "url": "https://uploadthing.com/"
+            },
+            {
+              "name": "Cloudinary",
+              "url": "https://cloudinary.com/"
+            },
+            {
+              "name": "Bunny.net",
+              "url": "https://bunny.net/"
+            }
+          ]
+        },
+        {
+          "id": "analytics",
+          "name": "אנליטיקה וניטור",
+          "tool_count": 5,
+          "tools": [
+            {
+              "name": "PostHog",
+              "url": "https://posthog.com/"
+            },
+            {
+              "name": "Sentry",
+              "url": "https://sentry.io/"
+            },
+            {
+              "name": "Vercel Analytics",
+              "url": "https://vercel.com/analytics"
+            },
+            {
+              "name": "Meilisearch",
+              "url": "https://www.meilisearch.com/"
+            },
+            {
+              "name": "Upstash Search",
+              "url": "https://upstash.com/docs/search/overall/whatisupstashsearch"
+            }
+          ]
+        },
+        {
+          "id": "infrastructure",
+          "name": "תשתיות שרת",
+          "tool_count": 4,
+          "tools": [
+            {
+              "name": "Upstash Redis",
+              "url": "https://upstash.com/"
+            },
+            {
+              "name": "Trigger.dev",
+              "url": "https://trigger.dev/"
+            },
+            {
+              "name": "Socket.IO",
+              "url": "https://socket.io/"
+            },
+            {
+              "name": "Serwist",
+              "url": "https://serwist.pages.dev/"
+            }
+          ]
+        },
+        {
+          "id": "payments",
+          "name": "תשלומים",
+          "tool_count": 7,
+          "tools": [
+            {
+              "name": "Stripe",
+              "url": "https://stripe.com/"
+            },
+            {
+              "name": "Paddle",
+              "url": "https://www.paddle.com/"
+            },
+            {
+              "name": "Polar",
+              "url": "https://polar.sh/"
+            },
+            {
+              "name": "Grow",
+              "url": "https://grow.business/"
+            },
+            {
+              "name": "Cardcom",
+              "url": "https://www.cardcom.solutions/"
+            },
+            {
+              "name": "Dodo Payments",
+              "url": "https://dodopayments.com/"
+            },
+            {
+              "name": "Autumn",
+              "url": "https://useautumn.com/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "web",
+      "marketplace_category": "Desktop App UI Components",
+      "priority": "P1 - Important",
+      "tool_count": 161,
+      "subcategories": [
+        {
+          "id": "web-animations",
+          "name": "אנימציות",
+          "tool_count": 10,
+          "tools": [
+            {
+              "name": "Motion",
+              "url": "https://motion.dev/"
+            },
+            {
+              "name": "UseAnimations",
+              "url": "https://react.useanimations.com/"
+            },
+            {
+              "name": "GSAP",
+              "url": "https://gsap.com/"
+            },
+            {
+              "name": "AutoAnimate",
+              "url": "https://auto-animate.formkit.com/"
+            },
+            {
+              "name": "AOS",
+              "url": "https://michalsnik.github.io/aos/"
+            },
+            {
+              "name": "Sal",
+              "url": "https://mciastek.github.io/sal/"
+            },
+            {
+              "name": "Lenis",
+              "url": "https://lenis.darkroom.engineering/"
+            },
+            {
+              "name": "simpleParallax.js",
+              "url": "https://simpleparallax.com/"
+            },
+            {
+              "name": "Flubber",
+              "url": "https://github.com/veltman/flubber"
+            },
+            {
+              "name": "Paper Shaders",
+              "url": "https://shaders.paper.design/"
+            }
+          ]
+        },
+        {
+          "id": "web-charts",
+          "name": "גרפים",
+          "tool_count": 5,
+          "tools": [
+            {
+              "name": "Chart.js",
+              "url": "https://www.chartjs.org/"
+            },
+            {
+              "name": "shadcn/ui Charts",
+              "url": "https://ui.shadcn.com/charts/area"
+            },
+            {
+              "name": "EvilCharts",
+              "url": "https://evilcharts.com/"
+            },
+            {
+              "name": "BlitzCharts",
+              "url": "https://blitz-charts.vercel.app/"
+            },
+            {
+              "name": "Bklit UI",
+              "url": "https://ui.bklit.com/"
+            }
+          ]
+        },
+        {
+          "id": "web-blocks",
+          "name": "בלוקים",
+          "tool_count": 11,
+          "tools": [
+            {
+              "name": "shadcn/ui Blocks",
+              "url": "https://ui.shadcn.com/blocks"
+            },
+            {
+              "name": "Tailark",
+              "url": "https://tailark.com/"
+            },
+            {
+              "name": "blocks.so",
+              "url": "https://blocks.so/"
+            },
+            {
+              "name": "shadcnui-blocks",
+              "url": "https://www.shadcnui-blocks.com/"
+            },
+            {
+              "name": "shadcn Registry",
+              "url": "https://shadcnregistry.com/"
+            },
+            {
+              "name": "Square UI",
+              "url": "https://square.lndev.me/"
+            },
+            {
+              "name": "Roi UI",
+              "url": "https://www.roiui.com/"
+            },
+            {
+              "name": "Delta Components",
+              "url": "https://deltacomponents.dev/"
+            },
+            {
+              "name": "Aniq UI",
+              "url": "https://www.aniq-ui.com/en/templates"
+            },
+            {
+              "name": "Tailwind Plus",
+              "url": "https://tailwindcss.com/plus"
+            },
+            {
+              "name": "PaceKit",
+              "url": "https://www.pacekit.dev/"
+            }
+          ]
+        },
+        {
+          "id": "web-flows",
+          "name": "תהליכים",
+          "tool_count": 2,
+          "tools": [
+            {
+              "name": "React Flow",
+              "url": "https://reactflow.dev/"
+            },
+            {
+              "name": "Stepperize",
+              "url": "https://stepperize.vercel.app/"
+            }
+          ]
+        },
+        {
+          "id": "web-carousels",
+          "name": "קרוסלות",
+          "tool_count": 2,
+          "tools": [
+            {
+              "name": "Splide",
+              "url": "https://splidejs.com/"
+            },
+            {
+              "name": "Smooothy",
+              "url": "https://smooothy.vercel.app/"
+            }
+          ]
+        },
+        {
+          "id": "web-editors",
+          "name": "עורכי טקסט",
+          "tool_count": 4,
+          "tools": [
+            {
+              "name": "Plate",
+              "url": "https://platejs.org/"
+            },
+            {
+              "name": "Tiptap shadcn",
+              "url": "https://tiptap.niazmorshed.dev/"
+            },
+            {
+              "name": "Tiptap",
+              "url": "https://tiptap.dev/"
+            },
+            {
+              "name": "Portable Text Editor",
+              "url": "https://shadcn-portable-text-editor.vercel.app/"
+            }
+          ]
+        },
+        {
+          "id": "web-hooks",
+          "name": "הוקס",
+          "tool_count": 3,
+          "tools": [
+            {
+              "name": "React Haiku",
+              "url": "https://www.reacthaiku.dev/"
+            },
+            {
+              "name": "Hookas",
+              "url": "https://github.com/letstri/hookas"
+            },
+            {
+              "name": "Prismane",
+              "url": "https://www.prismane.io/"
+            }
+          ]
+        },
+        {
+          "id": "web-components",
+          "name": "קומפוננטות",
+          "tool_count": 29,
+          "tools": [
+            {
+              "name": "mapcn",
+              "url": "https://mapcn.vercel.app/"
+            },
+            {
+              "name": "Awesome React Components",
+              "url": "https://github.com/brillout/awesome-react-components"
+            },
+            {
+              "name": "All Shadcn",
+              "url": "https://allshadcn.com/"
+            },
+            {
+              "name": "Awesome shadcn/ui",
+              "url": "https://github.com/birobirobiro/awesome-shadcn-ui"
+            },
+            {
+              "name": "Reusables",
+              "url": "https://reusables.vercel.app/"
+            },
+            {
+              "name": "Supabase UI",
+              "url": "https://supabase.com/ui"
+            },
+            {
+              "name": "RetroUI",
+              "url": "https://www.retroui.dev/"
+            },
+            {
+              "name": "RigidUI",
+              "url": "https://www.rigidui.com/"
+            },
+            {
+              "name": "basecn",
+              "url": "https://basecn.dev/"
+            },
+            {
+              "name": "ReUI",
+              "url": "https://reui.io/"
+            },
+            {
+              "name": "FlyonUI",
+              "url": "https://flyonui.com/"
+            },
+            {
+              "name": "Ruixen",
+              "url": "https://ruixen.com/"
+            },
+            {
+              "name": "FilePond",
+              "url": "https://pqina.nl/filepond/"
+            },
+            {
+              "name": "HeroUI",
+              "url": "https://www.heroui.com/"
+            },
+            {
+              "name": "Kibo UI",
+              "url": "https://www.kibo-ui.com/"
+            },
+            {
+              "name": "shadcn/ui",
+              "url": "https://ui.shadcn.com/"
+            },
+            {
+              "name": "CuiCui",
+              "url": "https://cuicui.day/application-ui"
+            },
+            {
+              "name": "Spectrum UI",
+              "url": "https://ui.spectrumhq.in/"
+            },
+            {
+              "name": "daisyUI",
+              "url": "https://daisyui.com/"
+            },
+            {
+              "name": "Uiverse",
+              "url": "https://uiverse.io/"
+            },
+            {
+              "name": "21st.dev",
+              "url": "https://21st.dev/"
+            },
+            {
+              "name": "Limeplay",
+              "url": "https://limeplay.winoffrg.dev/"
+            },
+            {
+              "name": "Ark UI",
+              "url": "https://ark-ui.com/"
+            },
+            {
+              "name": "Coss UI",
+              "url": "https://coss.com/ui"
+            },
+            {
+              "name": "Floating UI",
+              "url": "https://floating-ui.com/"
+            },
+            {
+              "name": "Shadcn Form",
+              "url": "https://www.shadcn-form.com/"
+            },
+            {
+              "name": "Dice UI",
+              "url": "https://www.diceui.com/"
+            },
+            {
+              "name": "Origin UI",
+              "url": "https://originui.com/"
+            },
+            {
+              "name": "Pace UI",
+              "url": "https://www.paceui.com/"
+            }
+          ]
+        },
+        {
+          "id": "web-animated-components",
+          "name": "קומפוננטות אנימטיביות",
+          "tool_count": 40,
+          "tools": [
+            {
+              "name": "FreeFrontend",
+              "url": "https://freefrontend.com/"
+            },
+            {
+              "name": "Drapes UI",
+              "url": "https://www.drapes.cc/"
+            },
+            {
+              "name": "Vengeance UI",
+              "url": "https://www.vengenceui.com/"
+            },
+            {
+              "name": "Lightswind",
+              "url": "https://www.lightswind.com/"
+            },
+            {
+              "name": "ScrollX UI",
+              "url": "https://www.scrollxui.dev/"
+            },
+            {
+              "name": "Systaliko UI",
+              "url": "https://systaliko-ui.vercel.app/"
+            },
+            {
+              "name": "Vynk",
+              "url": "https://www.vynk.live/"
+            },
+            {
+              "name": "Sera UI",
+              "url": "https://seraui.com/"
+            },
+            {
+              "name": "Lina",
+              "url": "https://lina.sameer.sh/"
+            },
+            {
+              "name": "Chánh Đại Components",
+              "url": "https://chanhdai.com/"
+            },
+            {
+              "name": "Kokonut UI",
+              "url": "https://kokonutui.com/"
+            },
+            {
+              "name": "Inspira UI",
+              "url": "https://inspira-ui.com/docs/en"
+            },
+            {
+              "name": "Animate UI",
+              "url": "https://animate-ui.com/"
+            },
+            {
+              "name": "Lukacho UI",
+              "url": "https://ui.lukacho.com/"
+            },
+            {
+              "name": "Fancy Components",
+              "url": "https://www.fancycomponents.dev/"
+            },
+            {
+              "name": "Motion Primitives",
+              "url": "https://motion-primitives.com/"
+            },
+            {
+              "name": "UI Layouts",
+              "url": "https://www.ui-layouts.com/"
+            },
+            {
+              "name": "KL UI",
+              "url": "https://karrix.dev/"
+            },
+            {
+              "name": "CodePen",
+              "url": "https://codepen.io/"
+            },
+            {
+              "name": "Cult UI",
+              "url": "https://www.cult-ui.com/"
+            },
+            {
+              "name": "Component Library",
+              "url": "https://component-library-sepia-ten.vercel.app/"
+            },
+            {
+              "name": "React Bits",
+              "url": "https://www.reactbits.dev/"
+            },
+            {
+              "name": "Magic UI",
+              "url": "https://magicui.design/"
+            },
+            {
+              "name": "SmoothUI",
+              "url": "https://smoothui.dev/"
+            },
+            {
+              "name": "Aceternity UI",
+              "url": "https://ui.aceternity.com/"
+            },
+            {
+              "name": "Animata",
+              "url": "https://animata.design/"
+            },
+            {
+              "name": "Hover.dev",
+              "url": "https://www.hover.dev/"
+            },
+            {
+              "name": "jh3y - Context Aware Hover Cards",
+              "url": "https://codepen.io/jh3y/pen/bNpjYar"
+            },
+            {
+              "name": "jh3y - Animated Gradient Text",
+              "url": "https://codepen.io/jh3y/pen/LYNZwGm"
+            },
+            {
+              "name": "jh3y - Blur Hover Cards",
+              "url": "https://codepen.io/jh3y/pen/WbwZaNa"
+            },
+            {
+              "name": "jh3y - CSS Animation Demo",
+              "url": "https://codepen.io/jh3y/pen/KKrYaxx"
+            },
+            {
+              "name": "jh3y - Morphing Disclosure",
+              "url": "https://codepen.io/jh3y/pen/QwyYoVr"
+            },
+            {
+              "name": "jh3y - Interactive CSS",
+              "url": "https://codepen.io/jh3y/pen/JjVRGwR"
+            },
+            {
+              "name": "jh3y - CSS Scroll Animation",
+              "url": "https://codepen.io/jh3y/pen/VYZwOwd"
+            },
+            {
+              "name": "jh3y CodePen",
+              "url": "https://codepen.io/jh3y"
+            },
+            {
+              "name": "Liquid Metal Button",
+              "url": "https://codepen.io/Majoramari/pen/pvbzpoa"
+            },
+            {
+              "name": "Neil Schulz Animation",
+              "url": "https://codepen.io/NeilSchulz/pen/ZYOzJWq"
+            },
+            {
+              "name": "Apple-Style 3D Scroll",
+              "url": "https://v0.app/templates/apple-style-scroll-animation-3-d-product-explode-Dav88XZy66u"
+            },
+            {
+              "name": "Jatin Yadav",
+              "url": "https://21st.dev/community/jatin-yadav05"
+            },
+            {
+              "name": "Ravi Katiyar",
+              "url": "https://21st.dev/community/ravikatiyar"
+            }
+          ]
+        },
+        {
+          "id": "web-interactive-components",
+          "name": "קומפוננטות אינטראקטיביות",
+          "tool_count": 55,
+          "tools": [
+            {
+              "name": "Interactions by Khagwal",
+              "url": "https://khagwal.com/interactions/"
+            },
+            {
+              "name": "Generate Button",
+              "url": "https://generate-btn.vercel.app/"
+            },
+            {
+              "name": "Cart Animation",
+              "url": "https://cart-anim.vercel.app/"
+            },
+            {
+              "name": "ForgeUI",
+              "url": "https://forgeui.in/"
+            },
+            {
+              "name": "BadtzUI",
+              "url": "https://www.badtz-ui.com/"
+            },
+            {
+              "name": "Cursify",
+              "url": "https://cursify.vercel.app/"
+            },
+            {
+              "name": "UI-Layouts Tools",
+              "url": "https://tools.ui-layouts.com/"
+            },
+            {
+              "name": "Enhanced Button",
+              "url": "https://enhanced-button.vercel.app/"
+            },
+            {
+              "name": "Ground",
+              "url": "https://ground.bossadizenith.me/"
+            },
+            {
+              "name": "Ground Pro",
+              "url": "https://pro.bossadizenith.me/"
+            },
+            {
+              "name": "lndev/ui",
+              "url": "https://ui.lndev.me/"
+            },
+            {
+              "name": "Ruixen UI Pro",
+              "url": "https://pro.ruixen.com/"
+            },
+            {
+              "name": "MicroInteractions UI",
+              "url": "https://www.microinteractionsui.com/"
+            },
+            {
+              "name": "UseLayouts",
+              "url": "https://uselayouts.com/"
+            },
+            {
+              "name": "micro.",
+              "url": "https://micro.bossadizenith.me/"
+            },
+            {
+              "name": "Bossadi Zenith Animations",
+              "url": "https://github.com/bossadizenith/animations"
+            },
+            {
+              "name": "Ground V2",
+              "url": "https://github.com/bossadizenith/ground-v2"
+            },
+            {
+              "name": "Disclosure Inline Delete",
+              "url": "https://github.com/ln-dev7/disclosure-inline-delete-interaction"
+            },
+            {
+              "name": "Site Card Updater",
+              "url": "https://github.com/ln-dev7/site-card-updater"
+            },
+            {
+              "name": "Vercel Navbar",
+              "url": "https://github.com/ln-dev7/vercel-navbar"
+            },
+            {
+              "name": "Tiered Pricing Interaction",
+              "url": "https://github.com/ln-dev7/tiered-pricing-interaction"
+            },
+            {
+              "name": "Schedule Button Interaction",
+              "url": "https://github.com/ln-dev7/schedule-button-interaction"
+            },
+            {
+              "name": "Floating Action Button",
+              "url": "https://github.com/ln-dev7/Floating-Action-Button"
+            },
+            {
+              "name": "Assisted Password Confirmation",
+              "url": "https://github.com/ln-dev7/assisted-password-confirmation"
+            },
+            {
+              "name": "Auto Layout Interaction",
+              "url": "https://github.com/ln-dev7/auto-layout-interaction"
+            },
+            {
+              "name": "Counter Followers",
+              "url": "https://github.com/ln-dev7/counter-followers"
+            },
+            {
+              "name": "Smooth Menu",
+              "url": "https://github.com/ln-dev7/smooth-menu"
+            },
+            {
+              "name": "Feedback Interaction",
+              "url": "https://github.com/ln-dev7/Feedback-Interaction"
+            },
+            {
+              "name": "Clerk Component",
+              "url": "https://github.com/ln-dev7/clerk-comp-1"
+            },
+            {
+              "name": "Counter Animation",
+              "url": "https://github.com/ln-dev7/counter-animation-1"
+            },
+            {
+              "name": "3D Slider Nike",
+              "url": "https://github.com/ln-dev7/3D-slider-Nike-Freebie"
+            },
+            {
+              "name": "Intro Slider Effect",
+              "url": "https://github.com/ln-dev7/Intro-Slider-Effect-Animation"
+            },
+            {
+              "name": "Car Rental Animation",
+              "url": "https://github.com/ln-dev7/Car-Rental-Website-Animation"
+            },
+            {
+              "name": "Characters Slider",
+              "url": "https://github.com/ln-dev7/characters-slider-animation"
+            },
+            {
+              "name": "Nike Carousel Animation",
+              "url": "https://github.com/ln-dev7/Nike-Carousel-Animation"
+            },
+            {
+              "name": "Interactive Touristic Gallery",
+              "url": "https://github.com/ln-dev7/Interactive-bloc-Touristic-Gallery"
+            },
+            {
+              "name": "Dynamic Action Bar GSAP",
+              "url": "https://github.com/ln-dev7/Dynamic-Action-Bar-Gsap"
+            },
+            {
+              "name": "Interactive Hamburger Menu",
+              "url": "https://github.com/ln-dev7/Interactive-Hamburger-Menu"
+            },
+            {
+              "name": "Slick Cars Hero Animation",
+              "url": "https://github.com/ln-dev7/Slick-Cars-Hero-Animation"
+            },
+            {
+              "name": "Image Gallery",
+              "url": "https://github.com/ln-dev7/Image-Gallery-1"
+            },
+            {
+              "name": "Recipe Smooth Carousel",
+              "url": "https://github.com/ln-dev7/Recipe-Smooth-Carousel-Animation"
+            },
+            {
+              "name": "Grid Transition Media",
+              "url": "https://github.com/ln-dev7/grid-transition-media"
+            },
+            {
+              "name": "Steps Animation",
+              "url": "https://github.com/ln-dev7/steps-animation"
+            },
+            {
+              "name": "Delete Interaction",
+              "url": "https://github.com/ln-dev7/delete-interaction-1"
+            },
+            {
+              "name": "Dual Button Proto",
+              "url": "https://github.com/ln-dev7/dual-button-proto"
+            },
+            {
+              "name": "Toggle Dark Mode Button",
+              "url": "https://github.com/ln-dev7/toggle-dark-mode-button"
+            },
+            {
+              "name": "Apple HomePod Mini Animation",
+              "url": "https://github.com/ln-dev7/apple-homepod-mini-animation"
+            },
+            {
+              "name": "Perfume Parallax Animation",
+              "url": "https://github.com/ln-dev7/perfume-parallax-animation"
+            },
+            {
+              "name": "Spinning Animation Card",
+              "url": "https://github.com/ln-dev7/spinning-animation-card"
+            },
+            {
+              "name": "Hover Card Animation",
+              "url": "https://github.com/ln-dev7/hover-card-animation"
+            },
+            {
+              "name": "Lays Proto",
+              "url": "https://github.com/ln-dev7/Lays-Proto"
+            },
+            {
+              "name": "Nike Animation",
+              "url": "https://github.com/ln-dev7/nike-animation-1"
+            },
+            {
+              "name": "Burger King Proto",
+              "url": "https://github.com/ln-dev7/Burger-King-Proto"
+            },
+            {
+              "name": "Repost X Button",
+              "url": "https://github.com/ln-dev7/repost-x-button"
+            },
+            {
+              "name": "Page Transition Next",
+              "url": "https://github.com/ln-dev7/page-transition-next"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "getting-started",
+      "marketplace_category": "Project Templates",
+      "priority": "P2 - Nice to have",
+      "tool_count": 26,
+      "subcategories": [
+        {
+          "id": "gs-general",
+          "name": "כללי",
+          "tool_count": 12,
+          "tools": [
+            {
+              "name": "התקנת Node.js",
+              "url": "https://nodejs.org"
+            },
+            {
+              "name": "התקנת Bun",
+              "url": "https://bun.sh"
+            },
+            {
+              "name": "TypeScript LSP Plugin",
+              "url": "https://docs.anthropic.com/en/docs/claude-code"
+            },
+            {
+              "name": "Ultracite (לינטר + פורמטר)",
+              "url": "https://github.com/haydenbleasel/ultracite"
+            },
+            {
+              "name": "התקנת Hugeicons",
+              "url": "https://hugeicons.com"
+            },
+            {
+              "name": "Bun install",
+              "url": "https://bun.sh/docs/cli/install"
+            },
+            {
+              "name": "Bun outdated",
+              "url": "https://bun.sh/docs/cli/outdated"
+            },
+            {
+              "name": "Bun update",
+              "url": "https://bun.sh/docs/cli/update"
+            },
+            {
+              "name": "חיפוש סקיל",
+              "url": "https://skills.sh"
+            },
+            {
+              "name": "התקנת סקיל",
+              "url": "https://skills.sh"
+            },
+            {
+              "name": "בדיקת עדכונים",
+              "url": "https://skills.sh"
+            },
+            {
+              "name": "עדכון סקילים",
+              "url": "https://skills.sh"
+            }
+          ]
+        },
+        {
+          "id": "gs-websites",
+          "name": "אתרים",
+          "tool_count": 6,
+          "tools": [
+            {
+              "name": "פרויקט בסיסי",
+              "url": "https://nextjs.org"
+            },
+            {
+              "name": "עם Supabase מובנה",
+              "url": "https://supabase.com"
+            },
+            {
+              "name": "פרויקט TanStack Start",
+              "url": "https://tanstack.com/start"
+            },
+            {
+              "name": "Better-T-Stack (Full-Stack)",
+              "url": "https://better-t-stack.amanvarshney.work"
+            },
+            {
+              "name": "הרצה בפיתוח",
+              "url": "https://bun.sh/docs/cli/run"
+            },
+            {
+              "name": "בנייה לפרודקשן",
+              "url": "https://bun.sh/docs/cli/run"
+            }
+          ]
+        },
+        {
+          "id": "gs-mobile",
+          "name": "מובייל",
+          "tool_count": 8,
+          "tools": [
+            {
+              "name": "יצירת פרויקט Expo",
+              "url": "https://docs.expo.dev"
+            },
+            {
+              "name": "Better-T-Stack (עם React Native)",
+              "url": "https://better-t-stack.amanvarshney.work"
+            },
+            {
+              "name": "הרצה בפיתוח",
+              "url": "https://docs.expo.dev/get-started/start-developing"
+            },
+            {
+              "name": "Prebuild (יצירת קבצי Native)",
+              "url": "https://docs.expo.dev/workflow/prebuild"
+            },
+            {
+              "name": "הרצה על iOS",
+              "url": "https://docs.expo.dev/guides/ios-development"
+            },
+            {
+              "name": "הרצה על Android",
+              "url": "https://docs.expo.dev/guides/android-development"
+            },
+            {
+              "name": "EAS Build",
+              "url": "https://docs.expo.dev/build/introduction"
+            },
+            {
+              "name": "EAS Submit",
+              "url": "https://docs.expo.dev/submit/introduction"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "design",
+      "marketplace_category": "Design & Theming",
+      "priority": "P2 - Nice to have",
+      "tool_count": 83,
+      "subcategories": [
+        {
+          "id": "da-tools",
+          "name": "כלי עיצוב",
+          "tool_count": 13,
+          "tools": [
+            {
+              "name": "KyuteFox",
+              "url": "https://kyutefox.com/"
+            },
+            {
+              "name": "Toools Design",
+              "url": "https://www.toools.design/"
+            },
+            {
+              "name": "Toolfolio",
+              "url": "https://toolfolio.io/"
+            },
+            {
+              "name": "Bookmarks.Design",
+              "url": "https://www.bookmarks.design/"
+            },
+            {
+              "name": "VideoBolt",
+              "url": "https://videobolt.net/"
+            },
+            {
+              "name": "Jitter Video",
+              "url": "https://jitter.video/"
+            },
+            {
+              "name": "IMG.LY Background Removal",
+              "url": "https://img.ly/showcases/cesdk/background-removal/web/standalone"
+            },
+            {
+              "name": "TinyPNG",
+              "url": "https://tinypng.com/"
+            },
+            {
+              "name": "Cloudinary PNG to WebP",
+              "url": "https://cloudinary.com/tools/png-to-webp"
+            },
+            {
+              "name": "Favicon Generator",
+              "url": "https://www.favicon-generator.org/"
+            },
+            {
+              "name": "LottieFiles",
+              "url": "https://lottiefiles.com/"
+            },
+            {
+              "name": "Rive",
+              "url": "https://rive.app/"
+            },
+            {
+              "name": "Genaimo AI Live",
+              "url": "https://genaimo.ailive.world/"
+            }
+          ]
+        },
+        {
+          "id": "da-inspiration",
+          "name": "השראה",
+          "tool_count": 15,
+          "tools": [
+            {
+              "name": "Best Designs on X",
+              "url": "https://bestdesignsonx.com/"
+            },
+            {
+              "name": "Dribbble",
+              "url": "https://dribbble.com/"
+            },
+            {
+              "name": "Godly",
+              "url": "https://godly.website/"
+            },
+            {
+              "name": "Landingfolio",
+              "url": "https://www.landingfolio.com/"
+            },
+            {
+              "name": "Dark Design",
+              "url": "https://www.dark.design/"
+            },
+            {
+              "name": "SiteInspire",
+              "url": "https://www.siteinspire.com/"
+            },
+            {
+              "name": "MaxiBestOf",
+              "url": "https://maxibestof.one/websites"
+            },
+            {
+              "name": "Bento Grids",
+              "url": "https://bentogrids.com/"
+            },
+            {
+              "name": "Savee Marketplace",
+              "url": "https://marketplace.savee.com/"
+            },
+            {
+              "name": "UI8",
+              "url": "https://ui8.net/"
+            },
+            {
+              "name": "Shopify Editions",
+              "url": "https://www.shopify.com/editions/winter2026"
+            },
+            {
+              "name": "Mobiq",
+              "url": "https://mobiq.framer.website/"
+            },
+            {
+              "name": "MilkInside",
+              "url": "https://www.milkinside.com/"
+            },
+            {
+              "name": "Viewport UI",
+              "url": "https://viewport-ui.design/"
+            },
+            {
+              "name": "1042 Studio Store",
+              "url": "https://www.1042.studio/store"
+            }
+          ]
+        },
+        {
+          "id": "da-themes",
+          "name": "ערכות נושא",
+          "tool_count": 4,
+          "tools": [
+            {
+              "name": "TweakCN Theme Editor",
+              "url": "https://tweakcn.com/editor/theme"
+            },
+            {
+              "name": "StyleGlide Themes",
+              "url": "https://www.styleglide.ai/themes"
+            },
+            {
+              "name": "Shadcn/ui Themes",
+              "url": "https://ui.shadcn.com/themes"
+            },
+            {
+              "name": "Shadcn Studio Theme Generator",
+              "url": "https://shadcnstudio.com/theme-generator"
+            }
+          ]
+        },
+        {
+          "id": "da-colors",
+          "name": "צבעים",
+          "tool_count": 5,
+          "tools": [
+            {
+              "name": "Shadcn Tailwind Colors",
+              "url": "https://ui.shadcn.com/colors"
+            },
+            {
+              "name": "Super Color Palette",
+              "url": "https://supercolorpalette.com/"
+            },
+            {
+              "name": "UI Colors",
+              "url": "https://uicolors.app/"
+            },
+            {
+              "name": "Coolors",
+              "url": "https://coolors.co/"
+            },
+            {
+              "name": "Color Palette X",
+              "url": "https://color-palette-x.vercel.app/"
+            }
+          ]
+        },
+        {
+          "id": "da-backgrounds",
+          "name": "רקעים",
+          "tool_count": 3,
+          "tools": [
+            {
+              "name": "CSS Hero Mesher",
+              "url": "https://csshero.org/mesher/"
+            },
+            {
+              "name": "Shader Gradient",
+              "url": "https://www.shadergradient.co/"
+            },
+            {
+              "name": "PatternCraft",
+              "url": "https://patterncraft.fun/"
+            }
+          ]
+        },
+        {
+          "id": "da-dividers",
+          "name": "מחלקים",
+          "tool_count": 2,
+          "tools": [
+            {
+              "name": "Shape Divider",
+              "url": "https://www.shapedivider.app/"
+            },
+            {
+              "name": "Haikei",
+              "url": "https://app.haikei.app/"
+            }
+          ]
+        },
+        {
+          "id": "da-fonts",
+          "name": "פונטים",
+          "tool_count": 7,
+          "tools": [
+            {
+              "name": "Fontshare",
+              "url": "https://fontshare.com/"
+            },
+            {
+              "name": "Uncut.wtf",
+              "url": "https://uncut.wtf/"
+            },
+            {
+              "name": "OnlineWebFonts",
+              "url": "https://www.onlinewebfonts.com/fonts"
+            },
+            {
+              "name": "Font Mirror",
+              "url": "https://www.fontmirror.com/"
+            },
+            {
+              "name": "Geist Font",
+              "url": "https://vercel.com/font"
+            },
+            {
+              "name": "Shadcn Font Picker",
+              "url": "https://shadcn-font-picker.vercel.app/"
+            },
+            {
+              "name": "Font Analyzer",
+              "url": "https://font-analyzer-six.vercel.app/"
+            }
+          ]
+        },
+        {
+          "id": "da-icons",
+          "name": "איקונים",
+          "tool_count": 12,
+          "tools": [
+            {
+              "name": "Hugeicons",
+              "url": "https://hugeicons.com/"
+            },
+            {
+              "name": "Lucide Icons",
+              "url": "https://lucide.dev/icons/"
+            },
+            {
+              "name": "Phosphor Icons",
+              "url": "https://phosphoricons.com/"
+            },
+            {
+              "name": "Tabler Icons",
+              "url": "https://tabler.io/icons"
+            },
+            {
+              "name": "React Icons",
+              "url": "https://react-icons.github.io/react-icons/"
+            },
+            {
+              "name": "Iconify",
+              "url": "https://icon-sets.iconify.design/"
+            },
+            {
+              "name": "SVG Repo",
+              "url": "https://www.svgrepo.com/"
+            },
+            {
+              "name": "Central Icons",
+              "url": "https://centralicons.com/"
+            },
+            {
+              "name": "Lobe Icons",
+              "url": "https://icons.lobehub.com/"
+            },
+            {
+              "name": "Lucide Animated",
+              "url": "https://lucide-animated.com/"
+            },
+            {
+              "name": "ItsHover Icons",
+              "url": "https://www.itshover.com/icons"
+            },
+            {
+              "name": "lndev Icons Explorer",
+              "url": "https://icons.lndev.me/"
+            }
+          ]
+        },
+        {
+          "id": "da-avatars",
+          "name": "אווטארים",
+          "tool_count": 1,
+          "tools": [
+            {
+              "name": "Avvvatars",
+              "url": "https://avvvatars.com/"
+            }
+          ]
+        },
+        {
+          "id": "da-mockups",
+          "name": "מוקאפים",
+          "tool_count": 7,
+          "tools": [
+            {
+              "name": "Mockoops",
+              "url": "https://mockoops.mohitya.dev/"
+            },
+            {
+              "name": "Shots.so",
+              "url": "https://shots.so/"
+            },
+            {
+              "name": "ContentCore",
+              "url": "https://contentcore.xyz/"
+            },
+            {
+              "name": "Mockuuups Studio",
+              "url": "https://mockuuups.studio/"
+            },
+            {
+              "name": "Previewed",
+              "url": "https://previewed.app/"
+            },
+            {
+              "name": "Rotato",
+              "url": "https://rotato.app/"
+            },
+            {
+              "name": "Morflax Things",
+              "url": "https://things.morflax.com/"
+            }
+          ]
+        },
+        {
+          "id": "da-3d",
+          "name": "תלת מימד",
+          "tool_count": 7,
+          "tools": [
+            {
+              "name": "Spline",
+              "url": "https://spline.design/"
+            },
+            {
+              "name": "Needle Engine",
+              "url": "https://needle.tools/"
+            },
+            {
+              "name": "Tripo 3D",
+              "url": "https://www.tripo3d.ai/"
+            },
+            {
+              "name": "Meshy AI",
+              "url": "https://www.meshy.ai/"
+            },
+            {
+              "name": "Instant 3D",
+              "url": "https://www.instant3d.ai/"
+            },
+            {
+              "name": "3D AI Studio",
+              "url": "https://www.3daistudio.com/"
+            },
+            {
+              "name": "MyWebAR",
+              "url": "https://mywebar.com/"
+            }
+          ]
+        },
+        {
+          "id": "da-media",
+          "name": "סטוק מדיה",
+          "tool_count": 7,
+          "tools": [
+            {
+              "name": "The Stocks",
+              "url": "https://v3.thestocks.im/"
+            },
+            {
+              "name": "Unsplash",
+              "url": "https://unsplash.com/"
+            },
+            {
+              "name": "Freepik",
+              "url": "https://www.freepik.com/"
+            },
+            {
+              "name": "Shopify Stock Photos",
+              "url": "https://www.shopify.com/stock-photos"
+            },
+            {
+              "name": "Lummi AI",
+              "url": "https://www.lummi.ai/"
+            },
+            {
+              "name": "Storyset",
+              "url": "https://storyset.com/"
+            },
+            {
+              "name": "PNGWing",
+              "url": "https://www.pngwing.com/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "dev-tools",
+      "marketplace_category": "Developer Tools",
+      "priority": "P2 - Nice to have",
+      "tool_count": 25,
+      "subcategories": [
+        {
+          "id": "graphics-rendering",
+          "name": "גרפיקה ורינדור",
+          "tool_count": 1,
+          "tools": [
+            {
+              "name": "ThorVG",
+              "url": "https://www.thorvg.org/"
+            }
+          ]
+        },
+        {
+          "id": "code-search",
+          "name": "חיפוש קוד ודוקומנטציה",
+          "tool_count": 3,
+          "tools": [
+            {
+              "name": "Grep by Vercel",
+              "url": "https://grep.app/"
+            },
+            {
+              "name": "Google Code Wiki",
+              "url": "https://codewiki.google/"
+            },
+            {
+              "name": "Sharuco",
+              "url": "https://sharuco.lndev.me/explore"
+            }
+          ]
+        },
+        {
+          "id": "video-tools",
+          "name": "וידאו",
+          "tool_count": 2,
+          "tools": [
+            {
+              "name": "Remotion",
+              "url": "https://www.remotion.dev/"
+            },
+            {
+              "name": "OpenCut",
+              "url": "https://github.com/OpenCut-app/OpenCut"
+            }
+          ]
+        },
+        {
+          "id": "seo-sharing",
+          "name": "SEO ושיתוף",
+          "tool_count": 2,
+          "tools": [
+            {
+              "name": "RalfyIndex",
+              "url": "https://ralfyindex.com/"
+            },
+            {
+              "name": "How's It Lookin",
+              "url": "https://www.howsitlookin.com/"
+            }
+          ]
+        },
+        {
+          "id": "open-source-projects",
+          "name": "פרויקטי Open Source",
+          "tool_count": 5,
+          "tools": [
+            {
+              "name": "OpenStock",
+              "url": "https://github.com/Open-Dev-Society/OpenStock"
+            },
+            {
+              "name": "Claude Usage Tracker",
+              "url": "https://github.com/hamed-elfayome/Claude-Usage-Tracker"
+            },
+            {
+              "name": "EFCore.BulkExtensions",
+              "url": "https://github.com/borisdj/EFCore.BulkExtensions"
+            },
+            {
+              "name": "Weekday",
+              "url": "https://github.com/ephraimduncan/weekday"
+            },
+            {
+              "name": "Keyboard Signature",
+              "url": "https://github.com/cnrad/keyboard-signature"
+            }
+          ]
+        },
+        {
+          "id": "resources-learning",
+          "name": "משאבים ולמידה",
+          "tool_count": 12,
+          "tools": [
+            {
+              "name": "JavaScript Rising Stars 2025",
+              "url": "https://risingstars.js.org/2025/en"
+            },
+            {
+              "name": "How Vercel Built the v0 iOS App",
+              "url": "https://vercel.com/blog/how-we-built-the-v0-ios-app"
+            },
+            {
+              "name": "Effect Institute",
+              "url": "https://www.effect.institute/"
+            },
+            {
+              "name": "Framer University",
+              "url": "https://framer.university/"
+            },
+            {
+              "name": "nerdy.dev",
+              "url": "https://nerdy.dev/"
+            },
+            {
+              "name": "Framer Labs",
+              "url": "https://github.com/fredm00n/framerlabs"
+            },
+            {
+              "name": "Apple Vision Pro Scroll (Framer)",
+              "url": "https://framer.university/resources/apple-vision-pro-scroll-animation"
+            },
+            {
+              "name": "Apple Siri Website (Framer)",
+              "url": "https://framer.university/resources/apple-siri-website-with-framer"
+            },
+            {
+              "name": "Advanced Zoom Scroll (Framer)",
+              "url": "https://framer.university/resources/advanced-zoom-scroll-effect"
+            },
+            {
+              "name": "Tedy Scroll Animation (Framer)",
+              "url": "https://framer.university/resources/tedy-website-scroll-animation-in-framer"
+            },
+            {
+              "name": "Burn Transition (Framer)",
+              "url": "https://framer.university/resources/burn-transition-component-for-framer"
+            },
+            {
+              "name": "Morphing Waitlist Input (Framer)",
+              "url": "https://framer.university/resources/morphing-waitlist-input-in-framer"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "mobile",
+      "marketplace_category": "Mobile (Future)",
+      "priority": "P3 - Future",
+      "tool_count": 97,
+      "subcategories": [
+        {
+          "id": "mob-ui",
+          "name": "ספריות UI",
+          "tool_count": 9,
+          "tools": [
+            {
+              "name": "NativewindUI",
+              "url": "https://nativewindui.com/"
+            },
+            {
+              "name": "gluestack",
+              "url": "https://gluestack.io/"
+            },
+            {
+              "name": "Lambda UI",
+              "url": "https://www.lambda-ui.dev/"
+            },
+            {
+              "name": "React Native Reusables",
+              "url": "https://reactnativereusables.com/"
+            },
+            {
+              "name": "React Native Components",
+              "url": "https://reactnativecomponents.com/components"
+            },
+            {
+              "name": "Make It Animated",
+              "url": "https://makeitanimated.dev/"
+            },
+            {
+              "name": "Reactix",
+              "url": "https://www.reacticx.com/"
+            },
+            {
+              "name": "RNUI",
+              "url": "https://www.rnui.dev/"
+            },
+            {
+              "name": "SynapsisUI",
+              "url": "https://www.synapsisui.com/"
+            }
+          ]
+        },
+        {
+          "id": "mob-animations",
+          "name": "אנימציות",
+          "tool_count": 11,
+          "tools": [
+            {
+              "name": "React Native Reanimated",
+              "url": "https://docs.swmansion.com/react-native-reanimated/"
+            },
+            {
+              "name": "React Native Skia",
+              "url": "https://shopify.github.io/react-native-skia/"
+            },
+            {
+              "name": "Animated TabBar",
+              "url": "https://github.com/gorhom/react-native-animated-tabbar"
+            },
+            {
+              "name": "React Native Screen Transitions",
+              "url": "https://github.com/eds2002/react-native-screen-transitions"
+            },
+            {
+              "name": "Expo Progressive Blur",
+              "url": "https://github.com/rit3zh/expo-progressive-blur"
+            },
+            {
+              "name": "Native Springs Shaders",
+              "url": "https://github.com/MatthewSRC/native-springs-shaders"
+            },
+            {
+              "name": "Liquid Glass",
+              "url": "https://github.com/callstack/liquid-glass"
+            },
+            {
+              "name": "Gesture Handler",
+              "url": "https://docs.swmansion.com/react-native-gesture-handler/"
+            },
+            {
+              "name": "Lottie React Native",
+              "url": "https://github.com/lottie-react-native/lottie-react-native"
+            },
+            {
+              "name": "Theme Switch Animation",
+              "url": "https://github.com/WadhahEssam/react-native-theme-switch-animation"
+            },
+            {
+              "name": "React Native Micro Interactions",
+              "url": "https://github.com/Sardar1208/react-native-micro-interactions"
+            }
+          ]
+        },
+        {
+          "id": "mob-core",
+          "name": "ספריות ליבה",
+          "tool_count": 25,
+          "tools": [
+            {
+              "name": "React Navigation",
+              "url": "https://reactnavigation.org/"
+            },
+            {
+              "name": "Bottom Sheet",
+              "url": "https://gorhom.dev/react-native-bottom-sheet/"
+            },
+            {
+              "name": "FlashList",
+              "url": "https://shopify.github.io/flash-list/"
+            },
+            {
+              "name": "MMKV",
+              "url": "https://github.com/mrousavy/react-native-mmkv"
+            },
+            {
+              "name": "React Native SVG",
+              "url": "https://github.com/software-mansion/react-native-svg"
+            },
+            {
+              "name": "React Native Maps",
+              "url": "https://github.com/react-native-maps/react-native-maps"
+            },
+            {
+              "name": "Edge to Edge",
+              "url": "https://github.com/zoontek/react-native-edge-to-edge"
+            },
+            {
+              "name": "Keyboard Controller",
+              "url": "https://github.com/kirillzyusko/react-native-keyboard-controller"
+            },
+            {
+              "name": "Portal",
+              "url": "https://github.com/gorhom/react-native-portal"
+            },
+            {
+              "name": "Burnt",
+              "url": "https://github.com/nandorojo/burnt"
+            },
+            {
+              "name": "View Shot",
+              "url": "https://github.com/gre/react-native-view-shot"
+            },
+            {
+              "name": "Compressor",
+              "url": "https://github.com/numandev1/react-native-compressor"
+            },
+            {
+              "name": "Expo Image",
+              "url": "https://docs.expo.dev/versions/latest/sdk/image/"
+            },
+            {
+              "name": "Expo Notifications",
+              "url": "https://docs.expo.dev/versions/latest/sdk/notifications/"
+            },
+            {
+              "name": "Expo Location",
+              "url": "https://docs.expo.dev/versions/latest/sdk/location/"
+            },
+            {
+              "name": "Expo Local Authentication",
+              "url": "https://docs.expo.dev/versions/latest/sdk/local-authentication/"
+            },
+            {
+              "name": "Expo Secure Store",
+              "url": "https://docs.expo.dev/versions/latest/sdk/securestore/"
+            },
+            {
+              "name": "Expo Image Picker",
+              "url": "https://docs.expo.dev/versions/latest/sdk/imagepicker/"
+            },
+            {
+              "name": "Expo Video",
+              "url": "https://docs.expo.dev/versions/latest/sdk/video/"
+            },
+            {
+              "name": "Expo Haptics",
+              "url": "https://docs.expo.dev/versions/latest/sdk/haptics/"
+            },
+            {
+              "name": "Expo Blur",
+              "url": "https://docs.expo.dev/versions/latest/sdk/blur-view/"
+            },
+            {
+              "name": "Expo Clipboard",
+              "url": "https://docs.expo.dev/versions/latest/sdk/clipboard/"
+            },
+            {
+              "name": "React Native WebView",
+              "url": "https://github.com/react-native-webview/react-native-webview"
+            },
+            {
+              "name": "React Native Directory",
+              "url": "https://reactnative.directory/"
+            },
+            {
+              "name": "Native Templates",
+              "url": "https://www.native-templates.com/"
+            }
+          ]
+        },
+        {
+          "id": "mob-components",
+          "name": "קומפוננטות",
+          "tool_count": 35,
+          "tools": [
+            {
+              "name": "Expo Paste Input",
+              "url": "https://github.com/arunabhverma/expo-paste-input"
+            },
+            {
+              "name": "Zoom Grid",
+              "url": "https://github.com/wassgha/react-native-zoom-grid"
+            },
+            {
+              "name": "React Native Tickle",
+              "url": "https://github.com/Renegades-Studio/react-native-tickle"
+            },
+            {
+              "name": "Zeego",
+              "url": "https://zeego.dev/"
+            },
+            {
+              "name": "Galeria",
+              "url": "https://github.com/nandorojo/galeria"
+            },
+            {
+              "name": "Fast Squircle",
+              "url": "https://github.com/fbeccaceci/react-native-fast-squircle"
+            },
+            {
+              "name": "Sticky Item",
+              "url": "https://github.com/gorhom/react-native-sticky-item"
+            },
+            {
+              "name": "Paper Onboarding",
+              "url": "https://github.com/gorhom/react-native-paper-onboarding"
+            },
+            {
+              "name": "Reanimated Carousel",
+              "url": "https://github.com/dohooo/react-native-reanimated-carousel"
+            },
+            {
+              "name": "Gifted Charts",
+              "url": "https://github.com/Abhinandan-Kushwaha/react-native-gifted-charts"
+            },
+            {
+              "name": "Gifted Chat",
+              "url": "https://github.com/FaridSafi/react-native-gifted-chat"
+            },
+            {
+              "name": "Awesome Gallery",
+              "url": "https://github.com/pavelbabenko/react-native-awesome-gallery"
+            },
+            {
+              "name": "BlurHash",
+              "url": "https://github.com/mrousavy/react-native-blurhash"
+            },
+            {
+              "name": "Element Dropdown",
+              "url": "https://github.com/hoaphantn7604/react-native-element-dropdown"
+            },
+            {
+              "name": "OTP Entry",
+              "url": "https://github.com/anday013/react-native-otp-entry"
+            },
+            {
+              "name": "Emoji Keyboard",
+              "url": "https://github.com/TheWidlarzGroup/rn-emoji-keyboard"
+            },
+            {
+              "name": "UI DatePicker",
+              "url": "https://github.com/farhoudshapouran/react-native-ui-datepicker"
+            },
+            {
+              "name": "Reanimated Skeleton",
+              "url": "https://github.com/marcuzgabriel/react-native-reanimated-skeleton"
+            },
+            {
+              "name": "Reanimated DnD",
+              "url": "https://github.com/entropyconquers/react-native-reanimated-dnd"
+            },
+            {
+              "name": "Tourguide",
+              "url": "https://github.com/xcarpentier/rn-tourguide"
+            },
+            {
+              "name": "Image Crop Picker",
+              "url": "https://github.com/ivpusic/react-native-image-crop-picker"
+            },
+            {
+              "name": "DateTimePicker",
+              "url": "https://github.com/react-native-datetimepicker/datetimepicker"
+            },
+            {
+              "name": "Advanced Input Mask",
+              "url": "https://github.com/IvanIhnatsiuk/react-native-advanced-input-mask"
+            },
+            {
+              "name": "Autocomplete Dropdown",
+              "url": "https://github.com/onmotion/react-native-autocomplete-dropdown"
+            },
+            {
+              "name": "Bouncy Checkbox",
+              "url": "https://github.com/WrathChaos/react-native-bouncy-checkbox"
+            },
+            {
+              "name": "Collapsible",
+              "url": "https://github.com/oblador/react-native-collapsible"
+            },
+            {
+              "name": "Popover View",
+              "url": "https://github.com/SteffeyDev/react-native-popover-view"
+            },
+            {
+              "name": "Progress",
+              "url": "https://github.com/oblador/react-native-progress"
+            },
+            {
+              "name": "Star Rating Widget",
+              "url": "https://github.com/bviebahn/react-native-star-rating-widget"
+            },
+            {
+              "name": "Animated Numbers",
+              "url": "https://github.com/heyman333/react-native-animated-numbers"
+            },
+            {
+              "name": "Timer Picker",
+              "url": "https://github.com/troberts-28/react-native-timer-picker"
+            },
+            {
+              "name": "Google Places Autocomplete",
+              "url": "https://github.com/FaridSafi/react-native-google-places-autocomplete"
+            },
+            {
+              "name": "Country Codes Picker",
+              "url": "https://github.com/GeorgeHop/react-native-country-codes-picker"
+            },
+            {
+              "name": "Swipeable List",
+              "url": "https://github.com/esthor/react-native-swipeable-list"
+            },
+            {
+              "name": "Map Link",
+              "url": "https://github.com/tschoffelen/react-native-map-link"
+            }
+          ]
+        },
+        {
+          "id": "mob-demos",
+          "name": "דמואים",
+          "tool_count": 14,
+          "tools": [
+            {
+              "name": "WA Swipe to Talk",
+              "url": "https://github.com/Solarin-Johnson/wa-swipe-to-talk"
+            },
+            {
+              "name": "TG Emoji Picker",
+              "url": "https://github.com/Solarin-Johnson/tg-emoji-picker"
+            },
+            {
+              "name": "Onboarding Screen",
+              "url": "https://github.com/Solarin-Johnson/react-native-onboarding"
+            },
+            {
+              "name": "Number Input Transition",
+              "url": "https://github.com/Solarin-Johnson/expo-number-input-transition"
+            },
+            {
+              "name": "Blog Screen",
+              "url": "https://github.com/Solarin-Johnson/expo-blog"
+            },
+            {
+              "name": "Time Picker Interaction",
+              "url": "https://github.com/Solarin-Johnson/expo-time-picker-interaction"
+            },
+            {
+              "name": "Masked Splash Screen",
+              "url": "https://github.com/Solarin-Johnson/masked-splash-screen"
+            },
+            {
+              "name": "Stretchy Header",
+              "url": "https://github.com/Solarin-Johnson/expo-stretchy-header"
+            },
+            {
+              "name": "Dropdown",
+              "url": "https://github.com/Solarin-Johnson/dropdown"
+            },
+            {
+              "name": "Disintegrate Effect",
+              "url": "https://github.com/arunabhverma/expo-disintegrate-effect"
+            },
+            {
+              "name": "Keyboard Guide",
+              "url": "https://github.com/betomoedano/keyboard-guide"
+            },
+            {
+              "name": "RN Playground (Solarin)",
+              "url": "https://github.com/Solarin-Johnson/my-app"
+            },
+            {
+              "name": "Reanimated Demos",
+              "url": "https://github.com/enzomanuelmangano/demos"
+            },
+            {
+              "name": "Expo Playground (thomino)",
+              "url": "https://github.com/thomino/expo-playground"
+            }
+          ]
+        },
+        {
+          "id": "mob-inspiration",
+          "name": "השראה",
+          "tool_count": 3,
+          "tools": [
+            {
+              "name": "Animate React Native",
+              "url": "https://www.animatereactnative.com/"
+            },
+            {
+              "name": "Spotted in Prod",
+              "url": "https://www.spottedinprod.com/"
+            },
+            {
+              "name": "Featured Mobile",
+              "url": "https://featuredmobile.com/"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

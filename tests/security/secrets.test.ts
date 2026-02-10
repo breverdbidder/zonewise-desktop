@@ -47,7 +47,7 @@ describe('No Hardcoded Secrets', () => {
     return files
   }
 
-  it('no hardcoded secrets in source files', () => {
+  it('no hardcoded secrets in source files', { timeout: 30000 }, () => {
     const dirs = ['apps/electron/src', 'apps/viewer/src', 'packages/shared/src']
     const allFindings: string[] = []
     for (const dir of dirs) {

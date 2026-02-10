@@ -1,0 +1,44 @@
+{
+  "version": "1.0.0",
+  "description": "ZoneWise MCP Server Registry — External MCP servers available for agent integration",
+  "servers": [
+    {
+      "id": "vibe-code-best-practices",
+      "name": "Vibe Code Best Practices",
+      "description": "Curated catalog of 627+ modern dev tools — AI agents, MCP servers, skills, UI components, and full-stack resources",
+      "author": "Gal Havkin",
+      "endpoint": "https://vibe-code-best-practices.vercel.app/api/mcp",
+      "protocol": "MCP 2024-11-05 (Streamable HTTP)",
+      "version": "1.0.0",
+      "language": "he",
+      "tools": [
+        "list-sections",
+        "search-tools",
+        "get-section"
+      ],
+      "categories": [
+        "ai-agents",
+        "mcp",
+        "skills",
+        "modern-stack",
+        "web",
+        "mobile",
+        "design",
+        "dev-tools",
+        "getting-started"
+      ],
+      "stats": {
+        "total_tools": 627,
+        "sections": 9,
+        "subcategories": 70,
+        "last_scraped": "2026-02-10T00:00:00Z"
+      },
+      "marketplace": {
+        "priority": "P0",
+        "install_type": "remote",
+        "requires_auth": false,
+        "auto_discover": true
+      }
+    }
+  ]
+}

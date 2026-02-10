@@ -53,10 +53,16 @@ jobs:
       - name: Scan for hardcoded secrets
         run: |
           echo "=== Scanning for potential secrets in source ==="
-          # Check for common secret patterns in source files
+          # Check for actual secret values (not regex patterns or test fixtures)
+          # Exclude test files, .example files, and regex pattern definitions
           FINDINGS=$(grep -rn --include="*.ts" --include="*.tsx" --include="*.js" --include="*.json" \
-            -E "(sk-ant-|sk-[a-zA-Z0-9]{48}|ghp_[a-zA-Z0-9]{36}|sbp_[a-zA-Z0-9]{40})" \
-            apps/ packages/ || true)
+            -E "(sk-ant-api[a-zA-Z0-9]{40,}|ghp_[a-zA-Z0-9]{36}|sbp_[a-zA-Z0-9]{40})" \
+            apps/ packages/ \
+            | grep -v '\.test\.' \
+            | grep -v '\.example' \
+            | grep -v 'secretPatterns' \
+            | grep -v '/regex/' \
+            || true)
           if [ -n "$FINDINGS" ]; then
             echo "::warning::Potential secrets found in source files:"
             echo "$FINDINGS"

@@ -85,7 +85,11 @@
     },
     "apps/electron": {
       "name": "@craft-agent/electron",
+<<<<<<< HEAD
       "version": "0.4.2",
+=======
+      "version": "0.4.3",
+>>>>>>> upstream/main
       "dependencies": {
         "@craft-agent/core": "workspace:*",
         "@craft-agent/shared": "workspace:*",
@@ -121,9 +125,38 @@
         "vaul": "^1.1.2",
       },
     },
+<<<<<<< HEAD
     "apps/viewer": {
       "name": "@craft-agent/viewer",
       "version": "0.4.2",
+=======
+    "apps/marketing": {
+      "name": "@craft-agent/marketing",
+      "version": "0.4.3",
+      "dependencies": {
+        "@craft-agent/ui": "workspace:*",
+        "@paper-design/shaders-react": "^0.0.70",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "react-router-dom": "^7.13.0",
+        "shiki": "^3.21.0",
+        "three": "^0.170.0",
+      },
+      "devDependencies": {
+        "@tailwindcss/vite": "^4.1.18",
+        "@types/react": "^18.3.0",
+        "@types/react-dom": "^18.3.0",
+        "@types/three": "^0.170.0",
+        "@vitejs/plugin-react": "^5.1.2",
+        "tailwindcss": "^4.1.18",
+        "typescript": "^5.0.0",
+        "vite": "^6.2.4",
+      },
+    },
+    "apps/viewer": {
+      "name": "@craft-agent/viewer",
+      "version": "0.4.3",
+>>>>>>> upstream/main
       "dependencies": {
         "@craft-agent/core": "workspace:*",
         "@craft-agent/ui": "workspace:*",
@@ -148,6 +181,7 @@
         "vite": "^6.2.5",
       },
     },
+<<<<<<< HEAD
     "packages/codex-types": {
       "name": "@craft-agent/codex-types",
       "version": "0.4.2",
@@ -155,6 +189,28 @@
     "packages/core": {
       "name": "@craft-agent/core",
       "version": "0.4.2",
+=======
+    "packages/bridge-mcp-server": {
+      "name": "@craft-agent/bridge-mcp-server",
+      "version": "0.4.3",
+      "bin": {
+        "bridge-mcp-server": "./dist/index.js",
+      },
+      "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.11.0",
+      },
+      "devDependencies": {
+        "@types/node": "^22.0.0",
+      },
+    },
+    "packages/codex-types": {
+      "name": "@craft-agent/codex-types",
+      "version": "0.4.3",
+    },
+    "packages/core": {
+      "name": "@craft-agent/core",
+      "version": "0.4.3",
+>>>>>>> upstream/main
       "devDependencies": {
         "@types/uuid": "^11.0.0",
       },
@@ -166,7 +222,11 @@
     },
     "packages/mermaid": {
       "name": "@craft-agent/mermaid",
+<<<<<<< HEAD
       "version": "0.4.2",
+=======
+      "version": "0.4.3",
+>>>>>>> upstream/main
       "dependencies": {
         "elkjs": "^0.11.0",
       },
@@ -174,9 +234,30 @@
         "shiki": "^3.19.0",
       },
     },
+<<<<<<< HEAD
     "packages/session-tools-core": {
       "name": "@craft-agent/session-tools-core",
       "version": "0.4.2",
+=======
+    "packages/session-mcp-server": {
+      "name": "@craft-agent/session-mcp-server",
+      "version": "0.4.3",
+      "bin": {
+        "session-mcp-server": "./dist/index.js",
+      },
+      "dependencies": {
+        "@craft-agent/session-tools-core": "workspace:*",
+        "@modelcontextprotocol/sdk": "^1.11.0",
+        "zod": "^3.23.0",
+      },
+      "devDependencies": {
+        "@types/node": "^22.0.0",
+      },
+    },
+    "packages/session-tools-core": {
+      "name": "@craft-agent/session-tools-core",
+      "version": "0.4.3",
+>>>>>>> upstream/main
       "dependencies": {
         "@craft-agent/mermaid": "workspace:*",
         "gray-matter": "^4.0.3",
@@ -188,7 +269,11 @@
     },
     "packages/shared": {
       "name": "@craft-agent/shared",
+<<<<<<< HEAD
       "version": "0.4.2",
+=======
+      "version": "0.4.3",
+>>>>>>> upstream/main
       "dependencies": {
         "@craft-agent/codex-types": "workspace:*",
         "@craft-agent/core": "workspace:*",
@@ -196,6 +281,7 @@
         "@isaacs/ttlcache": "^2.1.4",
         "@leeoniya/ufuzzy": "^1.0.19",
         "bash-parser": "^0.5.0",
+        "croner": "^10.0.1",
         "filtrex": "^3.1.0",
         "incr-regex-package": "^1.0.4",
         "shell-quote": "^1.8.3",
@@ -213,7 +299,11 @@
     },
     "packages/ui": {
       "name": "@craft-agent/ui",
+<<<<<<< HEAD
       "version": "0.4.2",
+=======
+      "version": "0.4.3",
+>>>>>>> upstream/main
       "dependencies": {
         "@craft-agent/core": "workspace:*",
         "@craft-agent/mermaid": "workspace:*",
@@ -1745,6 +1835,8 @@
     "crc": ["crc@3.8.0", "", { "dependencies": { "buffer": "^5.1.0" } }, "sha512-iX3mfgcTMIq3ZKLIsVFAbv7+Mc10kxabAGQb8HvjA1o3T1PIYprbakQ65d3I+2HGHt6nSKkM9PYjgoJO2KcFBQ=="],
 
     "crc-32": ["crc-32@1.2.2", "", { "bin": { "crc32": "bin/crc32.njs" } }, "sha512-ROmzCKrTnOwybPcJApAA6WBWij23HVfGVNKqqrZpuyZOHqK2CwHSvpGuyt/UNNvaIjEd8X5IFGp4Mh+Ie1IHJQ=="],
+
+    "croner": ["croner@10.0.1", "", {}, "sha512-ixNtAJndqh173VQ4KodSdJEI6nuioBWI0V1ITNKhZZsO0pEMoDxz539T4FTTbSZ/xIOSuDnzxLVRqBVSvPNE2g=="],
 
     "cross-dirname": ["cross-dirname@0.1.0", "", {}, "sha512-+R08/oI0nl3vfPcqftZRpytksBXDzOUveBq/NBVx0sUp1axwzPQrKinNx5yd5sxPu8j1wIy8AfnVQ+5eFdha6Q=="],
 

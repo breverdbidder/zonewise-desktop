@@ -12,7 +12,7 @@ import { registerOnboardingHandlers } from './onboarding'
 import { IPC_CHANNELS, type FileAttachment, type StoredAttachment, type SendMessageOptions, type LlmConnectionSetup } from '../shared/types'
 import { readFileAttachment, perf, validateImageForClaudeAPI, IMAGE_LIMITS } from '@craft-agent/shared/utils'
 import { safeJsonParse } from '@craft-agent/shared/utils/files'
-import { getPreferencesPath, getSessionDraft, setSessionDraft, deleteSessionDraft, getAllSessionDrafts, getWorkspaceByNameOrId, addWorkspace, setActiveWorkspace, loadStoredConfig, saveConfig, type Workspace, getLlmConnections, getLlmConnection, addLlmConnection, updateLlmConnection, deleteLlmConnection, getDefaultLlmConnection, setDefaultLlmConnection, touchLlmConnection, isCompatProvider, isAnthropicProvider, isOpenAIProvider, getDefaultModelsForConnection, getDefaultModelForConnection, type LlmConnection, type LlmConnectionWithStatus } from '@craft-agent/shared/config'
+import { getPreferencesPath, getSessionDraft, setSessionDraft, deleteSessionDraft, getAllSessionDrafts, getWorkspaceByNameOrId, addWorkspace, setActiveWorkspace, loadStoredConfig, saveConfig, type Workspace, getLlmConnections, getLlmConnection, addLlmConnection, updateLlmConnection, deleteLlmConnection, getDefaultLlmConnection, setDefaultLlmConnection, touchLlmConnection, isCompatProvider, isAnthropicProvider, isOpenAIProvider, isCopilotProvider, getDefaultModelsForConnection, getDefaultModelForConnection, type LlmConnection, type LlmConnectionWithStatus } from '@craft-agent/shared/config'
 import { getSessionAttachmentsPath, validateSessionId } from '@craft-agent/shared/sessions'
 import { loadWorkspaceSources, getSourcesBySlugs, type LoadedSource } from '@craft-agent/shared/sources'
 import { isValidThinkingLevel } from '@craft-agent/shared/agent/thinking-levels'
@@ -20,42 +20,11 @@ import { getCredentialManager } from '@craft-agent/shared/credentials'
 import { MarkItDown } from 'markitdown-js'
 
 /**
- * SEC-010: Allowed file extensions for attachments.
- * Prevents uploading of executable or dangerous file types.
- */
-const ALLOWED_ATTACHMENT_EXTENSIONS = new Set([
-  // Images
-  'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'tiff', 'tif', 'ico', 'icns', 'heic', 'heif', 'svg',
-  // Documents
-  'pdf', 'docx', 'xlsx', 'pptx', 'doc', 'xls', 'ppt', 'txt', 'md', 'rtf', 'csv', 'tsv',
-  // Code
-  'js', 'ts', 'tsx', 'jsx', 'py', 'json', 'css', 'html', 'xml', 'yaml', 'yml', 'sh', 'sql',
-  'go', 'rs', 'rb', 'php', 'java', 'c', 'cpp', 'h', 'swift', 'kt', 'toml', 'ini', 'cfg',
-  // Archives (read-only inspection)
-  'zip', 'tar', 'gz',
-])
-
-/**
- * SEC-010: Allowed MIME type prefixes for thumbnail generation.
- */
-const ALLOWED_THUMBNAIL_MIMETYPES = new Set([
-  'image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/bmp',
-  'image/tiff', 'image/heic', 'image/heif', 'image/svg+xml',
-  'application/pdf',
-])
-
-/**
  * Sanitizes a filename to prevent path traversal and filesystem issues.
- * SEC-010: Also strips null bytes, normalizes Unicode (NFKC), and validates extension.
+ * Removes dangerous characters and limits length.
  */
 function sanitizeFilename(name: string): string {
-  // SEC-010: Strip null bytes first (can bypass extension checks)
-  let sanitized = name.replace(/\0/g, '')
-
-  // SEC-010: Normalize Unicode to NFKC (prevents homoglyph attacks)
-  sanitized = sanitized.normalize('NFKC')
-
-  sanitized = sanitized
+  return name
     // Remove path separators and traversal patterns
     .replace(/[/\\]/g, '_')
     // Remove Windows-forbidden characters: < > : " | ? *
@@ -70,23 +39,6 @@ function sanitizeFilename(name: string): string {
     .slice(0, 200)
     // Fallback if name is empty after sanitization
     || 'unnamed'
-
-  return sanitized
-}
-
-/**
- * SEC-010: Validate that a file extension is in the allowed set.
- * Returns the extension (lowercase) if allowed, throws if not.
- */
-function validateFileExtension(filename: string): string {
-  const dotIndex = filename.lastIndexOf('.')
-  if (dotIndex < 0) return '' // No extension is acceptable for text content
-
-  const ext = filename.slice(dotIndex + 1).toLowerCase()
-  if (ext && !ALLOWED_ATTACHMENT_EXTENSIONS.has(ext)) {
-    throw new Error(`File type not allowed: .${ext}`)
-  }
-  return ext
 }
 
 /**
@@ -130,6 +82,11 @@ const BUILT_IN_CONNECTION_TEMPLATES: Record<string, {
     providerType: 'openai_compat', // Always use compat for API key (5.3 is OAuth-only)
     authType: (h) => h ? 'api_key_with_endpoint' : 'api_key',
   },
+  'copilot': {
+    name: 'GitHub Copilot',
+    providerType: 'copilot',
+    authType: 'oauth',
+  },
 }
 
 /**
@@ -166,9 +123,114 @@ function createBuiltInConnection(slug: string, baseUrl?: string | null): LlmConn
 }
 
 /**
- * SEC-003: Validates that a file path is within WHITELISTED directories only.
- * Uses a strict whitelist approach instead of allowing the entire home directory.
- * Blocks access to sensitive files (.ssh, .aws, .env, private keys, etc.)
+ * Fetch available models from the Copilot SDK and update the connection.
+ * Spins up a temporary CopilotClient, calls listModels(), then stops it.
+ * Throws on failure — Copilot has no hardcoded fallback models.
+ */
+async function fetchAndStoreCopilotModels(slug: string, accessToken: string): Promise<void> {
+  const { CopilotClient } = await import('@github/copilot-sdk')
+
+  // Resolve @github/copilot CLI path — import.meta.resolve() breaks in esbuild bundles
+  const copilotRelativePath = join('node_modules', '@github', 'copilot', 'index.js')
+  const basePath = app.isPackaged ? app.getAppPath() : process.cwd()
+  let copilotCliPath = join(basePath, copilotRelativePath)
+  if (!existsSync(copilotCliPath)) {
+    const monorepoRoot = join(basePath, '..', '..')
+    copilotCliPath = join(monorepoRoot, copilotRelativePath)
+  }
+
+  const debugLines: string[] = []
+  const debugLog = (msg: string) => {
+    const line = `[${new Date().toISOString()}] ${msg}`
+    debugLines.push(line)
+    ipcLog.info(msg)
+  }
+
+  debugLog(`Copilot CLI path: ${copilotCliPath} (exists: ${existsSync(copilotCliPath)})`)
+  debugLog(`Access token: ${accessToken.substring(0, 8)}...${accessToken.substring(accessToken.length - 4)}`)
+
+  // Pass token via COPILOT_GITHUB_TOKEN env var instead of githubToken option.
+  // The githubToken option uses --auth-token-env which bypasses the CLI's normal
+  // copilot_internal/v2/token exchange, causing 403 on model listing.
+  // Using the env var lets the CLI's auth resolution handle token exchange properly.
+  const prevToken = process.env.COPILOT_GITHUB_TOKEN
+  process.env.COPILOT_GITHUB_TOKEN = accessToken
+
+  const client = new CopilotClient({
+    useStdio: true,
+    autoStart: true,
+    logLevel: 'debug',
+    ...(existsSync(copilotCliPath) ? { cliPath: copilotCliPath } : {}),
+  })
+
+  const writeDebugFile = async () => {
+    try {
+      const debugPath = join(homedir(), '.craft-agent', 'copilot-debug.log')
+      await writeFile(debugPath, debugLines.join('\n') + '\n', 'utf-8')
+    } catch { /* ignore */ }
+  }
+
+  const restoreEnv = () => {
+    if (prevToken !== undefined) {
+      process.env.COPILOT_GITHUB_TOKEN = prevToken
+    } else {
+      delete process.env.COPILOT_GITHUB_TOKEN
+    }
+  }
+
+  let models: Array<{ id: string; name: string; supportedReasoningEfforts?: string[] }>
+  try {
+    debugLog('Starting Copilot client...')
+    await client.start()
+    debugLog('Copilot client started, fetching models...')
+    models = await client.listModels()
+    debugLog(`listModels returned ${models?.length ?? 0} models: ${models?.map(m => m.id).join(', ')}`)
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error)
+    const stack = error instanceof Error ? error.stack : undefined
+    debugLog(`Copilot listModels FAILED: ${msg}`)
+    if (stack) debugLog(`Stack: ${stack}`)
+    await writeDebugFile()
+    restoreEnv()
+    // Ensure cleanup
+    try { await client.stop() } catch { /* ignore cleanup errors */ }
+    throw error
+  }
+  await client.stop()
+  restoreEnv()
+  await writeDebugFile()
+
+  if (!models || models.length === 0) {
+    throw new Error('No models returned from Copilot API. Your Copilot plan may not support this feature.')
+  }
+
+  const modelDefs = models.map((m: { id: string; name: string; supportedReasoningEfforts?: string[] }) => ({
+    id: m.id,
+    name: m.name,
+    shortName: m.name,
+    description: '',
+    provider: 'copilot' as const,
+    contextWindow: 200_000,
+    supportsThinking: !!(m.supportedReasoningEfforts && m.supportedReasoningEfforts.length > 0),
+  }))
+
+  updateLlmConnection(slug, {
+    models: modelDefs,
+    // Keep current defaultModel if it's still in the list, otherwise use the first
+    ...(() => {
+      const current = getLlmConnection(slug)
+      const currentDefault = current?.defaultModel
+      const stillValid = currentDefault && modelDefs.some(m => m.id === currentDefault)
+      return stillValid ? {} : { defaultModel: modelDefs[0].id }
+    })(),
+  })
+
+  ipcLog.info(`Fetched ${modelDefs.length} Copilot models: ${modelDefs.map(m => m.id).join(', ')}`)
+}
+
+/**
+ * Validates that a file path is within allowed directories to prevent path traversal attacks.
+ * Allowed directories: user's home directory and /tmp
  */
 async function validateFilePath(filePath: string): Promise<string> {
   // Normalize the path to resolve . and .. components
@@ -184,7 +246,7 @@ async function validateFilePath(filePath: string): Promise<string> {
     throw new Error('Only absolute file paths are allowed')
   }
 
-  // Resolve symlinks to get the real path (prevent symlink traversal)
+  // Resolve symlinks to get the real path
   let realPath: string
   try {
     realPath = await realpath(normalizedPath)
@@ -193,35 +255,11 @@ async function validateFilePath(filePath: string): Promise<string> {
     realPath = normalizedPath
   }
 
-  // Re-normalize after realpath resolution
-  realPath = normalize(realPath)
-
-  // SEC-003: WHITELIST of allowed directories (not the entire home directory)
-  const home = homedir()
+  // Define allowed base directories
   const allowedDirs = [
-    tmpdir(),                                    // Platform temp directory
-    join(home, 'Documents'),                     // User documents
-    join(home, 'Downloads'),                     // User downloads
-    join(home, 'Desktop'),                       // User desktop
-    join(home, '.craft-agent'),                  // App config directory
-    join(home, '.zonewise'),                     // ZoneWise config directory
-    join(home, 'Library', 'Application Support'), // macOS app data
-    join(home, 'AppData'),                       // Windows app data
-    join(home, '.local', 'share'),               // Linux app data
+    homedir(),      // User's home directory
+    tmpdir(),       // Platform-appropriate temp directory
   ]
-
-  // Also allow the active workspace directory if one is set
-  try {
-    const config = loadStoredConfig()
-    if (config?.activeWorkspace) {
-      const workspace = getWorkspaceByNameOrId(config.activeWorkspace)
-      if (workspace?.path) {
-        allowedDirs.push(normalize(workspace.path))
-      }
-    }
-  } catch {
-    // Config loading failed — continue with static whitelist
-  }
 
   // Check if the real path is within an allowed directory (cross-platform)
   const isAllowed = allowedDirs.some(dir => {
@@ -234,58 +272,32 @@ async function validateFilePath(filePath: string): Promise<string> {
     throw new Error('Access denied: file path is outside allowed directories')
   }
 
-  // SEC-003: Comprehensive sensitive file pattern blocking
+  // Block sensitive files even within home directory
   const sensitivePatterns = [
-    // SSH and GPG keys
-    /[/\\]\.ssh[/\\]/i,
-    /[/\\]\.gnupg[/\\]/i,
-    // Cloud credentials
-    /[/\\]\.aws[/\\]/i,
-    /[/\\]\.config[/\\]gh[/\\]/i,
-    /[/\\]\.config[/\\]gcloud[/\\]/i,
-    /[/\\]\.azure[/\\]/i,
-    // Container and orchestration
-    /[/\\]\.kube[/\\]/i,
-    /[/\\]\.docker[/\\]/i,
-    // Environment and secrets files
-    /[/\\]\.env$/i,
-    /[/\\]\.env\.[^/\\]+$/i,
-    /[/\\]\.env\.local$/i,
-    /[/\\]credentials\.json$/i,
-    /[/\\]secrets?\./i,
-    // Private keys and certificates
-    /\.pem$/i,
-    /\.key$/i,
-    /\.pfx$/i,
-    /\.p12$/i,
-    /id_rsa/i,
-    /id_ed25519/i,
-    /id_ecdsa/i,
-    /id_dsa/i,
-    // Crypto wallets
-    /wallet\.dat$/i,
-    // Browser and password stores
-    /[/\\]\.password-store[/\\]/i,
-    /[/\\]\.mozilla[/\\].*logins/i,
-    /[/\\]Keychains[/\\]/i,
-    // Token files
-    /[/\\]\.npmrc$/i,
-    /[/\\]\.pypirc$/i,
-    /[/\\]\.netrc$/i,
+    /\.ssh\//,
+    /\.gnupg\//,
+    /\.aws\/credentials/,
+    /\.env$/,
+    /\.env\./,
+    /credentials\.json$/,
+    /secrets?\./i,
+    /\.pem$/,
+    /\.key$/,
   ]
 
   if (sensitivePatterns.some(pattern => pattern.test(realPath))) {
-    throw new Error('Access denied: cannot access sensitive files')
+    throw new Error('Access denied: cannot read sensitive files')
   }
 
   return realPath
 }
 
 export function registerIpcHandlers(sessionManager: SessionManager, windowManager: WindowManager): void {
-  // Get all sessions
-  ipcMain.handle(IPC_CHANNELS.GET_SESSIONS, async () => {
+  // Get all sessions for the calling window's workspace
+  ipcMain.handle(IPC_CHANNELS.GET_SESSIONS, async (event) => {
     const end = perf.start('ipc.getSessions')
-    const sessions = sessionManager.getSessions()
+    const workspaceId = windowManager.getWorkspaceForWindow(event.sender.id)
+    const sessions = sessionManager.getSessions(workspaceId ?? undefined)
     end()
     return sessions
   })
@@ -708,16 +720,9 @@ export function registerIpcHandlers(sessionManager: SessionManager, windowManage
 
   // Generate thumbnail from base64 data (for drag-drop files where we don't have a path)
   ipcMain.handle(IPC_CHANNELS.GENERATE_THUMBNAIL, async (_event, base64: string, mimeType: string): Promise<string | null> => {
-    // SEC-010: Validate mimeType against allowed thumbnailable types
-    if (!mimeType || typeof mimeType !== 'string' || !ALLOWED_THUMBNAIL_MIMETYPES.has(mimeType)) {
-      ipcLog.warn(`SEC-010: Rejected thumbnail for disallowed mimeType: ${mimeType}`)
-      return null
-    }
-
     // Save to temp file, generate thumbnail, clean up
     const tempDir = tmpdir()
-    // SEC-010: Sanitize extension from validated mimeType (strip special chars)
-    const ext = (mimeType.split('/')[1] || 'bin').replace(/[^a-z0-9]/gi, '')
+    const ext = mimeType.split('/')[1] || 'bin'
     const tempPath = join(tempDir, `craft-thumb-${randomUUID()}.${ext}`)
 
     try {
@@ -777,8 +782,6 @@ export function registerIpcHandlers(sessionManager: SessionManager, windowManage
       // Generate unique ID for this attachment
       const id = randomUUID()
       const safeName = sanitizeFilename(attachment.name)
-      // SEC-010: Validate file extension against allowed types
-      validateFileExtension(safeName)
       const storedFileName = `${id}_${safeName}`
       const storedPath = join(attachmentsDir, storedFileName)
 
@@ -962,6 +965,17 @@ export function registerIpcHandlers(sessionManager: SessionManager, windowManage
   // Check if running in debug mode (from source)
   ipcMain.handle(IPC_CHANNELS.IS_DEBUG_MODE, () => {
     return !app.isPackaged
+  })
+
+  // Release notes
+  ipcMain.handle(IPC_CHANNELS.GET_RELEASE_NOTES, () => {
+    const { getCombinedReleaseNotes } = require('@craft-agent/shared/release-notes') as typeof import('@craft-agent/shared/release-notes')
+    return getCombinedReleaseNotes()
+  })
+
+  ipcMain.handle(IPC_CHANNELS.GET_LATEST_RELEASE_VERSION, () => {
+    const { getLatestReleaseVersion } = require('@craft-agent/shared/release-notes') as typeof import('@craft-agent/shared/release-notes')
+    return getLatestReleaseVersion()
   })
 
   // Get git branch for a directory (returns null if not a git repo or git unavailable)
@@ -1484,6 +1498,14 @@ export function registerIpcHandlers(sessionManager: SessionManager, windowManage
         ipcLog.info(`Set default LLM connection: ${setup.slug}`)
       }
 
+      // For Copilot connections, fetch available models from the API
+      if (isCopilotProvider(pendingConnection.providerType)) {
+        const oauth = await manager.getLlmOAuth(setup.slug)
+        if (oauth?.accessToken) {
+          await fetchAndStoreCopilotModels(setup.slug, oauth.accessToken)
+        }
+      }
+
       // Reinitialize auth with the newly-created connection's slug
       // (not the default, which may be a different connection)
       const authSlug = getDefaultLlmConnection() || setup.slug
@@ -1774,6 +1796,7 @@ export function registerIpcHandlers(sessionManager: SessionManager, windowManage
       workingDirectory: config?.defaults?.workingDirectory,
       localMcpEnabled: config?.localMcpServers?.enabled ?? true,
       defaultLlmConnection: config?.defaults?.defaultLlmConnection,
+      enabledSourceSlugs: config?.defaults?.enabledSourceSlugs ?? [],
     }
   })
 
@@ -2073,6 +2096,30 @@ export function registerIpcHandlers(sessionManager: SessionManager, windowManage
         } catch {
           return { success: false, error: `API error: ${response.status} ${response.statusText}` }
         }
+      }
+
+      // ========================================
+      // GitHub Copilot OAuth validation
+      // ========================================
+      // Device flow tokens don't expire — just check if access token exists
+      if (connection.providerType === 'copilot' && connection.authType === 'oauth') {
+        const oauth = await credentialManager.getLlmOAuth(slug)
+        if (!oauth?.accessToken) {
+          return { success: false, error: 'Not authenticated. Please sign in with GitHub.' }
+        }
+
+        // Fetch available models from Copilot API — required, no fallback models
+        try {
+          await fetchAndStoreCopilotModels(slug, oauth.accessToken)
+        } catch (error) {
+          const msg = error instanceof Error ? error.message : 'Unknown error'
+          ipcLog.error(`Copilot model fetch failed during validation: ${msg}`)
+          return { success: false, error: `Failed to load Copilot models: ${msg}` }
+        }
+
+        ipcLog.info(`LLM connection validated (GitHub OAuth): ${slug}`)
+        touchLlmConnection(slug)
+        return { success: true }
       }
 
       // ========================================
@@ -2413,6 +2460,92 @@ export function registerIpcHandlers(sessionManager: SessionManager, windowManage
   })
 
   // ============================================================
+  // GitHub Copilot OAuth
+  // ============================================================
+
+  // Start GitHub Copilot OAuth flow (device flow)
+  ipcMain.handle(IPC_CHANNELS.COPILOT_START_OAUTH, async (event, connectionSlug: string): Promise<{
+    success: boolean
+    error?: string
+  }> => {
+    try {
+      const { startGithubOAuth } = await import('@craft-agent/shared/auth')
+      const credentialManager = getCredentialManager()
+
+      ipcLog.info(`Starting GitHub OAuth device flow for connection: ${connectionSlug}`)
+
+      // Start device flow — tokens are returned directly once user authorizes
+      const tokens = await startGithubOAuth(
+        (status) => {
+          ipcLog.info(`[GitHub OAuth] ${status}`)
+        },
+        (deviceCode) => {
+          // Send device code to renderer so the UI can display it
+          event.sender.send(IPC_CHANNELS.COPILOT_DEVICE_CODE, deviceCode)
+        },
+      )
+
+      // Store token in credential manager (no refresh token/expiry for device flow)
+      await credentialManager.setLlmOAuth(connectionSlug, {
+        accessToken: tokens.accessToken,
+      })
+
+      ipcLog.info('GitHub OAuth completed successfully')
+      return { success: true }
+    } catch (error) {
+      ipcLog.error('GitHub OAuth failed:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'OAuth authentication failed',
+      }
+    }
+  })
+
+  // Cancel ongoing GitHub OAuth flow
+  ipcMain.handle(IPC_CHANNELS.COPILOT_CANCEL_OAUTH, async (): Promise<{ success: boolean }> => {
+    try {
+      const { cancelGithubOAuth } = await import('@craft-agent/shared/auth')
+      cancelGithubOAuth()
+      ipcLog.info('GitHub OAuth cancelled')
+      return { success: true }
+    } catch (error) {
+      ipcLog.error('Failed to cancel GitHub OAuth:', error)
+      return { success: false }
+    }
+  })
+
+  // Get GitHub Copilot authentication status
+  // Device flow tokens don't expire — just check if access token exists
+  ipcMain.handle(IPC_CHANNELS.COPILOT_GET_AUTH_STATUS, async (_event, connectionSlug: string): Promise<{
+    authenticated: boolean
+  }> => {
+    try {
+      const credentialManager = getCredentialManager()
+      const creds = await credentialManager.getLlmOAuth(connectionSlug)
+
+      return {
+        authenticated: !!creds?.accessToken,
+      }
+    } catch (error) {
+      ipcLog.error('Failed to get GitHub auth status:', error)
+      return { authenticated: false }
+    }
+  })
+
+  // Logout from Copilot (clear stored tokens)
+  ipcMain.handle(IPC_CHANNELS.COPILOT_LOGOUT, async (_event, connectionSlug: string): Promise<{ success: boolean }> => {
+    try {
+      const credentialManager = getCredentialManager()
+      await credentialManager.deleteLlmCredentials(connectionSlug)
+      ipcLog.info('Copilot credentials cleared')
+      return { success: true }
+    } catch (error) {
+      ipcLog.error('Failed to clear Copilot credentials:', error)
+      return { success: false }
+    }
+  })
+
+  // ============================================================
   // Session Info Panel (files, notes, file watching)
   // ============================================================
 
@@ -2604,6 +2737,14 @@ export function registerIpcHandlers(sessionManager: SessionManager, windowManage
     if (!workspace) throw new Error(`Workspace not found: ${workspaceId}`)
     const { deleteSource } = await import('@craft-agent/shared/sources')
     deleteSource(workspace.rootPath, sourceSlug)
+
+    // Clean up stale slug from workspace default sources
+    const { loadWorkspaceConfig, saveWorkspaceConfig } = await import('@craft-agent/shared/workspaces')
+    const config = loadWorkspaceConfig(workspace.rootPath)
+    if (config?.defaults?.enabledSourceSlugs?.includes(sourceSlug)) {
+      config.defaults.enabledSourceSlugs = config.defaults.enabledSourceSlugs.filter(s => s !== sourceSlug)
+      saveWorkspaceConfig(workspace.rootPath, config)
+    }
   })
 
   // Start OAuth flow for a source
@@ -2870,15 +3011,17 @@ export function registerIpcHandlers(sessionManager: SessionManager, windowManage
   // Skills (Workspace-scoped)
   // ============================================================
 
-  // Get all skills for a workspace
-  ipcMain.handle(IPC_CHANNELS.SKILLS_GET, async (_event, workspaceId: string) => {
+  // Get all skills for a workspace (and optionally project-level skills from workingDirectory)
+  ipcMain.handle(IPC_CHANNELS.SKILLS_GET, async (_event, workspaceId: string, workingDirectory?: string) => {
+    ipcLog.info(`SKILLS_GET: Loading skills for workspace: ${workspaceId}${workingDirectory ? `, workingDirectory: ${workingDirectory}` : ''}`)
     const workspace = getWorkspaceByNameOrId(workspaceId)
     if (!workspace) {
       ipcLog.error(`SKILLS_GET: Workspace not found: ${workspaceId}`)
       return []
     }
-    const { loadWorkspaceSkills } = await import('@craft-agent/shared/skills')
-    const skills = loadWorkspaceSkills(workspace.rootPath)
+    const { loadAllSkills } = await import('@craft-agent/shared/skills')
+    const skills = loadAllSkills(workspace.rootPath, workingDirectory)
+    ipcLog.info(`SKILLS_GET: Loaded ${skills.length} skills from ${workspace.rootPath}`)
     return skills
   })
 
@@ -3391,6 +3534,18 @@ export function registerIpcHandlers(sessionManager: SessionManager, windowManage
     setKeepAwakeWhileRunning(enabled)
     // Update the power manager's cached value and power state
     setKeepAwakeSetting(enabled)
+  })
+
+  // Get rich tool descriptions setting
+  ipcMain.handle(IPC_CHANNELS.APPEARANCE_GET_RICH_TOOL_DESCRIPTIONS, async () => {
+    const { getRichToolDescriptions } = await import('@craft-agent/shared/config/storage')
+    return getRichToolDescriptions()
+  })
+
+  // Set rich tool descriptions setting
+  ipcMain.handle(IPC_CHANNELS.APPEARANCE_SET_RICH_TOOL_DESCRIPTIONS, async (_event, enabled: boolean) => {
+    const { setRichToolDescriptions } = await import('@craft-agent/shared/config/storage')
+    setRichToolDescriptions(enabled)
   })
 
   // Update app badge count

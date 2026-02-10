@@ -87,16 +87,10 @@
     "vite": "^6.2.4"
   },
   "dependencies": {
-<<<<<<< HEAD
-    "@anthropic-ai/claude-agent-sdk": "0.2.19",
-    "@anthropic-ai/sdk": "0.71.1",
-    "@modelcontextprotocol/sdk": "1.24.3",
-=======
     "@anthropic-ai/claude-agent-sdk": "^0.2.37",
     "@anthropic-ai/sdk": "^0.71.1",
     "@github/copilot-sdk": "^0.1.23",
     "@modelcontextprotocol/sdk": "^1.24.3",
->>>>>>> upstream/main
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dropdown-menu": "^2.1.16",

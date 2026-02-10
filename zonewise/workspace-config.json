@@ -34,8 +34,7 @@
     },
     "sources": [
       "zonewise-supabase",
-      "zonewise-agents",
-      "vibe-code-mcp"
+      "zonewise-agents"
     ],
     "skills": [
       "zonewise-intelligence",
@@ -113,15 +112,7 @@
         "name": "Multi-County",
         "color": "#607D8B"
       }
-    ],
-    "mcpServers": {
-      "vibe-code-best-practices": {
-        "endpoint": "https://vibe-code-best-practices.vercel.app/api/mcp",
-        "protocol": "streamable-http",
-        "description": "627+ curated modern dev tools catalog",
-        "autoConnect": true
-      }
-    }
+    ]
   },
   "localMcpServers": {
     "enabled": true

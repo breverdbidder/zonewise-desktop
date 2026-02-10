@@ -10,3 +10,4 @@ export * from './large-response.ts';
 export * from './title-generator.ts';
 export * from './toolNames.ts';
 export * from './workspace.ts';
+export * from './mcp-config-generator.ts';

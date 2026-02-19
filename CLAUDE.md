@@ -201,3 +201,28 @@ curl -s -H "Authorization: token $GH_TOKEN" \
   "https://api.github.com/repos/breverdbidder/zonewise-desktop/deployments?per_page=1" \
   | python -m json.tool | grep -E '"(state|description)"'
 ```
+
+
+---
+
+## The 12 Wise Module System (ZoneWise Brand Language)
+
+All pipeline stages use Wise-branded names. BidWise is the hero module.
+
+| # | Module | What It Does |
+|---|--------|-------------|
+| 01 | DiscoverWise | Find upcoming auctions — 67 FL counties |
+| 02 | GatherWise | Pull all property data (BCPAO, photos, history) |
+| 03 | TitleWise | Verify full chain of title |
+| 04 | LienWise | Map complete lien waterfall |
+| 05 | TaxWise | Check tax certificates and delinquencies |
+| 06 | NeighborWise | Neighborhood intel — income, vacancy, demand |
+| 07 | ScoreWise | AI bid probability score |
+| 08 | BidWise | THE HERO — exact max bid calculation |
+| 09 | CallWise | Final BID / REVIEW / SKIP decision |
+| 10 | InsightWise | Full 298-KPI intelligence report |
+| 11 | TrackWise | Disposition tracking |
+| 12 | VaultWise | Archive every deal and result |
+
+BidWise hero tagline: "Every module exists to get you to one number. BidWise gives you that number."
+Demo: https://zonewise.ai/demo.html

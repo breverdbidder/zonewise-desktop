@@ -2,6 +2,7 @@ import * as React from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from './App'
 import { SessionViewPage } from './SessionViewPage'
+import { OpsPage } from './OpsPage'
 import './index.css'
 
 const container = document.getElementById('root')
@@ -18,6 +19,10 @@ function Router() {
 
   if (path === '/s' || path.startsWith('/s/')) {
     return <SessionViewPage />
+  }
+
+  if (path === '/ops') {
+    return <OpsPage />
   }
 
   // Default: ZoneWise chatbot

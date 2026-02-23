@@ -1,157 +1,148 @@
 ---
 name: county-miami-dade
 description: >
-  Zoning intelligence for Miami-Dade County, FL (FDOR co_no: 13).
-  35 jurisdictions, 180 zoning districts in Supabase.
-  Avg data completeness: 30%. Portal type: custom.
-  Use for parcel lookups, permitted use queries, dimensional standards,
-  overlay districts. Triggers on: Miami-Dade County, co_no 13,
-  any address in Miami-Dade County Florida.
-supabase_county_filter: "county=ilike.%25Miami-Dade%25"
+  Zoning intelligence for Miami-Dade County, FL.
+  34 jurisdictions, FDOR co_no 13.
+  Portal: arcgis. Anti-scrape: true.
+  Triggers: Miami-Dade, miami-dade county, Miami, co_no 13.
 co_no: 13
-portal_type: custom
+county_slug: miami-dade
+portal_type: arcgis
 anti_scrape: true
-rate_limit_rpm: 10
-phase: P0_PILOT
+rate_limit_rpm: 20
+phase: P0
 last_validated: 2026-02-23
 ---
 
 # Miami-Dade County — Zoning Intelligence
 
-> **co_no**: 13 | **Phase**: P0_PILOT | **Anti-scrape**: true | **Rate limit**: 10 rpm
+**Seat**: Miami | **Pop**: 2,701,767 | **Municipalities**: 34
+**FDOR co_no**: 13 | **Portal**: ARCGIS | **Phase**: P0
+
+---
 
 ## Supabase Queries
 
-### 1. All jurisdictions in this county
+Host: `mocerqjnksmhcjzxrewo.supabase.co` — use `apikey` + `Authorization: Bearer` headers.
+
+### Jurisdictions in this county
 ```
-GET /jurisdictions
-  ?county=ilike.%25Miami-Dade%25
-  &select=id,name,data_completeness,municode_url,code_source
-  &order=data_completeness.desc
+GET /jurisdictions?county=ilike.%25Miami-Dade%25&select=id,name,data_completeness,municode_url&order=name.asc
 ```
 
-### 2. Zoning districts for a jurisdiction
+### Zoning districts for a jurisdiction
 ```
-GET /zoning_districts
-  ?jurisdiction_id=eq.{id}
-  &select=id,code,name,category
-  &order=category,code
-  &limit=200
+GET /zoning_districts?jurisdiction_id=eq.{id}&select=id,code,name,category&order=category,code
 ```
 
-### 3. Parcel lookup (FDOR statewide table)
+### Dimensional standards
 ```
-GET /fl_parcels
-  ?co_no=eq.13
-  &parcel_id=eq.{parcel_id}
-  &select=parcel_id,phy_addr1,phy_city,dor_uc,jv,lnd_val,centroid_lat,centroid_lng
+GET /zone_standards?zoning_district_id=eq.{district_id}&select=*
 ```
 
-### 4. Dimensional standards
+### Permitted uses
 ```
-GET /zone_standards
-  ?zoning_district_id=eq.{district_id}
-  &select=front_setback_ft,side_setback_ft,rear_setback_ft,max_height_ft,max_far,max_lot_coverage_pct,min_lot_size_sf
+GET /permitted_uses?zoning_district_id=eq.{district_id}&select=use_name,permission_type,use_category
 ```
 
-### 5. Permitted uses
+### Parcel lookup by address
 ```
-GET /permitted_uses
-  ?zoning_district_id=eq.{district_id}
-  &select=use_category_id,permission_type,notes
-  &order=permission_type
+GET /fl_parcels?co_no=eq.13&phy_addr1=ilike.%25{street}%25&select=parcel_id,phy_addr1,phy_city,phy_zipcd,dor_uc,centroid_lat,centroid_lng&limit=5
 ```
 
-### 6. Overlay districts
+### Parcel lookup by parcel ID
 ```
-GET /overlay_districts
-  ?jurisdiction_id=eq.{id}
-  &select=name,type,description,restrictions
+GET /fl_parcels?co_no=eq.13&parcel_id=eq.{parcel_id}&select=*
 ```
+
+### GIS Direct Query (ArcGIS)
+```
+GET https://maps.miamidade.gov/arcgis/rest/services/ZoningAndLandUse/MapServer/query?where=1=1&geometry={lng},{lat}&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects&outFields=ZONING&f=json
+```
+Zone field: `ZONING`
+
+---
 
 ## 3-Mode Research Protocol (CrossBeam Pattern)
 
-### Mode 1 — Discovery (WebSearch, ~30s)
-**Trigger**: `portal_url` unknown, stale (>30 days), or returns 404
+### Mode 1 — Discovery (WebSearch ≤30s)
+**Trigger**: portal unknown OR last_validated > 30 days
+Queries:
+1. `"Miami-Dade County Florida zoning map"`
+2. `"Miami-Dade County Florida municode zoning ordinance"`
+3. `"Miami-Dade County GIS ArcGIS zoning Florida"`
+**Output** → UPDATE `jurisdictions.skill_last_validated`
+
+### Mode 2 — Extraction (WebFetch ≤90s)
+**Target**: https://library.municode.com/fl/miami-dade_county
+**Extract**: district codes, permitted uses, setbacks, height limits, FAR
+**Output** → UPSERT `zoning_districts`, `zone_standards`, `permitted_uses`
+
+### Mode 3 — AgentQL/Modal (fallback)
+**Trigger**: Mode 2 empty OR anti_scrape=true
+**Rate limit**: 20 rpm | **Anti-detect**: ENABLED
+**Container**: `modal-county-miami-dade`
+
+AgentQL selector:
 ```python
-queries = [
-    "Miami-Dade County Florida zoning ordinance municode",
-    "Miami-Dade County Florida GIS zoning layer ArcGIS",
-    "Miami-Dade County Florida online zoning map portal",
-    "site:municode.com Miami-Dade county florida zoning",
-]
-# Output → candidate URLs → validate → UPDATE jurisdictions.code_source
+await page.query_elements("""
+  {
+    zoning_table {
+      district_code
+      district_name
+      uses_permitted[]
+      setback_front
+      setback_side
+      setback_rear
+      max_height
+    }
+  }
+""")
 ```
 
-### Mode 2 — Extraction (WebFetch + Parser, ~60-90s)
-**Trigger**: Mode 1 found valid URL; page renders without JS
-```python
-targets = ["zoning chapter", "district table", "dimensional standards table"]
-extract = ["district codes", "permitted uses", "setbacks", "height limits", "FAR", "lot coverage"]
-output = "INSERT/UPSERT zoning_districts + zone_standards + permitted_uses"
-```
+---
 
-### Mode 3 — AgentQL Fallback (Modal Container)
-**Trigger**: Mode 2 empty; JS rendering required; `anti_scrape: true`
-```python
-config = {
-    "county": "Miami-Dade", "co_no": 13,
-    "anti_scrape": true, "rate_limit_rpm": 10,
-    "agentql_api_key": "FCRgiir6uixy8nIHfCt7wNVaqcbb2kDAOp3rLxyHJnh5dkHhj8G2SQ",
-}
-# Modal container: zonewise-modal repo, nightly 11PM EST GitHub Action
-# Circuit breaker: 3 failures → INSERT insights(type='ESCALATE', meta={county:'miami-dade'})
-```
+## Circuit Breaker
+All 3 modes fail → INSERT `insights` table with `type='ESCALATE'`, `county='miami-dade'` → Traycer auto-issue.
+
+---
 
 ## County Profile
 
 | Field | Value |
 |-------|-------|
 | FDOR co_no | 13 |
-| Jurisdictions in DB | 35 |
-| Zoning districts | 180 |
-| Avg data completeness | 30% |
-| Portal type | custom |
-| Anti-scrape | true |
-| Rate limit | 10 rpm |
-| Test parcel | `0101010010010` |
-| GIS endpoint | https://gis.miamidade.gov/arcgis/rest/services/MDC_Zoning/MapServer/0 |
-| Phase | P0_PILOT |
+| Seat | Miami |
+| Population | 2,701,767 |
+| Municipalities | 34 |
+| Portal | ARCGIS |
+| Municode | [miami-dade_county](https://library.municode.com/fl/miami-dade_county) |
+| Anti-scrape | ⚠️ YES |
+| Rate limit | 20 rpm |
+| Phase | P0 |
 | Last validated | 2026-02-23 |
 
-## GIS Endpoints
+---
 
-- Primary: `https://gis.miamidade.gov/arcgis/rest/services/MDC_Zoning/MapServer/0`
-- Fallback: FDOR fl_parcels table (co_no=13)
+## Standard FL Zoning Categories
 
-## Miami-Dade Specific Notes
+| Category | Typical Codes |
+|----------|--------------|
+| Residential | RS, RE, RM, R-1, R-2, R-3, RSF |
+| Commercial | CN, CG, CB, C-1, C-2, C-3 |
+| Industrial | IL, IH, LI, I-1, I-2 |
+| Agricultural | A, AG, AU, A-1, A-5 |
+| Mixed Use | MX, MU, TOD |
+| Special | PUD, DRI, CDD |
+| Conservation | CV, CON, GU |
 
-### Portal
-Miami-Dade uses a **custom portal**, NOT Municode:
-- Zoning portal: https://www.miamidade.gov/zoning/
-- GIS: https://gis.miamidade.gov/arcgis/
-- Online zoning query: https://gis.miamidade.gov/arcgis/apps/Viewer/index.html
-
-### Anti-Scrape
-Miami-Dade portal has rate limiting. Use Mode 3 (AgentQL) for any JS-heavy pages.
-Rate limit: 10 rpm. Add 6s delay between requests.
-
-### Zoning Code System
-Uses **EU** (European-style) codes: T3-L, T4-R, T5-O, T6-80 (Transect zones)
-Plus legacy codes: RU-1, BU-1, IU-1, AU, GU
-
-### Municipalities
-35 municipalities including: Miami, Miami Beach, Coral Gables, Hialeah,
-Homestead, Miami Gardens, Doral, Aventura, North Miami, Opa-locka, etc.
-Each has its own zoning code — query by jurisdiction_id.
-
-## Escalation Conditions
-
-- 3 consecutive failures → `insights` table `type='ESCALATE'` + auto Traycer issue
-- `last_validated > 30 days` → Traycer: `[SKILL] Revalidate county-miami-dade`
-- Portal URL 404 → Mode 1 re-run
-- Completeness drops >10% → alert `daily_metrics`
+*Actual codes populated after Mode 2/3 extraction*
 
 ---
-*Auto-generated 2026-02-23 by `scripts/generate_county_skills.py`*
-*Runtime data populated by nightly Modal scraper + Supabase upsert*
+
+## Progressive Disclosure (CraftAgents)
+- **Level 1** (always): YAML frontmatter ~80 tokens
+- **Level 2** (on county mention): Full SKILL.md ~700 tokens
+- **Level 3** (deep extraction): references/ files ~2000 tokens
+
+Trigger phrases: "Miami-Dade", "miami-dade county", "Miami", "co_no 13"

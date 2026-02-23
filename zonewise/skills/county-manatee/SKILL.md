@@ -1,136 +1,142 @@
 ---
 name: county-manatee
 description: >
-  Zoning intelligence for Manatee County, FL (FDOR co_no: 41).
-  TBD — run generator after first scrape jurisdictions, TBD zoning districts in Supabase.
-  Avg data completeness: 0%. Portal type: unknown.
-  Use for parcel lookups, permitted use queries, dimensional standards,
-  overlay districts. Triggers on: Manatee County, co_no 41,
-  any address in Manatee County Florida.
-supabase_county_filter: "county=ilike.%25Manatee%25"
+  Zoning intelligence for Manatee County, FL.
+  4 jurisdictions, FDOR co_no 41.
+  Portal: arcgis. Anti-scrape: false.
+  Triggers: Manatee, manatee county, Bradenton, co_no 41.
 co_no: 41
-portal_type: unknown
+county_slug: manatee
+portal_type: arcgis
 anti_scrape: false
-rate_limit_rpm: 30
+rate_limit_rpm: 60
 phase: P3
 last_validated: 2026-02-23
 ---
 
 # Manatee County — Zoning Intelligence
 
-> **co_no**: 41 | **Phase**: P3 | **Anti-scrape**: false | **Rate limit**: 30 rpm
+**Seat**: Bradenton | **Pop**: 399,397 | **Municipalities**: 4
+**FDOR co_no**: 41 | **Portal**: ARCGIS | **Phase**: P3
+
+---
 
 ## Supabase Queries
 
-### 1. All jurisdictions in this county
+Host: `mocerqjnksmhcjzxrewo.supabase.co` — use `apikey` + `Authorization: Bearer` headers.
+
+### Jurisdictions in this county
 ```
-GET /jurisdictions
-  ?county=ilike.%25Manatee%25
-  &select=id,name,data_completeness,municode_url,code_source
-  &order=data_completeness.desc
+GET /jurisdictions?county=ilike.%25Manatee%25&select=id,name,data_completeness,municode_url&order=name.asc
 ```
 
-### 2. Zoning districts for a jurisdiction
+### Zoning districts for a jurisdiction
 ```
-GET /zoning_districts
-  ?jurisdiction_id=eq.{id}
-  &select=id,code,name,category
-  &order=category,code
-  &limit=200
+GET /zoning_districts?jurisdiction_id=eq.{id}&select=id,code,name,category&order=category,code
 ```
 
-### 3. Parcel lookup (FDOR statewide table)
+### Dimensional standards
 ```
-GET /fl_parcels
-  ?co_no=eq.41
-  &parcel_id=eq.{parcel_id}
-  &select=parcel_id,phy_addr1,phy_city,dor_uc,jv,lnd_val,centroid_lat,centroid_lng
+GET /zone_standards?zoning_district_id=eq.{district_id}&select=*
 ```
 
-### 4. Dimensional standards
+### Permitted uses
 ```
-GET /zone_standards
-  ?zoning_district_id=eq.{district_id}
-  &select=front_setback_ft,side_setback_ft,rear_setback_ft,max_height_ft,max_far,max_lot_coverage_pct,min_lot_size_sf
+GET /permitted_uses?zoning_district_id=eq.{district_id}&select=use_name,permission_type,use_category
 ```
 
-### 5. Permitted uses
+### Parcel lookup by address
 ```
-GET /permitted_uses
-  ?zoning_district_id=eq.{district_id}
-  &select=use_category_id,permission_type,notes
-  &order=permission_type
+GET /fl_parcels?co_no=eq.41&phy_addr1=ilike.%25{street}%25&select=parcel_id,phy_addr1,phy_city,phy_zipcd,dor_uc,centroid_lat,centroid_lng&limit=5
 ```
 
-### 6. Overlay districts
+### Parcel lookup by parcel ID
 ```
-GET /overlay_districts
-  ?jurisdiction_id=eq.{id}
-  &select=name,type,description,restrictions
+GET /fl_parcels?co_no=eq.41&parcel_id=eq.{parcel_id}&select=*
 ```
+
+---
 
 ## 3-Mode Research Protocol (CrossBeam Pattern)
 
-### Mode 1 — Discovery (WebSearch, ~30s)
-**Trigger**: `portal_url` unknown, stale (>30 days), or returns 404
+### Mode 1 — Discovery (WebSearch ≤30s)
+**Trigger**: portal unknown OR last_validated > 30 days
+Queries:
+1. `"Manatee County Florida zoning map"`
+2. `"Manatee County Florida municode zoning ordinance"`
+3. `"Manatee County GIS ArcGIS zoning Florida"`
+**Output** → UPDATE `jurisdictions.skill_last_validated`
+
+### Mode 2 — Extraction (WebFetch ≤90s)
+**Target**: https://library.municode.com/fl/manatee_county
+**Extract**: district codes, permitted uses, setbacks, height limits, FAR
+**Output** → UPSERT `zoning_districts`, `zone_standards`, `permitted_uses`
+
+### Mode 3 — AgentQL/Modal (fallback)
+**Trigger**: Mode 2 empty OR anti_scrape=false
+**Rate limit**: 60 rpm | **Anti-detect**: DISABLED
+**Container**: `modal-county-manatee`
+
+AgentQL selector:
 ```python
-queries = [
-    "Manatee County Florida zoning ordinance municode",
-    "Manatee County Florida GIS zoning layer ArcGIS",
-    "Manatee County Florida online zoning map portal",
-    "site:municode.com Manatee county florida zoning",
-]
-# Output → candidate URLs → validate → UPDATE jurisdictions.code_source
+await page.query_elements("""
+  {
+    zoning_table {
+      district_code
+      district_name
+      uses_permitted[]
+      setback_front
+      setback_side
+      setback_rear
+      max_height
+    }
+  }
+""")
 ```
 
-### Mode 2 — Extraction (WebFetch + Parser, ~60-90s)
-**Trigger**: Mode 1 found valid URL; page renders without JS
-```python
-targets = ["zoning chapter", "district table", "dimensional standards table"]
-extract = ["district codes", "permitted uses", "setbacks", "height limits", "FAR", "lot coverage"]
-output = "INSERT/UPSERT zoning_districts + zone_standards + permitted_uses"
-```
+---
 
-### Mode 3 — AgentQL Fallback (Modal Container)
-**Trigger**: Mode 2 empty; JS rendering required; `anti_scrape: false`
-```python
-config = {
-    "county": "Manatee", "co_no": 41,
-    "anti_scrape": false, "rate_limit_rpm": 30,
-    "agentql_api_key": "FCRgiir6uixy8nIHfCt7wNVaqcbb2kDAOp3rLxyHJnh5dkHhj8G2SQ",
-}
-# Modal container: zonewise-modal repo, nightly 11PM EST GitHub Action
-# Circuit breaker: 3 failures → INSERT insights(type='ESCALATE', meta={county:'manatee'})
-```
+## Circuit Breaker
+All 3 modes fail → INSERT `insights` table with `type='ESCALATE'`, `county='manatee'` → Traycer auto-issue.
+
+---
 
 ## County Profile
 
 | Field | Value |
 |-------|-------|
 | FDOR co_no | 41 |
-| Jurisdictions in DB | TBD — run generator after first scrape |
-| Zoning districts | TBD |
-| Avg data completeness | 0% |
-| Portal type | unknown |
-| Anti-scrape | false |
-| Rate limit | 30 rpm |
-| Test parcel | `TBD` |
-| GIS endpoint | Not yet validated |
+| Seat | Bradenton |
+| Population | 399,397 |
+| Municipalities | 4 |
+| Portal | ARCGIS |
+| Municode | [manatee_county](https://library.municode.com/fl/manatee_county) |
+| Anti-scrape | No |
+| Rate limit | 60 rpm |
 | Phase | P3 |
 | Last validated | 2026-02-23 |
 
-## GIS Endpoints
+---
 
-- Primary: `Not yet validated`
-- Fallback: FDOR fl_parcels table (co_no=41)
+## Standard FL Zoning Categories
 
-## Escalation Conditions
+| Category | Typical Codes |
+|----------|--------------|
+| Residential | RS, RE, RM, R-1, R-2, R-3, RSF |
+| Commercial | CN, CG, CB, C-1, C-2, C-3 |
+| Industrial | IL, IH, LI, I-1, I-2 |
+| Agricultural | A, AG, AU, A-1, A-5 |
+| Mixed Use | MX, MU, TOD |
+| Special | PUD, DRI, CDD |
+| Conservation | CV, CON, GU |
 
-- 3 consecutive failures → `insights` table `type='ESCALATE'` + auto Traycer issue
-- `last_validated > 30 days` → Traycer: `[SKILL] Revalidate county-manatee`
-- Portal URL 404 → Mode 1 re-run
-- Completeness drops >10% → alert `daily_metrics`
+*Actual codes populated after Mode 2/3 extraction*
 
 ---
-*Auto-generated 2026-02-23 by `scripts/generate_county_skills.py`*
-*Runtime data populated by nightly Modal scraper + Supabase upsert*
+
+## Progressive Disclosure (CraftAgents)
+- **Level 1** (always): YAML frontmatter ~80 tokens
+- **Level 2** (on county mention): Full SKILL.md ~700 tokens
+- **Level 3** (deep extraction): references/ files ~2000 tokens
+
+Trigger phrases: "Manatee", "manatee county", "Bradenton", "co_no 41"

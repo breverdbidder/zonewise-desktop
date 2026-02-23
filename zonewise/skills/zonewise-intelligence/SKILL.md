@@ -334,3 +334,33 @@ When users ask about pricing, explain the capability-based model:
 - **Not Investment Advice**: "This data supports your analysis. Always conduct independent due diligence."
 - **Data Privacy**: Never expose personal information from property records beyond what's publicly available
 - **Accuracy**: State data source and completeness level. When uncertain, say "I'd recommend verifying with [source]"
+
+
+---
+
+## County Skill Routing — 67-County Intelligence
+
+When a query mentions a Florida location, automatically load the appropriate county skill:
+
+### Detection Protocol
+1. **Explicit county**: "Miami-Dade County" → `county-miami-dade`
+2. **City name**: "Tampa" → Hillsborough → `county-hillsborough`
+3. **Parcel/address**: Parse zip or city → map to county
+4. **Direct co_no**: Load by FDOR number (1-67)
+
+### Loading Pattern
+```
+Load: zonewise/skills/county-{slug}/SKILL.md
+Query: GET /jurisdictions?county=ilike.%{county}%&select=id,name,co_no,skill_file_path
+```
+
+### County Skill Files (67 Available)
+All 67 FL county skills deployed at: `zonewise/skills/county-{slug}/SKILL.md`
+Each contains: portal_type, anti_scrape flag, rate_limit_rpm, Municode URL, GIS endpoint, 3-mode research protocol.
+
+**P0 Pilots (full data):** Brevard (co_no=5) | Miami-Dade (co_no=13) | Orange (co_no=48)
+
+### Acceptance Test
+- "What can I build in Miami-Dade?" → loads county-miami-dade skill → queries `/jurisdictions?county=ilike.%Miami-Dade%` → returns zones with co_no=13
+- "Zoning for 123 Main St, Tampa" → detects Hillsborough County → loads county-hillsborough → queries fl_parcels with co_no=29
+- co_no 5 always routes to county-brevard (Brevard County pilot)

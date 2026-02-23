@@ -1,86 +1,60 @@
 # ZoneWise.AI Skills Manifest
-# Progressive Disclosure Architecture
-# Updated: 2026-02-01
+# Progressive Disclosure Architecture — v2.0.0
+# Updated: 2026-02-23 by generate_county_skills.py
+# CrossBeam-adapted: 12 core skills + 67 county skills = 79 total
 
-version: "1.1.0"
-updated: "2026-02-01"
-total_skills: 12
+version: "2.0.0"
+updated: "2026-02-23"
+total_skills: 79
+total_core_skills: 12
+total_county_skills: 67
 
 skills:
-  # ============================================================================
-  # CORE ANALYSIS SKILLS
-  # ============================================================================
-  
+  # ── CORE SKILLS (12) ──────────────────────────────────────────────────
+
   - name: zoning-analysis
     description: |
-      Analyze zoning codes and land use regulations. Extract setbacks, FAR, 
-      height limits, and lot coverage from municipal codes.
+      Analyze zoning codes, permitted uses, setbacks. Routes to county-specific skill for all 67 FL counties.
     path: zonewise/skills/zoning-analysis/SKILL.md
     category: zoning
     priority: 1
     tokens_estimate: 100
-    references:
-      - malabar-zoning-table.md
-      - brevard-jurisdictions.md
 
   - name: property-valuation
     description: |
-      Estimate property values using comparable sales, income approach, and cost 
-      approach. Calculate ARV, max bid, and investment returns.
+      Estimate property values: comps, income, cost approach. ARV, max bid, investment returns.
     path: zonewise/skills/property-valuation/SKILL.md
     category: analysis
     priority: 1
     tokens_estimate: 120
-    references:
-      - valuation-methods.md
-      - bcpao-values-api.md
-      - comp-selection.md
 
   - name: permit-lookup
     description: |
-      Search building permits, code violations, and inspection history. Identify 
-      unpermitted work and assess permit risk for investment properties.
+      Search building permits, violations, inspection history. Unpermitted work identification.
     path: zonewise/skills/permit-lookup/SKILL.md
     category: data
     priority: 2
     tokens_estimate: 100
-    references:
-      - brevard-permit-portal.md
-      - permit-types.md
-      - violation-codes.md
 
   - name: sun-analysis
     description: |
-      Calculate sun position, generate sun paths, shadow projections, and solar 
-      exposure heatmaps. Animate shadows throughout the day.
+      Sun position, shadow projections, solar exposure heatmaps. Animate shadows throughout day.
     path: zonewise/skills/sun-analysis/SKILL.md
     category: analysis
     priority: 1
     tokens_estimate: 110
-    references:
-      - suncalc-api.md
-      - shadow-algorithm.md
 
-  # ============================================================================
-  # VISUALIZATION SKILLS
-  # ============================================================================
-  
   - name: envelope-development
     description: |
-      Generate 3D building envelopes from zoning parameters. Calculate maximum 
-      buildable volume using setbacks, height limits, and FAR.
+      3D building envelopes from zoning parameters. Max buildable volume from setbacks + height + FAR.
     path: zonewise/skills/envelope-development/SKILL.md
     category: visualization
     priority: 1
     tokens_estimate: 120
-    references:
-      - envelope-algorithm.md
-      - three-geometry-patterns.md
 
   - name: threejs-fundamentals
     description: |
-      Core Three.js concepts: Scene, Camera, Renderer, Mesh, Material. 
-      React Three Fiber integration patterns.
+      Three.js core: Scene, Camera, Renderer, React Three Fiber patterns.
     path: zonewise/skills/threejs-fundamentals/SKILL.md
     category: visualization
     priority: 2
@@ -88,8 +62,7 @@ skills:
 
   - name: threejs-geometry
     description: |
-      Create and manipulate Three.js geometries. BufferGeometry, ExtrudeGeometry,
-      vertex manipulation, polygon triangulation.
+      BufferGeometry, ExtrudeGeometry, vertex manipulation, polygon triangulation.
     path: zonewise/skills/threejs-geometry/SKILL.md
     category: visualization
     priority: 2
@@ -97,8 +70,7 @@ skills:
 
   - name: threejs-materials
     description: |
-      Three.js materials for building visualization. MeshStandardMaterial,
-      transparency, vertex colors.
+      MeshStandardMaterial, transparency, vertex colors for building visualization.
     path: zonewise/skills/threejs-materials/SKILL.md
     category: visualization
     priority: 2
@@ -106,8 +78,7 @@ skills:
 
   - name: threejs-lighting
     description: |
-      Lighting for architectural visualization. AmbientLight, DirectionalLight,
-      shadow mapping, sun simulation.
+      AmbientLight, DirectionalLight, shadow mapping, sun simulation.
     path: zonewise/skills/threejs-lighting/SKILL.md
     category: visualization
     priority: 2
@@ -115,90 +86,873 @@ skills:
 
   - name: threejs-interaction
     description: |
-      User interaction: OrbitControls, raycasting, click detection, hover effects.
+      OrbitControls, raycasting, click detection, hover effects.
     path: zonewise/skills/threejs-interaction/SKILL.md
     category: visualization
     priority: 2
     tokens_estimate: 65
 
-  # ============================================================================
-  # DATA INTEGRATION SKILLS
-  # ============================================================================
-  
   - name: bcpao-integration
     description: |
-      Brevard County Property Appraiser data integration. Parcel lookup, property
-      photos, owner information, assessed values.
+      Brevard County Property Appraiser: parcel lookup, photos, assessed values, owner info.
     path: zonewise/skills/bcpao-integration/SKILL.md
     category: data
     priority: 2
     tokens_estimate: 90
-    references:
-      - bcpao-api.md
-      - parcel-schema.md
 
   - name: mapbox-integration
     description: |
-      Mapbox GL JS integration with Three.js overlays. Satellite imagery, geocoding,
-      custom map styles.
+      Mapbox GL JS + Three.js overlays. Satellite imagery, geocoding, custom styles.
     path: zonewise/skills/mapbox-integration/SKILL.md
     category: visualization
     priority: 2
     tokens_estimate: 85
-    references:
-      - mapbox-styles.md
-      - react-three-map.md
 
-# Categories
+  # ── COUNTY SKILLS (67) ──────────────────────────────────────────────
+  # CrossBeam 3-mode research: WebSearch → WebFetch → AgentQL/Modal
+  # Progressive disclosure: 50 tokens metadata always loaded;
+  # full SKILL.md loaded on-demand when county detected in query.
+
+  - name: county-alachua
+    description: |
+      Alachua County FL (co_no: 1). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-alachua/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 1
+
+  - name: county-baker
+    description: |
+      Baker County FL (co_no: 2). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-baker/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 2
+
+  - name: county-bay
+    description: |
+      Bay County FL (co_no: 3). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-bay/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 3
+
+  - name: county-bradford
+    description: |
+      Bradford County FL (co_no: 4). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-bradford/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 4
+
+  - name: county-brevard
+    description: |
+      Brevard County FL (co_no: 5). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P0.
+    path: zonewise/skills/county-brevard/SKILL.md
+    category: county
+    priority: 1
+    tokens_estimate: 50
+    co_no: 5
+
+  - name: county-broward
+    description: |
+      Broward County FL (co_no: 6). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-broward/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 6
+
+  - name: county-calhoun
+    description: |
+      Calhoun County FL (co_no: 7). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-calhoun/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 7
+
+  - name: county-charlotte
+    description: |
+      Charlotte County FL (co_no: 8). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-charlotte/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 8
+
+  - name: county-citrus
+    description: |
+      Citrus County FL (co_no: 9). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-citrus/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 9
+
+  - name: county-clay
+    description: |
+      Clay County FL (co_no: 10). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-clay/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 10
+
+  - name: county-collier
+    description: |
+      Collier County FL (co_no: 11). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-collier/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 11
+
+  - name: county-columbia
+    description: |
+      Columbia County FL (co_no: 12). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-columbia/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 12
+
+  - name: county-miami-dade
+    description: |
+      Miami-Dade County FL (co_no: 13). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P0.
+    path: zonewise/skills/county-miami-dade/SKILL.md
+    category: county
+    priority: 1
+    tokens_estimate: 50
+    co_no: 13
+
+  - name: county-desoto
+    description: |
+      DeSoto County FL (co_no: 14). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-desoto/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 14
+
+  - name: county-dixie
+    description: |
+      Dixie County FL (co_no: 15). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-dixie/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 15
+
+  - name: county-duval
+    description: |
+      Duval County FL (co_no: 16). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-duval/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 16
+
+  - name: county-escambia
+    description: |
+      Escambia County FL (co_no: 17). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-escambia/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 17
+
+  - name: county-flagler
+    description: |
+      Flagler County FL (co_no: 18). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-flagler/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 18
+
+  - name: county-franklin
+    description: |
+      Franklin County FL (co_no: 19). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-franklin/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 19
+
+  - name: county-gadsden
+    description: |
+      Gadsden County FL (co_no: 20). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-gadsden/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 20
+
+  - name: county-gilchrist
+    description: |
+      Gilchrist County FL (co_no: 21). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-gilchrist/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 21
+
+  - name: county-glades
+    description: |
+      Glades County FL (co_no: 22). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-glades/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 22
+
+  - name: county-gulf
+    description: |
+      Gulf County FL (co_no: 23). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-gulf/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 23
+
+  - name: county-hamilton
+    description: |
+      Hamilton County FL (co_no: 24). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-hamilton/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 24
+
+  - name: county-hardee
+    description: |
+      Hardee County FL (co_no: 25). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-hardee/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 25
+
+  - name: county-hendry
+    description: |
+      Hendry County FL (co_no: 26). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-hendry/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 26
+
+  - name: county-hernando
+    description: |
+      Hernando County FL (co_no: 27). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-hernando/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 27
+
+  - name: county-highlands
+    description: |
+      Highlands County FL (co_no: 28). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-highlands/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 28
+
+  - name: county-hillsborough
+    description: |
+      Hillsborough County FL (co_no: 29). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P1.
+    path: zonewise/skills/county-hillsborough/SKILL.md
+    category: county
+    priority: 2
+    tokens_estimate: 50
+    co_no: 29
+
+  - name: county-holmes
+    description: |
+      Holmes County FL (co_no: 30). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-holmes/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 30
+
+  - name: county-indian-river
+    description: |
+      Indian River County FL (co_no: 31). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-indian-river/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 31
+
+  - name: county-jackson
+    description: |
+      Jackson County FL (co_no: 32). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-jackson/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 32
+
+  - name: county-jefferson
+    description: |
+      Jefferson County FL (co_no: 33). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-jefferson/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 33
+
+  - name: county-lafayette
+    description: |
+      Lafayette County FL (co_no: 34). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-lafayette/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 34
+
+  - name: county-lake
+    description: |
+      Lake County FL (co_no: 35). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-lake/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 35
+
+  - name: county-lee
+    description: |
+      Lee County FL (co_no: 36). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-lee/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 36
+
+  - name: county-leon
+    description: |
+      Leon County FL (co_no: 37). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-leon/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 37
+
+  - name: county-levy
+    description: |
+      Levy County FL (co_no: 38). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-levy/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 38
+
+  - name: county-liberty
+    description: |
+      Liberty County FL (co_no: 39). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-liberty/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 39
+
+  - name: county-madison
+    description: |
+      Madison County FL (co_no: 40). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-madison/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 40
+
+  - name: county-manatee
+    description: |
+      Manatee County FL (co_no: 41). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-manatee/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 41
+
+  - name: county-marion
+    description: |
+      Marion County FL (co_no: 42). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-marion/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 42
+
+  - name: county-martin
+    description: |
+      Martin County FL (co_no: 43). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-martin/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 43
+
+  - name: county-monroe
+    description: |
+      Monroe County FL (co_no: 44). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-monroe/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 44
+
+  - name: county-nassau
+    description: |
+      Nassau County FL (co_no: 45). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-nassau/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 45
+
+  - name: county-okaloosa
+    description: |
+      Okaloosa County FL (co_no: 46). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-okaloosa/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 46
+
+  - name: county-okeechobee
+    description: |
+      Okeechobee County FL (co_no: 47). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-okeechobee/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 47
+
+  - name: county-orange
+    description: |
+      Orange County FL (co_no: 48). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P0.
+    path: zonewise/skills/county-orange/SKILL.md
+    category: county
+    priority: 1
+    tokens_estimate: 50
+    co_no: 48
+
+  - name: county-osceola
+    description: |
+      Osceola County FL (co_no: 49). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-osceola/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 49
+
+  - name: county-palm-beach
+    description: |
+      Palm Beach County FL (co_no: 50). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P1.
+    path: zonewise/skills/county-palm-beach/SKILL.md
+    category: county
+    priority: 2
+    tokens_estimate: 50
+    co_no: 50
+
+  - name: county-pasco
+    description: |
+      Pasco County FL (co_no: 51). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-pasco/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 51
+
+  - name: county-pinellas
+    description: |
+      Pinellas County FL (co_no: 52). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P1.
+    path: zonewise/skills/county-pinellas/SKILL.md
+    category: county
+    priority: 2
+    tokens_estimate: 50
+    co_no: 52
+
+  - name: county-polk
+    description: |
+      Polk County FL (co_no: 53). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-polk/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 53
+
+  - name: county-putnam
+    description: |
+      Putnam County FL (co_no: 54). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-putnam/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 54
+
+  - name: county-st-johns
+    description: |
+      St. Johns County FL (co_no: 55). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-st-johns/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 55
+
+  - name: county-st-lucie
+    description: |
+      St. Lucie County FL (co_no: 56). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-st-lucie/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 56
+
+  - name: county-santa-rosa
+    description: |
+      Santa Rosa County FL (co_no: 57). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-santa-rosa/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 57
+
+  - name: county-sarasota
+    description: |
+      Sarasota County FL (co_no: 58). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-sarasota/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 58
+
+  - name: county-seminole
+    description: |
+      Seminole County FL (co_no: 59). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-seminole/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 59
+
+  - name: county-sumter
+    description: |
+      Sumter County FL (co_no: 60). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-sumter/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 60
+
+  - name: county-suwannee
+    description: |
+      Suwannee County FL (co_no: 61). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-suwannee/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 61
+
+  - name: county-taylor
+    description: |
+      Taylor County FL (co_no: 62). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-taylor/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 62
+
+  - name: county-union
+    description: |
+      Union County FL (co_no: 63). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-union/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 63
+
+  - name: county-volusia
+    description: |
+      Volusia County FL (co_no: 64). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-volusia/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 64
+
+  - name: county-wakulla
+    description: |
+      Wakulla County FL (co_no: 65). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-wakulla/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 65
+
+  - name: county-walton
+    description: |
+      Walton County FL (co_no: 66). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-walton/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 66
+
+  - name: county-washington
+    description: |
+      Washington County FL (co_no: 67). Zoning intelligence via
+      Supabase: jurisdictions, zoning_districts, zone_standards, permitted_uses,
+      fl_parcels (10.8M statewide). 3-mode research: WebSearch→WebFetch→AgentQL.
+      Phase: P3.
+    path: zonewise/skills/county-washington/SKILL.md
+    category: county
+    priority: 3
+    tokens_estimate: 50
+    co_no: 67
+
 categories:
   zoning: "Zoning code analysis and regulations"
   visualization: "3D visualization and rendering"
   analysis: "Property and environmental analysis"
-  data: "External data integration"
+  data: "External data source integration"
+  county: "Per-county FL zoning intelligence (67 counties, CrossBeam 3-mode pattern)"
 
-# Progressive Disclosure Levels
 disclosure_levels:
   level_1:
     name: "Metadata"
-    description: "Brief description in system prompt"
-    tokens: "50-150 per skill"
-    loaded: "Always"
-  
+    tokens: "50 per county, 50-150 per core skill"
+    loaded: "Always — all 79 skill descriptions in system prompt"
   level_2:
     name: "Instructions"
-    description: "Full SKILL.md content"
-    tokens: "500-2000 per skill"
-    loaded: "On-demand via load_skill"
-  
+    tokens: "800-1500 per county SKILL.md"
+    loaded: "On-demand: when county name detected in user query"
   level_3:
-    name: "References"
-    description: "API docs, examples, schemas"
-    tokens: "1000-5000 per reference"
-    loaded: "On-demand via read_reference"
+    name: "Live Data"
+    tokens: "Runtime Supabase REST query results"
+    loaded: "On-demand via zonewise-supabase source"
 
-# Agent Configuration
+tool_search:
+  header: advanced-tool-use-2025-11-20
+  defer_loading: true
+  county_tools: deferred  # ~67 tools deferred until county detected
+  max_tools: 10000
+
 agents:
-  orchestrator:
-    name: "ZoneWise Orchestrator"
-    description: "Main agent that routes to specialized agents"
-    skills: ["all"]
-  
-  zoning_agent:
-    name: "Zoning Agent"
-    description: "Analyzes zoning codes and regulations"
-    skills: ["zoning-analysis", "envelope-development"]
-  
-  valuation_agent:
-    name: "Valuation Agent"
-    description: "Estimates property values"
-    skills: ["property-valuation", "bcpao-integration"]
-  
-  permit_agent:
-    name: "Permit Agent"
-    description: "Checks permits and violations"
-    skills: ["permit-lookup"]
-  
-  visualization_agent:
-    name: "Visualization Agent"
-    description: "Creates 3D visualizations"
-    skills: ["envelope-development", "sun-analysis", "threejs-*", "mapbox-integration"]
+  orchestrator: {skills: ["zoning-analysis", "county-*"], routes: "address → co_no → county skill"}
+  county_research: {skills: ["county-{slug}"], pattern: "CrossBeam 3-mode"}
+  valuation: {skills: ["property-valuation", "bcpao-integration", "county-brevard"]}
+  visualization: {skills: ["envelope-development", "sun-analysis", "threejs-*", "mapbox-integration"]}
+
+pipeline:
+  schedule: daily 23:00 EST
+  executor: Modal.com (67 parallel containers)
+  orchestrator: LangGraph (zonewise-agents Render)
+  action: .github/workflows/nightly-county-scrape.yml
+  circuit_breaker: 3 failures → insights table ESCALATE → Traycer GitHub Issue

@@ -26,8 +26,48 @@ import { isUsableGitBashPath, validateGitBashPath } from './git-bash'
  * Sanitizes a filename to prevent path traversal and filesystem issues.
  * Removes dangerous characters and limits length.
  */
+// Allowed attachment extensions (whitelist — executable types excluded)
+const ALLOWED_ATTACHMENT_EXTENSIONS = new Set([
+  // Images
+  'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp', 'ico', 'tiff', 'tif', 'heic', 'heif', 'avif',
+  // Documents
+  'pdf', 'docx', 'xlsx', 'pptx', 'doc', 'xls', 'ppt', 'txt', 'md', 'rtf', 'csv', 'odt', 'ods',
+  // Code
+  'js', 'ts', 'tsx', 'jsx', 'py', 'json', 'yaml', 'yml', 'toml', 'ini', 'cfg',
+  'css', 'html', 'xml', 'sql', 'sh', 'bash', 'go', 'rs', 'rb', 'php',
+  'java', 'c', 'cpp', 'h', 'swift', 'kt', 'scala', 'r', 'lua',
+  // Data/Config
+  'log', 'env', 'gitignore', 'dockerfile',
+])
+
+// Allowed thumbnail MIME types
+const ALLOWED_THUMBNAIL_MIMETYPES = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'image/gif',
+  'image/svg+xml',
+  'image/bmp',
+  'image/avif',
+])
+
+/**
+ * Validates that a file extension is in the allowed whitelist.
+ * Throws if the extension is not permitted.
+ */
+function validateFileExtension(filePath: string): void {
+  const ext = filePath.split('.').pop()?.toLowerCase() ?? ''
+  if (!ALLOWED_ATTACHMENT_EXTENSIONS.has(ext)) {
+    throw new Error(`File type not allowed: .${ext}`)
+  }
+}
+
 function sanitizeFilename(name: string): string {
-  return name
+  return (name
+    // Normalize Unicode to NFKC to prevent homograph attacks
+    .normalize('NFKC')
+    // Strip null bytes
+    .replace(/\0/g, '')
     // Remove path separators and traversal patterns
     .replace(/[/\\]/g, '_')
     // Remove Windows-forbidden characters: < > : " | ? *
@@ -39,7 +79,7 @@ function sanitizeFilename(name: string): string {
     // Remove leading/trailing dots and spaces (Windows issues)
     .replace(/^[.\s]+|[.\s]+$/g, '')
     // Limit length (200 chars is safe for all filesystems)
-    .slice(0, 200)
+    .slice(0, 200))
     // Fallback if name is empty after sanitization
     || 'unnamed'
 }
@@ -416,10 +456,27 @@ async function validateFilePath(filePath: string): Promise<string> {
     realPath = normalizedPath
   }
 
-  // Define allowed base directories
+  // Define allowed base directories (whitelist — NOT the entire home dir)
+  const home = homedir()
   const allowedDirs = [
-    homedir(),      // User's home directory
-    tmpdir(),       // Platform-appropriate temp directory
+    // User document directories
+    join(home, 'Documents'),
+    join(home, 'Downloads'),
+    join(home, 'Desktop'),
+    // App-specific directories
+    join(home, '.craft-agent'),
+    join(home, '.zonewise'),
+    // macOS Application Support
+    join(home, 'Library', 'Application Support', 'craft-agent'),
+    join(home, 'Library', 'Application Support', 'zonewise'),
+    // Windows AppData
+    join(home, 'AppData', 'Roaming', 'craft-agent'),
+    join(home, 'AppData', 'Local', 'craft-agent'),
+    // Linux XDG data
+    join(home, '.local', 'share', 'craft-agent'),
+    join(home, '.local', 'share', 'zonewise'),
+    // Temp directory always allowed
+    tmpdir(),
   ]
 
   // Check if the real path is within an allowed directory (cross-platform)
@@ -433,17 +490,39 @@ async function validateFilePath(filePath: string): Promise<string> {
     throw new Error('Access denied: file path is outside allowed directories')
   }
 
-  // Block sensitive files even within home directory
+  // Block sensitive files even within allowed directories
   const sensitivePatterns = [
+    // SSH keys and config
     /\.ssh\//,
+    /id_rsa/i,
+    /id_ed25519/i,
+    /id_ecdsa/i,
+    /id_dsa/i,
+    // GPG / password managers
     /\.gnupg\//,
+    /password-store/i,
+    /\.password-store/i,
+    /Keychains/i,
+    // Cloud provider credentials
     /\.aws\/credentials/,
-    /\.env$/,
-    /\.env\./,
+    /\.aws\/config/,
+    /gcloud/i,
+    /\.config\/gcloud/i,
+    /\.azure/i,
+    /\.kube\/config/,
+    // Container and runtime configs
+    /\.docker\/config/i,
+    /\.npmrc/i,
+    /\.netrc/i,
+    // General credential files
     /credentials\.json$/,
     /secrets?\./i,
+    /\.env$/,
+    /\.env\./,
     /\.pem$/,
     /\.key$/,
+    /\.p12$/,
+    /\.pfx$/,
   ]
 
   if (sensitivePatterns.some(pattern => pattern.test(realPath))) {

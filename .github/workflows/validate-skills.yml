@@ -1,0 +1,44 @@
+name: Validate County Skill Files
+
+on:
+  push:
+    paths:
+      - 'zonewise/skills/county-*/SKILL.md'
+      - 'zonewise/skills/skills-manifest.yaml'
+  pull_request:
+    paths:
+      - 'zonewise/skills/county-*/SKILL.md'
+
+jobs:
+  validate:
+    name: Validate 67 County SKILL.md Files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: pip install pyyaml
+      
+      - name: Validate county skill files
+        run: python3 scripts/validate_county_skills.py --skills-dir zonewise/skills
+      
+      - name: Check skills-manifest.yaml
+        run: |
+          python3 << 'PYEOF'
+          import yaml, sys
+          with open('zonewise/skills/skills-manifest.yaml') as f:
+              manifest = yaml.safe_load(f)
+          skills = manifest.get('skills', [])
+          county_skills = [s for s in skills if s.get('name','').startswith('county-')]
+          print(f"Total skills: {len(skills)}")
+          print(f"County skills: {len(county_skills)}")
+          if len(county_skills) != 67:
+              print(f"ERROR: Expected 67 county skills, found {len(county_skills)}")
+              sys.exit(1)
+          print("✅ skills-manifest.yaml valid: 67 county skills + core skills")
+          PYEOF

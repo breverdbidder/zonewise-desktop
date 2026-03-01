@@ -13,6 +13,7 @@
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { AuctionsPanel } from './components/AuctionsPanel'
 import {
   Markdown,
   Spinner,
@@ -25,6 +26,7 @@ import {
   GitCompare,
   FlaskConical,
   ClipboardCheck,
+  Gavel,
   Building2,
   Ruler,
   Scale,
@@ -54,7 +56,7 @@ import {
 // ═══════════════════════════════════════════════════════════════
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://zonewise-agents.onrender.com'
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoiZXZlcmVzdDE4IiwiYSI6ImNtanB5cDQ5ZzF1eWgzaHB2cGVhZXdqbjMifQ.4RPrkTf84GL1-clmhmCnTw'
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || ''
 
 // ═══════════════════════════════════════════════════════════════
 // TYPES
@@ -143,6 +145,14 @@ const AGENTS: Agent[] = [
     description: 'Check permitted uses',
     placeholder: "What's allowed in [district] [city]?",
     systemPrompt: 'You are a permit check agent. Help users understand what uses are permitted in specific zoning districts.',
+  },
+  {
+    id: 'auctions',
+    name: 'Auction Intel',
+    icon: Gavel,
+    description: 'Florida auction intelligence',
+    placeholder: 'Search auctions...',
+    systemPrompt: '',
   },
 ]
 
@@ -755,6 +765,11 @@ export function App() {
 
   const selectAgent = useCallback((agentId: string) => {
     setActiveAgent(prev => prev === agentId ? null : agentId)
+    // Auctions agent doesn't use chat sessions
+    if (agentId === 'auctions') {
+      setMobileMenu(false)
+      return
+    }
     // Start a new session with this agent context
     const agent = AGENTS.find(a => a.id === agentId)
     if (agent) {
@@ -876,27 +891,34 @@ export function App() {
           onMobileClose={() => setMobileMenu(false)}
         />
 
-        {/* Chat Center */}
-        <ChatArea
-          messages={messages}
-          onSend={sendMessage}
-          isLoading={isLoading}
-          thinkText={thinkText}
-          session={activeSession}
-          activeAgent={currentAgent}
-          lang={lang}
-          artifactsOpen={artifactsOpen}
-          onToggleArtifacts={() => setArtifactsOpen(v => !v)}
-          onMobileMenuOpen={() => setMobileMenu(true)}
-        />
+        {activeAgent === 'auctions' ? (
+          /* Auction Intel — full-width panel replacing chat + artifacts */
+          <AuctionsPanel onBack={() => setActiveAgent(null)} />
+        ) : (
+          <>
+            {/* Chat Center */}
+            <ChatArea
+              messages={messages}
+              onSend={sendMessage}
+              isLoading={isLoading}
+              thinkText={thinkText}
+              session={activeSession}
+              activeAgent={currentAgent}
+              lang={lang}
+              artifactsOpen={artifactsOpen}
+              onToggleArtifacts={() => setArtifactsOpen(v => !v)}
+              onMobileMenuOpen={() => setMobileMenu(true)}
+            />
 
-        {/* Right Artifacts Panel (desktop only) */}
-        <div className="hidden lg:block">
-          <ArtifactsPanel
-            visible={artifactsOpen}
-            onClose={() => setArtifactsOpen(false)}
-          />
-        </div>
+            {/* Right Artifacts Panel (desktop only) */}
+            <div className="hidden lg:block">
+              <ArtifactsPanel
+                visible={artifactsOpen}
+                onClose={() => setArtifactsOpen(false)}
+              />
+            </div>
+          </>
+        )}
       </div>
     </TooltipProvider>
   )

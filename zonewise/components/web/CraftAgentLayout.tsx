@@ -316,6 +316,10 @@ function LeftSidebar({
               <BarChart3 className="w-4 h-4 mr-2" />
               Dashboard
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate('/chat')}>
+              <MessageSquare className="w-4 h-4 mr-2" />
+              AI Chat
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate('/pricing')}>
               <Settings className="w-4 h-4 mr-2" />
               Subscription

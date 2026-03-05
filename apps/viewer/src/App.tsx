@@ -14,6 +14,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { AuctionsPanel } from './components/AuctionsPanel'
+import ChatWidget from '../../zonewise/components/web/ChatWidget'
 import {
   Markdown,
   Spinner,
@@ -152,6 +153,14 @@ const AGENTS: Agent[] = [
     icon: Gavel,
     description: 'Florida auction intelligence',
     placeholder: 'Search auctions...',
+    systemPrompt: '',
+  },
+  {
+    id: 'chat',
+    name: 'AI Analyst',
+    icon: MessageSquare,
+    description: 'Full NLP chatbot · Claude Sonnet',
+    placeholder: 'Ask about any FL property, zone, or auction…',
     systemPrompt: '',
   },
 ]
@@ -894,6 +903,11 @@ export function App() {
         {activeAgent === 'auctions' ? (
           /* Auction Intel — full-width panel replacing chat + artifacts */
           <AuctionsPanel onBack={() => setActiveAgent(null)} />
+        ) : activeAgent === 'chat' ? (
+          /* AI Analyst — split-screen NLP chatbot with Claude Sonnet */
+          <div className="flex-1 overflow-hidden p-3 bg-background">
+            <ChatWidget apiEndpoint="https://zonewise.ai/api/chat" />
+          </div>
         ) : (
           <>
             {/* Chat Center */}

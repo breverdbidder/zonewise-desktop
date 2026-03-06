@@ -1,0 +1,20 @@
+{
+  "project": "zonewise-desktop",
+  "framework": "Electron (CraftAgents fork)",
+  "deployment": "Vercel \u2192 zonewise.app",
+  "last_updated": "2026-03-06",
+  "upstream": "CraftAgents OSS v0.4.0",
+  "checkpoints_legacy": [
+    "CHECKPOINT_2026-02-01.json",
+    "CHECKPOINT_2026-02-08.json"
+  ],
+  "root_clutter_count": 15,
+  "recent_decisions": [
+    {
+      "date": "2026-03-06",
+      "decision": "Structure compliance push \u2014 adding TODO, STATE, REPO_MAP",
+      "rationale": "Scored 6/9 on Claude Code structure audit"
+    }
+  ],
+  "blockers": []
+}

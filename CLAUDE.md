@@ -263,3 +263,22 @@ dap stop                                      # end session
 5. Fix only after understanding root cause
 
 Full skill docs: `skills/debugging-code/SKILL.md`
+
+---
+
+## shadcn/ui CLI v4 (March 2026)
+
+### Setup
+`components.json` at repo root configures shadcn CLI for the monorepo. Shared UI components live in `packages/ui/src/components/ui/`. The `cn()` utility is at `packages/ui/src/lib/utils.ts`.
+
+### CLI Workflow (MANDATORY)
+1. **Before adding any component:** `npx shadcn@latest add <component> --dry-run`
+2. **Before updating any component:** `npx shadcn@latest add <component> --diff`
+3. **To get component docs:** `npx shadcn@latest docs <component>`
+4. **NEVER fetch raw component files from GitHub** — always use the CLI
+
+### Brand Colors
+- Accent orange: `#F59E0B` — NEVER use `#F47B20` (old wrong value)
+- Navy primary: `#1E3A5F`
+- Use CSS vars (`var(--accent)`, `var(--zw-navy)`) or Tailwind tokens (`text-accent`, `bg-accent`)
+- See `BRAND_COLORS.md` for complete spec

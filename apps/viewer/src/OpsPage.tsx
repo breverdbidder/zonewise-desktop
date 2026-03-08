@@ -169,7 +169,7 @@ export function OpsPage() {
           </a>
           <span style={{ color: "#475569" }}>|</span>
           <span style={{ fontWeight: 700, fontSize: 16, display: "flex", alignItems: "center", gap: 8 }}>
-            <Activity size={18} color="#F47B20" /> Agent Ops Dashboard
+            <Activity size={18} color="#F59E0B" /> Agent Ops Dashboard
           </span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 13, color: "#94a3b8" }}>

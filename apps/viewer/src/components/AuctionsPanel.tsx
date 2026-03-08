@@ -167,7 +167,7 @@ export function AuctionsPanel({ onBack }: { onBack: () => void }) {
           <div className="px-4 py-3 grid grid-cols-4 gap-3 border-b border-border">
             <div className="bg-foreground/3 rounded-lg px-3 py-2">
               <p className="text-[10px] text-slate-500 uppercase tracking-wider">Total</p>
-              <p className="text-lg font-bold text-[#F47B20]">{summary.total_rows}</p>
+              <p className="text-lg font-bold text-[#F59E0B]">{summary.total_rows}</p>
             </div>
             <div className="bg-foreground/3 rounded-lg px-3 py-2">
               <p className="text-[10px] text-slate-500 uppercase tracking-wider">With Address</p>
@@ -194,7 +194,7 @@ export function AuctionsPanel({ onBack }: { onBack: () => void }) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search address, case, party..."
-              className="w-full pl-8 pr-3 py-1.5 text-xs bg-foreground/3 border border-border rounded-md text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#F47B20]/30"
+              className="w-full pl-8 pr-3 py-1.5 text-xs bg-foreground/3 border border-border rounded-md text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#F59E0B]/30"
             />
           </div>
           <select
@@ -220,7 +220,7 @@ export function AuctionsPanel({ onBack }: { onBack: () => void }) {
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="w-6 h-6 border-2 border-[#F47B20] border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-[#F59E0B] border-t-transparent rounded-full animate-spin" />
             </div>
           ) : error ? (
             <div className="px-4 py-8 text-center text-slate-500 text-sm">{error}</div>
@@ -286,7 +286,7 @@ export function AuctionsPanel({ onBack }: { onBack: () => void }) {
             {selected.centroid_lat && selected.centroid_lng && (
               <div className="rounded-lg overflow-hidden border border-border">
                 <img
-                  src={`https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/pin-s+F47B20(${selected.centroid_lng},${selected.centroid_lat})/${selected.centroid_lng},${selected.centroid_lat},13,0/320x180@2x?access_token=${import.meta.env.VITE_MAPBOX_TOKEN || ''}`}
+                  src={`https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/pin-s+F59E0B(${selected.centroid_lng},${selected.centroid_lat})/${selected.centroid_lng},${selected.centroid_lat},13,0/320x180@2x?access_token=${import.meta.env.VITE_MAPBOX_TOKEN || ''}`}
                   alt="Property location"
                   className="w-full h-[90px] object-cover"
                   loading="lazy"

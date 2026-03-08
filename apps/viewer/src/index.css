@@ -20,14 +20,14 @@
   --zw-navy: #1E3A5F;
   --zw-navy-light: #2A4A73;
   --zw-navy-dark: #152C4A;
-  --zw-accent: #F47B20;
-  --zw-accent-light: #F69345;
-  --zw-accent-dark: #D9691A;
+  --zw-accent: #F59E0B;
+  --zw-accent-light: #FBBF24;
+  --zw-accent-dark: #D97706;
   --zw-sidebar-bg: #1E3A5F;
   --zw-sidebar-text: #CBD5E1;
   --zw-sidebar-active: rgba(244, 123, 32, 0.15);
   --zw-sidebar-hover: rgba(255, 255, 255, 0.08);
-  --accent: #F47B20;
+  --accent: #F59E0B;
   --accent-foreground: white;
 }
 

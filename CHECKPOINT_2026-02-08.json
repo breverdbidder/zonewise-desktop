@@ -110,7 +110,7 @@
       "/s/{id}": "Upstream Craft Agents SessionViewer (read-only, S3)"
     },
     "backend": "zonewise-agents.onrender.com (UNCHANGED)",
-    "branding": { "navy": "#1E3A5F", "orange": "#F47B20" },
+    "branding": { "navy": "#1E3A5F", "orange": "#F59E0B" },
     "deploy_targets": {
       "viewer": "zonewise-desktop-viewer.vercel.app (VERIFIED LIVE)",
       "marketing": "zonewise-web on Cloudflare Pages",

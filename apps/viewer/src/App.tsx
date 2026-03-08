@@ -5,7 +5,7 @@
  *  - Left (280px): Logo, Agents, Skills, History
  *  - Right (flex-1): Chat with SSE streaming + collapsible Artifacts panel
  *
- * Navy brand: #1E3A5F primary, #F47B20 accent
+ * Navy brand: #1E3A5F primary, #F59E0B accent
  * 7 languages (EN, ES, HE/RTL, PT, FR, ZH, HI)
  *
  * @module ZoneWise
@@ -210,7 +210,7 @@ function timeAgo(ts: number): string {
 function ZoneWiseLogo({ size = 32 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="40" height="40" rx="10" fill="#F47B20" />
+      <rect width="40" height="40" rx="10" fill="#F59E0B" />
       <path d="M10 14h20v3H15.5l14.5 9v3H10v-3h14.5L10 17v-3z" fill="white" />
     </svg>
   )
@@ -271,7 +271,7 @@ function Sidebar({
         <div className="flex items-center gap-2.5">
           <ZoneWiseLogo size={28} />
           <div>
-            <div className="text-sm font-bold text-white tracking-tight">ZoneWise<span className="text-[#F47B20]">.AI</span></div>
+            <div className="text-sm font-bold text-white tracking-tight">ZoneWise<span className="text-[#F59E0B]">.AI</span></div>
             <div className="text-[9px] text-slate-400 tracking-wider uppercase">Florida Zoning Intel</div>
           </div>
         </div>
@@ -295,7 +295,7 @@ function Sidebar({
                       onClick={() => { onLangChange(code); setLangOpen(false) }}
                       className={cn(
                         'w-full flex items-center gap-2 px-3 py-1.5 text-xs transition-colors',
-                        lang === code ? 'text-[#F47B20] bg-white/5' : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                        lang === code ? 'text-[#F59E0B] bg-white/5' : 'text-slate-300 hover:bg-white/5 hover:text-white'
                       )}
                     >
                       <span>{LANGS[code].flag}</span>
@@ -328,7 +328,7 @@ function Sidebar({
       <div className="px-3 pt-3 pb-1">
         <button
           onClick={onNewSession}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-[#F47B20] hover:bg-[#F69345] text-white text-sm font-medium transition-colors"
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-[#F59E0B] hover:bg-[#FBBF24] text-white text-sm font-medium transition-colors"
         >
           <Plus size={14} />
           New Chat
@@ -349,11 +349,11 @@ function Sidebar({
                 className={cn(
                   'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-all mb-0.5',
                   isActive
-                    ? 'bg-[var(--zw-sidebar-active)] text-[#F47B20]'
+                    ? 'bg-[var(--zw-sidebar-active)] text-[#F59E0B]'
                     : 'text-slate-300 hover:bg-[var(--zw-sidebar-hover)] hover:text-white'
                 )}
               >
-                <Icon size={16} className={isActive ? 'text-[#F47B20]' : 'text-slate-400'} />
+                <Icon size={16} className={isActive ? 'text-[#F59E0B]' : 'text-slate-400'} />
                 <div className="flex-1 min-w-0">
                   <div className="text-[13px] font-medium truncate">{agent.name}</div>
                   <div className="text-[10px] text-slate-500 truncate">{agent.description}</div>
@@ -476,7 +476,7 @@ function ArtifactsPanel({
       {/* Header */}
       <div className="px-4 py-3 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <BarChart3 size={14} className="text-[#F47B20]" />
+          <BarChart3 size={14} className="text-[#F59E0B]" />
           <span className="text-sm font-semibold text-foreground">Artifacts</span>
         </div>
         <button onClick={onClose} className="p-1 rounded-md hover:bg-foreground/5 text-muted-foreground hover:text-foreground transition-colors">
@@ -495,7 +495,7 @@ function ArtifactsPanel({
             <div className="grid grid-cols-2 gap-2">
               {Object.entries(stats).map(([k, v]) => (
                 <div key={k} className="bg-foreground/3 border border-border rounded-lg p-3 text-center">
-                  <p className="text-lg font-bold text-[#F47B20]">
+                  <p className="text-lg font-bold text-[#F59E0B]">
                     {typeof v === 'number' ? v.toLocaleString() : String(v)}
                   </p>
                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">
@@ -508,7 +508,7 @@ function ArtifactsPanel({
             <div className="grid grid-cols-2 gap-2">
               {[{ label: 'Jurisdictions', value: '369' }, { label: 'Districts', value: '5,395' }, { label: 'Standards', value: '59' }, { label: 'Uses', value: '350+' }].map(item => (
                 <div key={item.label} className="bg-foreground/3 border border-border rounded-lg p-3 text-center">
-                  <p className="text-lg font-bold text-[#F47B20]">{item.value}</p>
+                  <p className="text-lg font-bold text-[#F59E0B]">{item.value}</p>
                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{item.label}</p>
                 </div>
               ))}
@@ -587,7 +587,7 @@ function ChatArea({
           <button onClick={onMobileMenuOpen} className="p-1.5 rounded-md hover:bg-foreground/5 text-muted-foreground md:hidden">
             <Menu size={16} />
           </button>
-          <div className="w-7 h-7 rounded-lg bg-[#F47B20] flex items-center justify-center">
+          <div className="w-7 h-7 rounded-lg bg-[#F59E0B] flex items-center justify-center">
             {activeAgent ? (
               <activeAgent.icon size={14} className="text-white" />
             ) : (
@@ -634,7 +634,7 @@ function ChatArea({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-lg w-full">
             {STARTERS.map((s, i) => (
               <button key={i} onClick={() => send(s.text)}
-                className="text-left px-4 py-3 rounded-xl border border-border bg-background hover:bg-foreground/3 transition-colors text-sm text-foreground hover:border-[#F47B20]/30">
+                className="text-left px-4 py-3 rounded-xl border border-border bg-background hover:bg-foreground/3 transition-colors text-sm text-foreground hover:border-[#F59E0B]/30">
                 {s.text}
               </button>
             ))}
@@ -645,8 +645,8 @@ function ChatArea({
           {display.map((m, i) => (
             <div key={m.id || i} className={cn('flex gap-3', m.role === 'user' ? 'justify-end' : 'justify-start')}>
               {m.role === 'assistant' && (
-                <div className="w-7 h-7 rounded-full bg-[#F47B20]/10 flex items-center justify-center shrink-0 mt-0.5">
-                  <Sparkles size={14} className="text-[#F47B20]" />
+                <div className="w-7 h-7 rounded-full bg-[#F59E0B]/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <Sparkles size={14} className="text-[#F59E0B]" />
                 </div>
               )}
               <div className={cn(
@@ -667,7 +667,7 @@ function ChatArea({
           ))}
           {isLoading && (
             <div className="flex gap-3">
-              <div className="w-7 h-7 rounded-full bg-[#F47B20]/10 flex items-center justify-center shrink-0 mt-0.5">
+              <div className="w-7 h-7 rounded-full bg-[#F59E0B]/10 flex items-center justify-center shrink-0 mt-0.5">
                 <Spinner size={14} />
               </div>
               <div className="bg-foreground/3 border border-border rounded-xl px-4 py-2.5 text-sm text-muted-foreground">
@@ -694,11 +694,11 @@ function ChatArea({
             ref={inputRef} value={input} onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
             placeholder={placeholder}
-            className="zw-chat-input flex-1 resize-none min-h-[42px] max-h-32 px-4 py-2.5 rounded-xl bg-foreground/3 border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#F47B20]/30 focus:border-[#F47B20]/50 transition-all"
+            className="zw-chat-input flex-1 resize-none min-h-[42px] max-h-32 px-4 py-2.5 rounded-xl bg-foreground/3 border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/30 focus:border-[#F59E0B]/50 transition-all"
             rows={1} dir={dir}
           />
           <button type="submit" disabled={!input.trim() || isLoading}
-            className="shrink-0 w-10 h-10 rounded-xl bg-[#F47B20] hover:bg-[#F69345] disabled:bg-muted disabled:text-muted-foreground text-white flex items-center justify-center transition-colors">
+            className="shrink-0 w-10 h-10 rounded-xl bg-[#F59E0B] hover:bg-[#FBBF24] disabled:bg-muted disabled:text-muted-foreground text-white flex items-center justify-center transition-colors">
             <Send size={16} />
           </button>
         </form>

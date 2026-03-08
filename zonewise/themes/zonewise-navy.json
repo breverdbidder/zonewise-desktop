@@ -1,7 +1,7 @@
 {
   "name": "ZoneWise Navy",
   "slug": "zonewise-navy",
-  "description": "ZoneWise.AI brand theme — Navy (#1E3A5F) with Orange (#F47B20) accents",
+  "description": "ZoneWise.AI brand theme — Navy (#1E3A5F) with Orange (#F59E0B) accents",
   "author": "ZoneWise.AI",
   "colors": {
     "background": "#0F1B2D",
@@ -10,15 +10,15 @@
     "cardForeground": "#E8EDF3",
     "primary": "#1E3A5F",
     "primaryForeground": "#FFFFFF",
-    "secondary": "#F47B20",
+    "secondary": "#F59E0B",
     "secondaryForeground": "#FFFFFF",
     "muted": "#243B5C",
     "mutedForeground": "#8899AA",
-    "accent": "#F47B20",
+    "accent": "#F59E0B",
     "accentForeground": "#FFFFFF",
     "border": "#2A4A6B",
     "input": "#1D3555",
-    "ring": "#F47B20",
+    "ring": "#F59E0B",
     "destructive": "#EF4444",
     "destructiveForeground": "#FFFFFF"
   }

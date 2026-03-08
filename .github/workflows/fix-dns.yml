@@ -9,22 +9,46 @@ jobs:
     env:
       ZONE_ID: b32406b78aaaefd55557d77c843a5940
     steps:
+      - name: Find correct zone for zonewise.ai
+        run: |
+          set +e
+          echo "=== All zones accessible to this token ==="
+          curl -s -X GET \
+            "https://api.cloudflare.com/client/v4/zones?name=zonewise.ai" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" | jq '.result[] | {id, name, status}'
+          
+          echo ""
+          echo "=== All zones (first 5) ==="
+          curl -s -X GET \
+            "https://api.cloudflare.com/client/v4/zones?per_page=5" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" | jq '.result[] | {id, name, status}'
+          
+          echo ""
+          echo "=== Pages project domains ==="
+          curl -s -X GET \
+            "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects/zonewise-web/domains" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" | jq '.'
+
       - name: List current DNS records
+        continue-on-error: true
         run: |
           echo "=== Current DNS records for zonewise.ai ==="
-          curl -s -X GET \
+          RESP=$(curl -s -X GET \
             "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records?name=zonewise.ai" \
             -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
-            -H "Content-Type: application/json" | jq '.result[] | {id, name, type, content, proxied}'
+            -H "Content-Type: application/json")
+          echo "$RESP" | jq '.'
           
           echo ""
           echo "=== Current DNS records for www.zonewise.ai ==="
-          curl -s -X GET \
+          RESP2=$(curl -s -X GET \
             "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records?name=www.zonewise.ai" \
             -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
-            -H "Content-Type: application/json" | jq '.result[] | {id, name, type, content, proxied}'
+            -H "Content-Type: application/json")
+          echo "$RESP2" | jq '.'
 
-      - name: Delete old DNS records pointing to Vercel
+      - name: Delete old DNS records
+        continue-on-error: true pointing to Vercel
         run: |
           echo "Fetching record IDs..."
           # Get all A/CNAME records for root domain
@@ -53,7 +77,8 @@ jobs:
               -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" | jq '{success}'
           done
 
-      - name: Create CNAME records pointing to Cloudflare Pages
+      - name: Create CNAME records
+        continue-on-error: true pointing to Cloudflare Pages
         run: |
           echo "Creating root CNAME → zonewise-web.pages.dev..."
           curl -s -X POST \
@@ -82,7 +107,8 @@ jobs:
               "ttl": 1
             }' | jq '{success, result: {name: .result.name, type: .result.type, content: .result.content}}'
 
-      - name: Verify new DNS and Pages domain status
+      - name: Verify new DNS
+        continue-on-error: true and Pages domain status
         run: |
           sleep 15
           echo "=== DNS Records ==="

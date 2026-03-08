@@ -245,7 +245,7 @@ export function AuctionsPanel({ onBack }: { onBack: () => void }) {
                     onClick={() => setSelected(a)}
                     className={`cursor-pointer transition-colors ${
                       selected?.id === a.id
-                        ? 'bg-[rgba(244,123,32,0.1)]'
+                        ? 'bg-[rgba(245,158,11,0.1)]'
                         : 'hover:bg-foreground/3'
                     }`}
                   >

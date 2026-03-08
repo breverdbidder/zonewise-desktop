@@ -1,0 +1,38 @@
+name: Add Custom Domain to Cloudflare Pages
+
+on:
+  workflow_dispatch:
+
+jobs:
+  add-domain:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add zonewise.ai to Cloudflare Pages
+        run: |
+          echo "Adding zonewise.ai custom domain..."
+          
+          # Add root domain
+          curl -s -X POST \
+            "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects/zonewise-web/domains" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"name": "zonewise.ai"}' | jq .
+          
+          # Add www subdomain
+          curl -s -X POST \
+            "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects/zonewise-web/domains" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"name": "www.zonewise.ai"}' | jq .
+          
+          echo "Done. If DNS is on Cloudflare, CNAME records are auto-created."
+          echo "If DNS is external, add these CNAME records manually:"
+          echo "  zonewise.ai     → zonewise-web.pages.dev"
+          echo "  www.zonewise.ai → zonewise-web.pages.dev"
+
+      - name: Verify domains
+        run: |
+          sleep 10
+          curl -s -X GET \
+            "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects/zonewise-web/domains" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" | jq '.result[] | {name, status}'

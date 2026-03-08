@@ -1,0 +1,101 @@
+name: Fix zonewise.ai DNS → Cloudflare Pages
+
+on:
+  workflow_dispatch:
+
+jobs:
+  fix-dns:
+    runs-on: ubuntu-latest
+    env:
+      ZONE_ID: b32406b78aaaefd55557d77c843a5940
+    steps:
+      - name: List current DNS records
+        run: |
+          echo "=== Current DNS records for zonewise.ai ==="
+          curl -s -X GET \
+            "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records?name=zonewise.ai" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" | jq '.result[] | {id, name, type, content, proxied}'
+          
+          echo ""
+          echo "=== Current DNS records for www.zonewise.ai ==="
+          curl -s -X GET \
+            "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records?name=www.zonewise.ai" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" | jq '.result[] | {id, name, type, content, proxied}'
+
+      - name: Delete old DNS records pointing to Vercel
+        run: |
+          echo "Fetching record IDs..."
+          # Get all A/CNAME records for root domain
+          RECORDS=$(curl -s -X GET \
+            "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records?name=zonewise.ai" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" | jq -r '.result[] | select(.type == "A" or .type == "CNAME") | .id')
+          
+          for ID in $RECORDS; do
+            echo "Deleting record $ID..."
+            curl -s -X DELETE \
+              "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records/$ID" \
+              -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" | jq '{success}'
+          done
+          
+          # Also delete www records
+          WWW_RECORDS=$(curl -s -X GET \
+            "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records?name=www.zonewise.ai" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" | jq -r '.result[] | select(.type == "A" or .type == "CNAME") | .id')
+          
+          for ID in $WWW_RECORDS; do
+            echo "Deleting www record $ID..."
+            curl -s -X DELETE \
+              "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records/$ID" \
+              -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" | jq '{success}'
+          done
+
+      - name: Create CNAME records pointing to Cloudflare Pages
+        run: |
+          echo "Creating root CNAME → zonewise-web.pages.dev..."
+          curl -s -X POST \
+            "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "type": "CNAME",
+              "name": "zonewise.ai",
+              "content": "zonewise-web.pages.dev",
+              "proxied": true,
+              "ttl": 1
+            }' | jq '{success, result: {name: .result.name, type: .result.type, content: .result.content}}'
+          
+          echo ""
+          echo "Creating www CNAME → zonewise-web.pages.dev..."
+          curl -s -X POST \
+            "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "type": "CNAME",
+              "name": "www",
+              "content": "zonewise-web.pages.dev",
+              "proxied": true,
+              "ttl": 1
+            }' | jq '{success, result: {name: .result.name, type: .result.type, content: .result.content}}'
+
+      - name: Verify new DNS and Pages domain status
+        run: |
+          sleep 15
+          echo "=== DNS Records ==="
+          curl -s -X GET \
+            "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records?name=zonewise.ai" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" | jq '.result[] | {name, type, content, proxied}'
+          
+          curl -s -X GET \
+            "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records?name=www.zonewise.ai" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" | jq '.result[] | {name, type, content, proxied}'
+          
+          echo ""
+          echo "=== Pages Custom Domains ==="
+          curl -s -X GET \
+            "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects/zonewise-web/domains" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" | jq '.result[] | {name, status}'

@@ -14,7 +14,13 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { AuctionsPanel } from './components/AuctionsPanel'
-import ChatWidget from '../../zonewise/components/web/ChatWidget'
+// TODO: ChatWidget needs @/lib/supabase/client alias fix before re-enabling
+// import ChatWidget from '../../../zonewise/components/web/ChatWidget'
+const ChatWidget = ({ apiEndpoint }: { apiEndpoint: string }) => (
+  <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
+    AI Analyst — coming soon
+  </div>
+)
 import {
   Markdown,
   Spinner,

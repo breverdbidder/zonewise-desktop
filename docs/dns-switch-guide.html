@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZoneWise.AI DNS Switch Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #020617; color: #e2e8f0; line-height: 1.6; }
+  
+  .header { background: #1E3A5F; padding: 2rem; text-align: center; border-bottom: 3px solid #F59E0B; }
+  .header h1 { font-size: 1.5rem; font-weight: 800; color: #fff; }
+  .header p { color: #94a3b8; margin-top: 0.25rem; font-size: 0.9rem; }
+  .header .tag { display: inline-block; background: #F59E0B; color: #020617; font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 4px; margin-top: 0.5rem; letter-spacing: 0.05em; }
+  
+  .container { max-width: 720px; margin: 0 auto; padding: 1.5rem; }
+
+  .context-box { background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 1.25rem; margin-bottom: 2rem; }
+  .context-box h3 { color: #F59E0B; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.75rem; }
+  .context-box .row { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid #1e293b; font-size: 0.85rem; }
+  .context-box .row:last-child { border: none; }
+  .context-box .label { color: #64748b; }
+  .context-box .val { color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
+  .context-box .bad { color: #ef4444; }
+  .context-box .good { color: #22c55e; }
+  
+  .step { background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; margin-bottom: 1.25rem; overflow: hidden; transition: border-color 0.2s; }
+  .step.done { border-color: #22c55e40; }
+  .step-header { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; cursor: pointer; user-select: none; }
+  .step-num { width: 32px; height: 32px; border-radius: 50%; background: #1E3A5F; color: #F59E0B; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.2s; }
+  .step.done .step-num { background: #22c55e; color: #fff; }
+  .step-title { font-weight: 600; font-size: 0.95rem; flex: 1; }
+  .step-time { color: #64748b; font-size: 0.75rem; }
+  .step-check { width: 22px; height: 22px; border: 2px solid #334155; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+  .step.done .step-check { border-color: #22c55e; background: #22c55e; }
+  .step.done .step-check::after { content: '✓'; color: #fff; font-size: 0.75rem; font-weight: 700; }
+  
+  .step-body { padding: 0 1.25rem 1.25rem; display: none; }
+  .step.open .step-body { display: block; }
+  .step-body p { font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.75rem; }
+
+  a.action-link { display: inline-flex; align-items: center; gap: 0.5rem; background: #1E3A5F; color: #F59E0B; text-decoration: none; padding: 0.6rem 1.1rem; border-radius: 6px; font-weight: 600; font-size: 0.85rem; margin: 0.5rem 0; transition: background 0.2s; }
+  a.action-link:hover { background: #2a5280; }
+  a.action-link::before { content: '→'; }
+
+  .warn { background: #F59E0B15; border-left: 3px solid #F59E0B; padding: 0.75rem 1rem; border-radius: 0 6px 6px 0; font-size: 0.8rem; color: #fbbf24; margin: 0.75rem 0; }
+  
+  .code-block { background: #020617; border: 1px solid #1e293b; border-radius: 6px; padding: 0.75rem 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #22c55e; position: relative; margin: 0.5rem 0; overflow-x: auto; white-space: pre; }
+  .copy-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: #1e293b; border: none; color: #94a3b8; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.7rem; cursor: pointer; font-family: 'Inter', sans-serif; }
+  .copy-btn:hover { background: #334155; color: #fff; }
+  .copy-btn.copied { background: #22c55e; color: #fff; }
+
+  .visual-guide { background: #020617; border: 1px solid #1e293b; border-radius: 6px; padding: 1rem; margin: 0.75rem 0; }
+  .dns-row { display: grid; grid-template-columns: 80px 1fr 1fr 80px; gap: 0.5rem; padding: 0.5rem 0; border-bottom: 1px solid #1e293b; font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; }
+  .dns-row.header-row { color: #64748b; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .dns-row:last-child { border: none; }
+  .dns-row .delete { color: #ef4444; text-decoration: line-through; }
+  .dns-row .add { color: #22c55e; }
+  
+  .progress-bar { background: #1e293b; height: 6px; border-radius: 3px; margin: 1.5rem 0; overflow: hidden; }
+  .progress-fill { background: linear-gradient(90deg, #1E3A5F, #F59E0B); height: 100%; border-radius: 3px; transition: width 0.5s; }
+
+  .verify-section { background: #0f172a; border: 2px solid #F59E0B40; border-radius: 8px; padding: 1.25rem; margin-top: 2rem; }
+  .verify-section h3 { color: #F59E0B; margin-bottom: 0.75rem; }
+  
+  .footer { text-align: center; padding: 2rem; color: #475569; font-size: 0.75rem; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Switch zonewise.ai → Cloudflare Pages</h1>
+  <p>DNS change: Vercel (stale) → Cloudflare Pages (live, correct brand)</p>
+  <span class="tag">EST. TIME: 2 MINUTES</span>
+</div>
+
+<div class="container">
+
+  <div class="context-box">
+    <h3>Current Situation</h3>
+    <div class="row"><span class="label">Domain</span><span class="val">zonewise.ai</span></div>
+    <div class="row"><span class="label">Currently points to</span><span class="val bad">Vercel (stale build, wrong orange #F47B20)</span></div>
+    <div class="row"><span class="label">Should point to</span><span class="val good">Cloudflare Pages (fresh build, correct #F59E0B)</span></div>
+    <div class="row"><span class="label">Cloudflare Zone ID</span><span class="val">b32406b78aaaefd55557d77c843a5940</span></div>
+    <div class="row"><span class="label">Pages project</span><span class="val">zonewise-web</span></div>
+    <div class="row"><span class="label">Target CNAME</span><span class="val good">zonewise-web.pages.dev</span></div>
+  </div>
+
+  <div class="progress-bar"><div class="progress-fill" id="progress" style="width: 0%"></div></div>
+
+  <!-- STEP 1 -->
+  <div class="step open" id="step1">
+    <div class="step-header" onclick="toggleStep(1)">
+      <div class="step-num">1</div>
+      <div class="step-title">Open Cloudflare DNS Dashboard</div>
+      <div class="step-time">10 sec</div>
+      <div class="step-check" onclick="event.stopPropagation(); completeStep(1)"></div>
+    </div>
+    <div class="step-body">
+      <p>Click the link below to open the DNS settings for zonewise.ai directly in Cloudflare.</p>
+      <a class="action-link" href="https://dash.cloudflare.com/?to=/:account/zonewise.ai/dns/records" target="_blank" rel="noopener">Open Cloudflare DNS for zonewise.ai</a>
+      <p style="margin-top: 0.75rem;">If the direct link doesn't work, try this path manually:</p>
+      <a class="action-link" href="https://dash.cloudflare.com" target="_blank" rel="noopener">Open Cloudflare Dashboard</a>
+      <p style="margin-top: 0.5rem; font-size: 0.8rem;">Then navigate: <strong>zonewise.ai</strong> → <strong>DNS</strong> → <strong>Records</strong></p>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step" id="step2">
+    <div class="step-header" onclick="toggleStep(2)">
+      <div class="step-num">2</div>
+      <div class="step-title">Delete Vercel DNS Records</div>
+      <div class="step-time">30 sec</div>
+      <div class="step-check" onclick="event.stopPropagation(); completeStep(2)"></div>
+    </div>
+    <div class="step-body">
+      <p>Find and delete ALL existing A records or CNAME records for the root domain (<code>zonewise.ai</code>) and <code>www</code>. These currently point to Vercel.</p>
+      <div class="warn">Look for A records pointing to <strong>76.76.21.x</strong> or CNAME records pointing to <strong>cname.vercel-dns.com</strong>. Delete them ALL.</div>
+      <p>For each record, click the <strong>Edit</strong> button (pencil icon) → then <strong>Delete</strong>.</p>
+      <div class="visual-guide">
+        <div class="dns-row header-row"><span>Type</span><span>Name</span><span>Content</span><span>Action</span></div>
+        <div class="dns-row"><span>A</span><span class="delete">zonewise.ai</span><span class="delete">76.76.21.x</span><span class="delete">DELETE</span></div>
+        <div class="dns-row"><span>CNAME</span><span class="delete">www</span><span class="delete">cname.vercel-dns.com</span><span class="delete">DELETE</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step" id="step3">
+    <div class="step-header" onclick="toggleStep(3)">
+      <div class="step-num">3</div>
+      <div class="step-title">Add Cloudflare Pages CNAME Records</div>
+      <div class="step-time">30 sec</div>
+      <div class="step-check" onclick="event.stopPropagation(); completeStep(3)"></div>
+    </div>
+    <div class="step-body">
+      <p>Click <strong>"Add Record"</strong> and create these two CNAME records:</p>
+      
+      <div class="visual-guide">
+        <div class="dns-row header-row"><span>Type</span><span>Name</span><span>Target</span><span>Proxy</span></div>
+        <div class="dns-row"><span class="add">CNAME</span><span class="add">zonewise.ai</span><span class="add">zonewise-web.pages.dev</span><span class="add">Proxied ☁️</span></div>
+        <div class="dns-row"><span class="add">CNAME</span><span class="add">www</span><span class="add">zonewise-web.pages.dev</span><span class="add">Proxied ☁️</span></div>
+      </div>
+
+      <p style="margin-top: 0.75rem; font-weight: 600;">Record 1 — Root domain:</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin: 0.5rem 0;">
+        <div class="code-block" style="white-space: normal;">Type: <strong>CNAME</strong></div>
+        <div class="code-block" style="white-space: normal;">Name: <strong>@</strong></div>
+      </div>
+      <div class="code-block" style="position: relative;">zonewise-web.pages.dev<button class="copy-btn" onclick="copyText(this, 'zonewise-web.pages.dev')">Copy</button></div>
+      <p style="font-size: 0.8rem; color: #64748b;">Paste above into the <strong>Target</strong> field. Ensure proxy is <strong>ON</strong> (orange cloud).</p>
+
+      <p style="margin-top: 1rem; font-weight: 600;">Record 2 — www subdomain:</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin: 0.5rem 0;">
+        <div class="code-block" style="white-space: normal;">Type: <strong>CNAME</strong></div>
+        <div class="code-block" style="white-space: normal;">Name: <strong>www</strong></div>
+      </div>
+      <div class="code-block" style="position: relative;">zonewise-web.pages.dev<button class="copy-btn" onclick="copyText(this, 'zonewise-web.pages.dev')">Copy</button></div>
+      <p style="font-size: 0.8rem; color: #64748b;">Same target, proxy <strong>ON</strong>.</p>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step" id="step4">
+    <div class="step-header" onclick="toggleStep(4)">
+      <div class="step-num">4</div>
+      <div class="step-title">Verify Pages Custom Domain Activates</div>
+      <div class="step-time">30 sec</div>
+      <div class="step-check" onclick="event.stopPropagation(); completeStep(4)"></div>
+    </div>
+    <div class="step-body">
+      <p>Go to the Pages project settings to confirm the custom domain status changes from "deactivated" to "active".</p>
+      <a class="action-link" href="https://dash.cloudflare.com/?to=/:account/pages/view/zonewise-web/domains" target="_blank" rel="noopener">Open Pages Custom Domains</a>
+      <p style="margin-top: 0.5rem; font-size: 0.8rem;">If the direct link doesn't work: <strong>Workers & Pages</strong> → <strong>zonewise-web</strong> → <strong>Custom domains</strong> tab</p>
+      <div class="warn">Both <strong>zonewise.ai</strong> and <strong>www.zonewise.ai</strong> should show status <strong>"Active"</strong>. If still "pending", wait 1-2 minutes and refresh.</div>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step" id="step5">
+    <div class="step-header" onclick="toggleStep(5)">
+      <div class="step-num">5</div>
+      <div class="step-title">Verify Live Site</div>
+      <div class="step-time">10 sec</div>
+      <div class="step-check" onclick="event.stopPropagation(); completeStep(5)"></div>
+    </div>
+    <div class="step-body">
+      <p>Open the live site and confirm the new build is serving.</p>
+      <a class="action-link" href="https://zonewise.ai" target="_blank" rel="noopener">Open zonewise.ai</a>
+      <p style="margin-top: 0.75rem; font-weight: 600;">What you should see:</p>
+      <div style="font-size: 0.85rem; margin: 0.5rem 0;">
+        <div style="padding: 0.3rem 0;">✅ Title: <strong>"ZoneWise.AI - Florida Zoning Intelligence"</strong></div>
+        <div style="padding: 0.3rem 0;">✅ Orange accent color is <span style="color: #F59E0B; font-weight: 700;">#F59E0B</span> (amber, not burnt)</div>
+        <div style="padding: 0.3rem 0;">✅ Navy sidebar with Craft Agents layout</div>
+        <div style="padding: 0.3rem 0;">❌ NOT "Loan Application & Underwriting"</div>
+        <div style="padding: 0.3rem 0;">❌ NOT the old Vite SPA with Plus Jakarta Sans font</div>
+      </div>
+      <div class="warn">If the old site still shows, try hard refresh: <strong>Ctrl+Shift+R</strong> (Windows) or <strong>Cmd+Shift+R</strong> (Mac). DNS propagation is instant through Cloudflare proxy.</div>
+    </div>
+  </div>
+
+  <div class="verify-section">
+    <h3>🎯 What This Fix Resolves</h3>
+    <div style="font-size: 0.85rem; margin-top: 0.5rem;">
+      <div style="padding: 0.4rem 0; border-bottom: 1px solid #1e293b;">Brand orange: <span class="bad" style="text-decoration: line-through;">#F47B20</span> → <span class="good">#F59E0B</span> across entire UI</div>
+      <div style="padding: 0.4rem 0; border-bottom: 1px solid #1e293b;">Stale Vercel build (months old) → Fresh Cloudflare Pages build (today)</div>
+      <div style="padding: 0.4rem 0; border-bottom: 1px solid #1e293b;">Auto-deploy on every push to <code>zonewise-desktop</code> main branch</div>
+      <div style="padding: 0.4rem 0; border-bottom: 1px solid #1e293b;">shadcn CLI v4 ready (<code>components.json</code> + <code>BRAND_COLORS.md</code>)</div>
+      <div style="padding: 0.4rem 0;">No more dependency on broken Next.js build in <code>zonewise-web</code></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Generated by Claude AI (Opus 4.6) — AI Architect, Shapira Agentic Stack<br>
+    March 8, 2026
+  </div>
+</div>
+
+<script>
+function toggleStep(n) {
+  const el = document.getElementById('step' + n);
+  el.classList.toggle('open');
+}
+
+function completeStep(n) {
+  const el = document.getElementById('step' + n);
+  el.classList.toggle('done');
+  el.classList.remove('open');
+  
+  // Open next step
+  const next = document.getElementById('step' + (n + 1));
+  if (next && !next.classList.contains('done')) {
+    next.classList.add('open');
+  }
+  
+  // Update progress
+  const total = 5;
+  const done = document.querySelectorAll('.step.done').length;
+  document.getElementById('progress').style.width = (done / total * 100) + '%';
+}
+
+function copyText(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>

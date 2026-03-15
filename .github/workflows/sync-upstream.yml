@@ -1,7 +1,7 @@
-# Upstream Sync + Release Docs + Cross-Repo Notify
+# Upstream Sync + Release Docs + Telegram Notify
 # Syncs lukilabs/craft-agents-oss → breverdbidder/zonewise-desktop
-# Then notifies zonewise-web that upstream changed
 # Schedule: every 6 hours + manual trigger
+# Notifies: Telegram, zonewise-web, Supabase
 
 name: Sync Upstream Craft Agents
 
@@ -28,6 +28,8 @@ jobs:
       synced: ${{ steps.sync.outputs.synced }}
       upstream_tag: ${{ steps.detect.outputs.upstream_tag }}
       behind_count: ${{ steps.detect.outputs.behind_count }}
+      fork_version: ${{ steps.detect.outputs.fork_version }}
+      has_new_release: ${{ steps.detect.outputs.has_new_release }}
     steps:
       - name: Checkout Fork
         uses: actions/checkout@v4
@@ -50,12 +52,23 @@ jobs:
         run: |
           BEHIND=$(git rev-list --count HEAD..upstream/main 2>/dev/null || echo "0")
           UPSTREAM_TAG=$(curl -s "https://api.github.com/repos/${{ env.UPSTREAM_REPO }}/releases/latest" | jq -r '.tag_name // "unknown"')
+          FORK_VERSION=$(cat package.json | jq -r '.version // "unknown"')
+
+          # Check if upstream tag is newer than fork version
+          HAS_NEW_RELEASE="false"
+          if [ "$UPSTREAM_TAG" != "unknown" ] && [ "$UPSTREAM_TAG" != "v$FORK_VERSION" ]; then
+            HAS_NEW_RELEASE="true"
+          fi
 
           echo "behind_count=$BEHIND" >> $GITHUB_OUTPUT
           echo "upstream_tag=$UPSTREAM_TAG" >> $GITHUB_OUTPUT
+          echo "fork_version=$FORK_VERSION" >> $GITHUB_OUTPUT
+          echo "has_new_release=$HAS_NEW_RELEASE" >> $GITHUB_OUTPUT
 
           echo "Upstream tag: $UPSTREAM_TAG"
+          echo "Fork version: $FORK_VERSION"
           echo "Commits behind: $BEHIND"
+          echo "New release: $HAS_NEW_RELEASE"
 
       - name: Sync Upstream
         id: sync
@@ -74,29 +87,35 @@ jobs:
           if git merge upstream/main --no-edit -m "sync: upstream ${{ steps.detect.outputs.upstream_tag }}"; then
             git push origin main
             echo "synced=true" >> $GITHUB_OUTPUT
-            echo "Sync complete."
+            echo "Clean merge complete."
           else
-            echo "Merge conflict. Auto-resolving..."
-            git checkout --ours apps/viewer/src/App.tsx apps/viewer/src/index.css 2>/dev/null || true
-            git checkout --theirs packages/ apps/electron/ 2>/dev/null || true
+            echo "Merge conflict detected. Auto-resolving..."
+            # Keep our branding/custom files, take upstream for core packages
+            git checkout --ours zonewise/ BRAND_COLORS.md docs/ 2>/dev/null || true
+            git checkout --theirs packages/ apps/electron/src/ 2>/dev/null || true
             git add -A
             git commit --no-edit -m "sync: upstream ${{ steps.detect.outputs.upstream_tag }} (auto-resolved)" || true
             git push origin main
             echo "synced=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Trigger Vercel Deploy
+      - name: Update package.json version
         if: steps.sync.outputs.synced == 'true'
         run: |
-          if [ -n "${{ secrets.VERCEL_DEPLOY_HOOK }}" ]; then
-            curl -s -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"
+          UPSTREAM_TAG="${{ steps.detect.outputs.upstream_tag }}"
+          VERSION="${UPSTREAM_TAG#v}"
+          if [ "$VERSION" != "unknown" ] && [ -n "$VERSION" ]; then
+            jq --arg v "$VERSION" '.version = $v' package.json > package.tmp && mv package.tmp package.json
+            git add package.json
+            git commit -m "chore: bump version to $VERSION (upstream sync)" || true
+            git push origin main || true
           fi
-          echo "Vercel auto-deploys on push anyway."
 
       - name: Summary
         run: |
           echo "## Sync Summary" >> $GITHUB_STEP_SUMMARY
           echo "- Upstream: ${{ steps.detect.outputs.upstream_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Fork was: v${{ steps.detect.outputs.fork_version }}" >> $GITHUB_STEP_SUMMARY
           echo "- Behind: ${{ steps.detect.outputs.behind_count }}" >> $GITHUB_STEP_SUMMARY
           echo "- Synced: ${{ steps.sync.outputs.synced }}" >> $GITHUB_STEP_SUMMARY
 
@@ -128,7 +147,6 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "zw_version=$ZW_VERSION" >> $GITHUB_OUTPUT
 
-          # Save release body to file (avoids heredoc issues)
           curl -s "https://api.github.com/repos/lukilabs/craft-agents-oss/releases/latest" | jq -r '.body // "No release notes"' > /tmp/upstream_notes.txt
 
       - name: Generate Release Doc
@@ -142,15 +160,16 @@ jobs:
           # ZoneWise V${ZW_VERSION} Release Notes
           **Date:** ${DATE}
           **Upstream:** Craft Agents OSS ${UPSTREAM_TAG}
+          **Previous fork version:** v${{ needs.sync.outputs.fork_version }}
           **Status:** Synced & Deployed
 
           ## Upstream Changes
           $(cat /tmp/upstream_notes.txt)
 
           ## ZoneWise Integration
-          - Web: zonewise.ai/app (proxy to viewer)
-          - Desktop: GitHub Releases
-          - Backend: zonewise-agents.onrender.com
+          - Desktop: zonewise-desktop (Electron)
+          - Web: zonewise.ai
+          - Backend: Supabase Edge Functions
 
           *Auto-generated by ZoneWise Sync Bot*
           EOF
@@ -160,12 +179,9 @@ jobs:
           git push origin main || echo "Push skipped"
 
       - name: Create GitHub Release
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           ZW_TAG="v${{ steps.notes.outputs.zw_version }}"
 
-          # Check if release already exists
           EXISTS=$(curl -s -o /dev/null -w "%{http_code}" \
             -H "Authorization: token ${{ secrets.GH_PAT }}" \
             "https://api.github.com/repos/breverdbidder/zonewise-desktop/releases/tags/${ZW_TAG}")
@@ -182,17 +198,62 @@ jobs:
             -d "{
               \"tag_name\": \"${ZW_TAG}\",
               \"name\": \"ZoneWise ${ZW_TAG} (Craft Agents ${{ needs.sync.outputs.upstream_tag }})\",
-              \"body\": \"Upstream sync with Craft Agents ${{ needs.sync.outputs.upstream_tag }}.\nSee docs/releases/ for full notes.\",
+              \"body\": \"Upstream sync with Craft Agents ${{ needs.sync.outputs.upstream_tag }}.\\nSee docs/releases/ for full notes.\",
               \"draft\": false,
               \"prerelease\": false
             }"
 
-  notify-web:
+  notify:
     needs: [sync, release-doc]
-    if: needs.sync.outputs.synced == 'true'
+    if: always() && needs.sync.outputs.synced == 'true'
     runs-on: ubuntu-latest
     steps:
+      - name: Telegram — Sync Success
+        if: needs.release-doc.result == 'success'
+        run: |
+          UPSTREAM_TAG="${{ needs.sync.outputs.upstream_tag }}"
+          FORK_WAS="v${{ needs.sync.outputs.fork_version }}"
+          BEHIND="${{ needs.sync.outputs.behind_count }}"
+
+          MSG="⛰️ *UPSTREAM SYNC COMPLETE*
+
+🔄 Craft Agents: \`${FORK_WAS}\` → \`${UPSTREAM_TAG}\`
+📊 Merged: ${BEHIND} commits
+📦 Release doc generated
+
+🔗 [View Releases](https://github.com/breverdbidder/zonewise-desktop/releases)
+🔗 [Upstream](https://github.com/lukilabs/craft-agents-oss/releases/tag/${UPSTREAM_TAG})
+
+⏰ $(TZ=America/New_York date '+%I:%M %p EST')"
+
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -d text="$MSG" \
+            -d parse_mode="Markdown" \
+            -d disable_web_page_preview="true"
+
+      - name: Telegram — Sync Failed
+        if: needs.release-doc.result == 'failure' || needs.sync.result == 'failure'
+        run: |
+          MSG="🚨 *UPSTREAM SYNC FAILED*
+
+❌ Craft Agents sync to zonewise-desktop failed
+🏷️ Upstream: \`${{ needs.sync.outputs.upstream_tag }}\`
+📋 Fork was: \`v${{ needs.sync.outputs.fork_version }}\`
+
+⚠️ Manual merge may be required.
+🔗 [View Workflow](https://github.com/breverdbidder/zonewise-desktop/actions/workflows/sync-upstream.yml)
+
+⏰ $(TZ=America/New_York date '+%I:%M %p EST')"
+
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -d text="$MSG" \
+            -d parse_mode="Markdown" \
+            -d disable_web_page_preview="true"
+
       - name: Notify zonewise-web
+        if: needs.release-doc.result == 'success'
         run: |
           curl -s -X POST \
             -H "Authorization: token ${{ secrets.GH_PAT }}" \
@@ -204,26 +265,50 @@ jobs:
                 \"upstream_tag\": \"${{ needs.sync.outputs.upstream_tag }}\",
                 \"synced_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
               }
-            }"
-          echo "Notified zonewise-web of upstream sync."
+            }" || echo "zonewise-web dispatch failed (non-critical)"
 
       - name: Log to Supabase
         if: always()
         run: |
-          if [ -n "${{ secrets.SUPABASE_URL }}" ] && [ -n "${{ secrets.SUPABASE_SERVICE_KEY }}" ]; then
+          if [ -n "${{ secrets.SUPABASE_URL }}" ] && [ -n "${{ secrets.SUPABASE_ANON_KEY }}" ]; then
             curl -s -X POST \
               "${{ secrets.SUPABASE_URL }}/rest/v1/insights" \
-              -H "apikey: ${{ secrets.SUPABASE_SERVICE_KEY }}" \
-              -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_KEY }}" \
+              -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+              -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
               -H "Content-Type: application/json" \
               -d "{
                 \"type\": \"upstream_sync\",
                 \"data\": {
                   \"upstream_tag\": \"${{ needs.sync.outputs.upstream_tag }}\",
+                  \"fork_was\": \"v${{ needs.sync.outputs.fork_version }}\",
                   \"behind_count\": ${{ needs.sync.outputs.behind_count }},
                   \"synced\": true,
-                  \"notified_web\": true,
+                  \"sync_result\": \"${{ needs.release-doc.result }}\",
                   \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
                 }
-              }" > /dev/null 2>&1
+              }" > /dev/null 2>&1 || true
           fi
+
+  # Heartbeat — notify if upstream has new release but sync hasn't run
+  parity-check:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    needs: sync
+    steps:
+      - name: Alert if behind and sync failed
+        if: needs.sync.outputs.has_new_release == 'true' && needs.sync.outputs.synced != 'true'
+        run: |
+          MSG="⚠️ *PARITY DRIFT DETECTED*
+
+🏷️ Upstream: \`${{ needs.sync.outputs.upstream_tag }}\`
+📋 Fork: \`v${{ needs.sync.outputs.fork_version }}\`
+📊 Behind: ${{ needs.sync.outputs.behind_count }} commits
+
+Sync did not execute. Check workflow.
+🔗 [Fix it](https://github.com/breverdbidder/zonewise-desktop/actions/workflows/sync-upstream.yml)"
+
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -d text="$MSG" \
+            -d parse_mode="Markdown" \
+            -d disable_web_page_preview="true"

@@ -8,6 +8,8 @@
   "trailingSlash": false,
   "rewrites": [
     { "source": "/s/:path*", "destination": "/index.html" },
+    { "source": "/app/:path*", "destination": "/index.html" },
+    { "source": "/ops", "destination": "/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [

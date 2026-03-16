@@ -5,14 +5,15 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 import type { RightPanelContent } from '../CraftAgentLayout'
 
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoiZXZlcmVzdDE4IiwiYSI6ImNtanB5cDQ5ZzF1eWgzaHB2cGVhZXdqbjMifQ.4RPrkTf84GL1-clmhmCnTw'
+import MapboxHeatmap from '../MapboxHeatmap'
+
 const API_BASE = import.meta.env.VITE_API_URL || 'https://zonewise-agents.onrender.com'
 
 // ============================================================================
 // Tab definitions
 // ============================================================================
 
-type TabId = 'map' | 'property' | '3d' | 'analytics' | 'export'
+type TabId = 'map' | 'property' | '3d' | 'sun' | 'analytics' | 'export'
 
 interface Tab {
   id: TabId
@@ -24,6 +25,7 @@ const TABS: Tab[] = [
   { id: 'map', label: 'Map', icon: <Map className="size-4" /> },
   { id: 'property', label: 'Property', icon: <Building2 className="size-4" /> },
   { id: '3d', label: '3D', icon: <Building2 className="size-4" /> },
+  { id: 'sun' as TabId, label: 'Sun', icon: <Sun className="size-4" /> },
   { id: 'analytics', label: 'Stats', icon: <BarChart3 className="size-4" /> },
   { id: 'export', label: 'Export', icon: <FileText className="size-4" /> },
 ]
@@ -33,36 +35,17 @@ const TABS: Tab[] = [
 // ============================================================================
 
 function MapPanel({ data }: { data?: unknown }) {
-  const mapData = data as { lat?: number; lng?: number; zoom?: number; markers?: Array<{ lat: number; lng: number; color?: string }> } | undefined
-  const lat = mapData?.lat || 28.3922  // Default: Brevard County center
-  const lng = mapData?.lng || -80.6077
-  const zoom = mapData?.zoom || 10
-
-  // Build marker string for static API
-  const markerStr = mapData?.markers?.map(
-    (m) => `pin-s+FF6B00(${m.lng},${m.lat})`
-  ).join(',') || ''
-
-  const staticUrl = `https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/${markerStr ? markerStr + '/' : ''}${lng},${lat},${zoom},0/600x500@2x?access_token=${MAPBOX_TOKEN}`
+  const mapData = data as { lat?: number; lng?: number; zoom?: number; auctions?: Array<{ id: string; lat: number; lng: number; status: 'BID' | 'REVIEW' | 'SKIP'; address?: string; judgment?: number; arv?: number }> } | undefined
 
   return (
     <div className="h-full flex flex-col">
-      <div className="relative flex-1 rounded-lg overflow-hidden bg-muted">
-        <img
-          src={staticUrl}
-          alt="Zoning map"
-          className="absolute inset-0 w-full h-full object-cover"
-          loading="lazy"
+      <div className="relative flex-1 rounded-lg overflow-hidden">
+        <MapboxHeatmap
+          auctions={mapData?.auctions || []}
+          defaultCenter={[mapData?.lng || -80.6077, mapData?.lat || 28.3922]}
+          defaultZoom={mapData?.zoom || 10}
         />
-        <div className="absolute bottom-3 left-3 bg-background/90 backdrop-blur px-3 py-1.5 rounded-lg shadow-sm">
-          <span className="text-xs font-medium text-foreground">
-            {mapData?.lat ? `${lat.toFixed(4)}, ${lng.toFixed(4)}` : 'Brevard County, FL'}
-          </span>
-        </div>
       </div>
-      <p className="text-xs text-muted-foreground text-center mt-2">
-        Interactive map coming in next sprint
-      </p>
     </div>
   )
 }
@@ -202,6 +185,32 @@ function AnalyticsPanel() {
 }
 
 // ============================================================================
+// Sun & Shadow Panel
+// ============================================================================
+
+function SunPanel({ data }: { data?: unknown }) {
+  const sunData = data as { lat?: number; lng?: number; date?: string } | undefined
+
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center">
+      <Sun className="size-12 text-amber-400/60" />
+      <div>
+        <p className="text-sm font-medium">Sun & Shadow Analysis</p>
+        {sunData?.lat ? (
+          <p className="text-xs text-muted-foreground mt-1">
+            Location: {sunData.lat.toFixed(4)}, {sunData.lng?.toFixed(4)}
+          </p>
+        ) : (
+          <p className="text-xs text-muted-foreground mt-1 max-w-xs">
+            Ask about a property's solar exposure to generate sun/shadow study
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ============================================================================
 // Export Panel
 // ============================================================================
 
@@ -235,7 +244,7 @@ export function RightPanel({ content, onClose }: RightPanelProps) {
       case 'property': return 'property'
       case 'map': return 'map'
       case '3d': return '3d'
-      case 'sun-shadow': return '3d'
+      case 'sun-shadow': return 'sun'
       case 'export': return 'export'
       case 'documents': return 'export'
       default: return 'map'
@@ -286,7 +295,8 @@ export function RightPanel({ content, onClose }: RightPanelProps) {
       <div className="flex-1 p-4 overflow-hidden">
         {activeTab === 'map' && <MapPanel data={content.type === 'map' ? content.data : undefined} />}
         {activeTab === 'property' && <PropertyPanel data={content.type === 'property' ? content.data : undefined} />}
-        {activeTab === '3d' && <ThreeDPanel data={content.type === '3d' || content.type === 'sun-shadow' ? content.data : undefined} />}
+        {activeTab === '3d' && <ThreeDPanel data={content.type === '3d' ? content.data : undefined} />}
+        {activeTab === 'sun' && <SunPanel data={content.type === 'sun-shadow' ? content.data : undefined} />}
         {activeTab === 'analytics' && <AnalyticsPanel />}
         {activeTab === 'export' && <ExportPanel />}
       </div>

@@ -43,3 +43,10 @@ When I say "Summit" → execute immediately, no questions, no clarification
 - Wife Mariam: runs Property360 real estate, Protection Partners insurance, contracting
 - Son Michael (16): D1 competitive swimmer, Satellite Beach HS, keto diet, Shabbat observance
 - Orthodox practices: Shabbat (no work Fri sunset–Sat havdalah), kosher, holidays
+
+
+## Design System
+- Read DESIGN.md before any UI work
+- Navy #1E3A5F (surfaces), Amber #F59E0B (accent/CTA), Void #020617 (background)
+- Inter (UI text) + JetBrains Mono (financial data)
+- No pill buttons, no light mode, no gradients on buttons

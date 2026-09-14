@@ -22,5 +22,5 @@ Implementation PR from branch `security-gate`. Gitleaks scans PR diff on pull_re
 - No remediation of existing workflow debt (separate fix wave).
 - No changes to deploy workflows, runner config, or Actions secrets.
 
-## Estimated Complexity
+## Estimated Complexity: Low
 Low - 4 additive config files, no code changes, pattern proven green on 8 repos.
